@@ -83,6 +83,10 @@ def install_z3():
         do_cmd('copy submodules\\z3\\build\\*.lib ivy\\lib')
         do_cmd('copy submodules\\z3\\build\\*.dll ivy\\z3')
         do_cmd('copy submodules\\z3\\build\\python\\z3\\*.py ivy\\z3')
+    elif platform.system() == 'Darwin':
+        do_cmd('cp include/*.h ivy/include')
+        do_cmd('cp lib/*.dylib ivy/lib')
+        do_cmd('cp lib/*.dylib ivy/z3')
     else:
         do_cmd('cp include/*.h ivy/include')
         do_cmd('cp lib/*.so ivy/lib')

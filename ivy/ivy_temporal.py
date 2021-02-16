@@ -201,23 +201,6 @@ class NormalProgram(ia.AST):
         res.append('    }\n')
         return ''.join(res)
 
-class TemporalModels(ia.AST):    
-    """ A predicate of the form M |= phi where M is a NormalProgram
-    and phi is a temporal formula """
-    def __init__(self,model,fmla):
-        self.model,self.fmla = model,fmla
-    @property
-    def args(self):
-        """ The fmla is the only subterm """
-        return [self.fmla]
-    def clone(self,args):
-        """ clone just copies this node """
-        res = TemporalModels(self.model,args[0])
-        ia.copy_attrs(self,res)
-        return res
-    def __str__(self):
-        return str(self.model) + ' |= ' + str(self.fmla)
-
 def old_action_to_new(act):
     return ActionTerm(act.formal_params,act.formal_returns,act.labels,act)
 

@@ -50,6 +50,7 @@ from ivy_printer import print_module
 from ivy_actions import (AssignAction, Sequence, ChoiceAction,
                          AssumeAction, AssertAction, HavocAction,
                          concat_actions, Action, CallAction)
+import ivy_ast
 import ivy_actions as iact
 import logic as lg
 import ivy_logic as ilg
@@ -70,7 +71,7 @@ def l2s_tactic(prover,goals,proof):
     goal = goals[0]                  # pick up the first proof goal
     lineno = goal.lineno
     conc = ipr.goal_conc(goal)       # get its conclusion
-    if not isinstance(conc,itm.TemporalModels):
+    if not isinstance(conc,ivy_ast.TemporalModels):
         raise iu.IvyError(proof,'proof goal is not temporal')
     model = conc.model.clone([])
     fmla = conc.fmla
@@ -81,6 +82,12 @@ def l2s_tactic(prover,goals,proof):
 
     assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal]
     model.asms.extend([p.clone([p.label,p.formula.args[0]]) for p in assumed_gprops])
+
+
+    temporal_prems = [x for x in ipr.goal_prems(goal) if x.temporal]
+    if temporal_prems:
+        fmla = ilg.Implies(ilg.And(*[x.formula for x in temporal_prems]),fmla)
+    print 'fmla: {}'.format(fmla)
 
     # TRICKY: We postpone compiling formulas in the tactic until now, so
     # that tactics can introduce their own symbols. But, this means that the
@@ -367,20 +374,21 @@ def l2s_tactic(prover,goals,proof):
     # semantics applied.
     
     def prop_events(gprops):
-        res = []
+        pre = []
+        post = []
         for gprop in gprops:
             vs,t,env = gprop.variables, gprop.body, gprop.environ
-            res.append(AssignAction(old_l2s_g(vs, t, env)(*vs),l2s_g(vs, t, env)(*vs)).set_lineno(lineno))
-            res.append(HavocAction(l2s_g(vs, t, env)(*vs)).set_lineno(lineno))
+            pre.append(AssignAction(old_l2s_g(vs, t, env)(*vs),l2s_g(vs, t, env)(*vs)).set_lineno(lineno))
+            pre.append(HavocAction(l2s_g(vs, t, env)(*vs)).set_lineno(lineno))
         for gprop in gprops:
             vs,t,env = gprop.variables, gprop.body, gprop.environ
-            res.append(AssumeAction(forall(vs, lg.Implies(old_l2s_g(vs, t, env)(*vs),
+            pre.append(AssumeAction(forall(vs, lg.Implies(old_l2s_g(vs, t, env)(*vs),
                                                           l2s_g(vs, t, env)(*vs)))).set_lineno(lineno))
-            res.append(AssumeAction(forall(vs, lg.Implies(lg.And(lg.Not(old_l2s_g(vs, t, env)(*vs)), t),
+            pre.append(AssumeAction(forall(vs, lg.Implies(lg.And(lg.Not(old_l2s_g(vs, t, env)(*vs)), t),
                                                           lg.Not(l2s_g(vs, t, env)(*vs))))).set_lineno(lineno))
-            res.append(AssumeAction(forall(vs, lg.Implies(l2s_g(vs, t, env)(*vs), t))).set_lineno(lineno))
+            post.append(AssumeAction(forall(vs, lg.Implies(l2s_g(vs, t, env)(*vs), t))).set_lineno(lineno))
             
-        return res
+        return (pre, post)
             
 
     # This procedure generates code for an event corresponding to a
@@ -467,9 +475,10 @@ def l2s_tactic(prover,goals,proof):
         # Now, for every property event, we update the property state (none in this case)
         # and also assert the property semantic constraint. 
 
-        events = prop_events(event_props)
-        events += wait_events(event_waits)
-        res =  iact.postfix_action(res,events)
+        (pre_events, post_events) = prop_events(event_props)
+        post_events += wait_events(event_waits)
+        res =  iact.prefix_action(res,pre_events)
+        res =  iact.postfix_action(res,post_events)
         stmt.copy_formals(res) # HACK: This shouldn't be needed
         return res
 
@@ -589,10 +598,11 @@ def l2s_tactic(prover,goals,proof):
         b.action.stmt.formal_returns = b.action.outputs
 
     # Change the conclusion formula to M |= true
-    conc = itm.TemporalModels(model,lg.And())
+    conc = ivy_ast.TemporalModels(model,lg.And())
 
     # Build the new goal
-    goal = ipr.clone_goal(goal,ipr.goal_prems(goal),conc)
+    non_temporal_prems = [x for x in ipr.goal_prems(goal) if not x.temporal]
+    goal = ipr.clone_goal(goal,non_temporal_prems,conc)
 
     # Return the new goal stack
 

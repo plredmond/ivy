@@ -117,7 +117,7 @@ def check_temporals():
             if prop.temporal:
                 proof = pmap.get(prop.id,None)
                 model = itmp.normal_program_from_module(im.module)
-                subgoal = prop.clone([prop.args[0],itmp.TemporalModels(model,prop.args[1])])
+                subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,prop.args[1])])
                 subgoals = [subgoal]
                 subgoals = pc.admit_proposition(prop,proof,subgoals)
                 check_subgoals(subgoals)
@@ -406,7 +406,7 @@ def check_isolate():
         pc = ivy_proof.ProofChecker(mod.labeled_axioms+mod.assumed_invariants,mod.definitions,mod.schemata)
         model = itmp.normal_program_from_module(im.module)
         prop = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),lg.And())
-        subgoal = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),itmp.TemporalModels(model,lg.And()))
+        subgoal = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),ivy_ast.TemporalModels(model,lg.And()))
 #        print 'subgoal = {}'.format(subgoal)
         subgoals = [subgoal]
         subgoals = pc.admit_proposition(prop,mod.isolate_proof,subgoals)
@@ -601,7 +601,7 @@ def check_subgoals(goals):
     for goal in goals:
         # print 'goal: {}'.format(goal)
         conc = ivy_proof.goal_conc(goal)
-        if isinstance(conc,itmp.TemporalModels):
+        if isinstance(conc,ivy_ast.TemporalModels):
             model = conc.model
             fmla = conc.fmla
             if not lg.is_true(fmla):

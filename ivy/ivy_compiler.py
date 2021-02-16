@@ -2043,9 +2043,9 @@ def handle_temporals(mod):
 
 def add_labels_to_proof(proof,labels):
     if isinstance(proof,ivy_ast.ComposeTactics):
-        return proof.clone(map(add_labels_to_proof,proof.args))
+        return proof.clone([add_labels_to_proof(pf,labels) for pf in proof.args])
     if isinstance(proof,ivy_ast.IfTactic):
-        return proof.clone([proof.args[0]] + map(add_labels_to_proof,proof.args[1:]))
+        return proof.clone([proof.args[0]] + [add_labels_to_proof(pf,labels) for pf in proof.args[1:]])
     if isinstance(proof,ivy_ast.TacticTactic):
         proof.labels = list(labels)
     return proof

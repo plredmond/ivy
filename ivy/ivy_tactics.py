@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 
+import ivy_ast
 import ivy_proof as pf
 import ivy_actions as ia
 import ivy_temporal as tm
@@ -19,7 +20,7 @@ def vcgen(self,decls,proof):
     goal = decls[0]
     conc = pr.goal_conc(goal)
     decls = decls[1:]
-    if not isinstance(conc,tm.TemporalModels) or not lg.is_true(conc.fmla):
+    if not isinstance(conc,ivy_ast.TemporalModels) or not lg.is_true(conc.fmla):
         raise iu.IvyError(self,'vcgen tactic applies only to safety properties')
     model = conc.model
     goal1 = triple_to_goal(proof.lineno,'initiation',model.init,postcond=model.invars)

@@ -182,7 +182,7 @@ class ProofChecker(object):
     def tactic_tactic(self,decls,proof):
         tn = proof.tactic_name
         if tn not in registered_tactics:
-            raise IvyError(proof,'unknown tactic: {}'.format(proof.tn))
+            raise iu.IvyError(proof,'unknown tactic: {}'.format(tn))
         tactic = registered_tactics[tn]
         return tactic(self,decls,proof)
     
@@ -405,7 +405,9 @@ class ProofChecker(object):
 
         Returns a match or None
         """
-        
+
+        if isinstance(goal_conc(decl),ia.TemporalModels):
+            raise NoMatch(proof,"goal does not match the given schema")
         prob, pmatch = self.setup_matching(decl,proof)
         apply_match_to_problem(pmatch,prob,apply_match_alt)
         if isinstance(prob.pat,ia.Tuple):

@@ -1660,11 +1660,12 @@ def check_definitions(mod):
         mp = dict((lf.formula.defines(),lf.formula.rhs()) for lf in mod.definitions)
         if not opt_mutax.get():
             for lf in mod.labeled_axioms:
-                deps = set()
-                get_symbol_dependencies(mp,deps,lf.formula)
-                for s in deps:
-                    if s in side_effects:
-                        raise IvyError(side_effects[s],'immutable symbol assigned. \n{} info: symbol is used in axiom here'.format(lf.lineno))
+                if not lf.temporal:
+                    deps = set()
+                    get_symbol_dependencies(mp,deps,lf.formula)
+                    for s in deps:
+                        if s in side_effects:
+                            raise IvyError(side_effects[s],'immutable symbol assigned. \n{} info: symbol is used in axiom here'.format(lf.lineno))
 
         for lf in mod.definitions:
             s = lf.formula.lhs().rep
@@ -2020,23 +2021,23 @@ def create_conj_actions(mod):
 # TODO: this does not handle temporal axioms.
 
 def handle_temporals(mod):
-    imap = iso.get_isolate_map(mod,verified=True,present=False)
-    new_props = []
-    for prop in mod.labeled_props:
-        isonames = imap[prop.name]
-        if prop.temporal:
-            assert len(isonames) > 0  # should at least be verified in isolate 'this'!
-            if len(isonames) > 1:
-                raise IvyError(prop,'Temporal property belongs to more than one isolate: {}'.format(','.join(str(x) for x in isonames)))
-            new_props.append(prop.clone([prop.label,ivy_logic.label_temporal(prop.formula,isonames[0])]))
-        else:
-            new_props.append(prop)
+    # imap = iso.get_isolate_map(mod,verified=True,present=False)
+    # new_props = []
+    # for prop in mod.labeled_props:
+    #     isonames = imap[prop.name]
+    #     if prop.temporal:
+    #         assert len(isonames) > 0  # should at least be verified in isolate 'this'!
+    #         if len(isonames) > 1:
+    #             raise IvyError(prop,'Temporal property belongs to more than one isolate: {}'.format(','.join(str(x) for x in isonames)))
+    #         new_props.append(prop.clone([prop.label,ivy_logic.label_temporal(prop.formula,isonames[0])]))
+    #     else:
+    #         new_props.append(prop)
             
-    for prop,proof in mod.proofs:
-        if prop.temporal:
-            isonames = imap[prop.name]
-            add_labels_to_proof(proof,isonames)
-    mod.labeled_props = new_props
+    # for prop,proof in mod.proofs:
+    #     if prop.temporal:
+    #         isonames = imap[prop.name]
+    #         add_labels_to_proof(proof,isonames)
+    # mod.labeled_props = new_props
     imap = iso.get_isolate_map(mod,verified=True,present=True)
     for actname,action in mod.actions.iteritems():
         action.labels = imap[actname]

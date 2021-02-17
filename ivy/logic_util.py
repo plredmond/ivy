@@ -8,7 +8,7 @@ from itertools import product, chain
 from functools import partial
 
 from logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
-                   Iff, ForAll, Exists, Lambda, NamedBinder)
+                   Iff, ForAll, Exists, Lambda, NamedBinder, Globally, Eventually)
 from logic import contains_topsort
 
 import ivy_utils as iu
@@ -155,6 +155,9 @@ def substitute(t, subs):
     elif type(t) in (Apply, Eq, Ite, Not, And, Or, Implies, Iff):
         return type(t)(*(substitute(x, subs) for x in t))
 
+    elif type(t) in (Globally, Eventually):
+        return type(t)(t.environ, *(substitute(x, subs) for x in t))
+
     elif type(t) in (ForAll, Exists, Lambda, NamedBinder):
         forbidden_variables = free_variables(*subs.values())
         if forbidden_variables.isdisjoint(t.variables):
@@ -167,7 +170,7 @@ def substitute(t, subs):
             assert False, (t, subs) # capturing would be created
 
     else:
-        assert False, type(e)
+        assert False, type(t)
 
 
 def substitute_apply(t, subs, by_name=False):

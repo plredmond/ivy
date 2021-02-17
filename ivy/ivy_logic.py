@@ -1247,7 +1247,7 @@ def app_ugly(self,prec):
         return res
     if len(args) == 0:  # shouldn't happen
         return name
-    return name + '(' + ','.join(args) + ')'
+    return name + ":" + str(self.func.sort) + '(' + ','.join(args) + ')'
 
 def nary_ugly(op,args,myprec,prec):
     if len(args) == 2:

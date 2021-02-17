@@ -703,7 +703,7 @@ def compile_expr_vocab(expr,vocab):
                 return il.sig.sorts[expr.rep]
             with il.top_sort_as_default():
                 with ia.ASTContext(expr):
-                    expr = il.sort_infer_list([expr.compile()] + vocab.variables)[0]
+                    expr = expr.compile()
                     return expr
 
 
@@ -1358,11 +1358,16 @@ def skolemize_fmla(fmla,pos,renamer,skfuns):
             for v in fmla.variables:
                 outer.pop()
             return res
+        if isinstance(fmla,ia.TemporalModels):
+            return fmla.clone([rec(fmla.args[0],pos)])
         return fmla
     body = rec(fmla,pos)
     if univs:
         quant = il.Exists if pos else il.ForAll
-        body = quant(univs,body)
+        if isinstance(body,ia.TemporalModels):
+            body = body.clone([quant(univs,body.args[0])])
+        else:
+            body = quant(univs,body)
     return body
 
 def compile_witness_list(proof,goal):
@@ -1371,6 +1376,11 @@ def compile_witness_list(proof,goal):
     the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
     return [compile_expr_vocab(d,the_goal_vocab) for d in proof.args]
     
+def compile_with_goal_vocab(expr,goal):
+#    the_goal_vocab = goal_vocab(goal,get_bound_vars=True)
+    the_goal_vocab = goal_vocab(goal)
+#    the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
+    return compile_expr_vocab(expr,the_goal_vocab)
 
 def match_from_defn(defn):
     vs = set()

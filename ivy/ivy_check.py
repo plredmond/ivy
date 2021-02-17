@@ -620,7 +620,7 @@ def check_subgoals(goals):
             mod.labeled_axioms = list(mod.labeled_axioms)
             mod.assumed_invars = model.asms
             for prem in ivy_proof.goal_prems(goal):
-                if prem.temporal:
+                if hasattr(prem,'temporal') and prem.temporal:
                     mod.labeled_axioms.append(prem)
             # ivy_printer.print_module(mod)
         else:

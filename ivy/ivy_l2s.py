@@ -80,14 +80,14 @@ def l2s_tactic(prover,goals,proof):
     
     # Add all the assumed invariants to the model
 
-    assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal]
+    assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal and isinstance(x.formula,lg.Globally)]
     model.asms.extend([p.clone([p.label,p.formula.args[0]]) for p in assumed_gprops])
 
 
-    temporal_prems = [x for x in ipr.goal_prems(goal) if x.temporal]
+    temporal_prems = [x for x in ipr.goal_prems(goal) if hasattr(x,'temporal') and x.temporal] + [
+        x for x in prover.axioms if not x.explicit and x.temporal]
     if temporal_prems:
         fmla = ilg.Implies(ilg.And(*[x.formula for x in temporal_prems]),fmla)
-    print 'fmla: {}'.format(fmla)
 
     # TRICKY: We postpone compiling formulas in the tactic until now, so
     # that tactics can introduce their own symbols. But, this means that the
@@ -95,10 +95,12 @@ def l2s_tactic(prover,goals,proof):
     # operators. Here, we compile the invariants in the tactic, using the given
     # label.
 
-    assert hasattr(proof,'labels') and len(proof.labels) == 1
-    proof_label = proof.labels[0]
+#    assert hasattr(proof,'labels') and len(proof.labels) == 1
+#    proof_label = proof.labels[0]
+    proof_label = None
 #    print 'proof label: {}'.format(proof_label)
-    invars = [ilg.label_temporal(inv.compile(),proof_label) for inv in proof.tactic_decls]
+    invars = [ilg.label_temporal(ipr.compile_with_goal_vocab(inv,goal),proof_label) for inv in proof.tactic_decls]
+#    invars = [ilg.label_temporal(inv.compile(),proof_label) for inv in proof.tactic_decls]
 
     l2s_waiting = lg.Const('l2s_waiting', lg.Boolean)
     l2s_frozen = lg.Const('l2s_frozen', lg.Boolean)
@@ -601,7 +603,7 @@ def l2s_tactic(prover,goals,proof):
     conc = ivy_ast.TemporalModels(model,lg.And())
 
     # Build the new goal
-    non_temporal_prems = [x for x in ipr.goal_prems(goal) if not x.temporal]
+    non_temporal_prems = [x for x in ipr.goal_prems(goal) if not (hasattr(x,'temporal') and x.temporal)]
     goal = ipr.clone_goal(goal,non_temporal_prems,conc)
 
     # Return the new goal stack

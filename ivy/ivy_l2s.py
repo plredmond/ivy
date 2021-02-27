@@ -67,6 +67,13 @@ def forall(vs, body):
 
 
 def l2s_tactic(prover,goals,proof):
+    vocab = ipr.goal_vocab(goals[0])
+    with ilg.WithSymbols(vocab.symbols):
+        with ilg.WithSorts(vocab.sorts):
+            return l2s_tactic_int(prover,goals,proof)
+
+
+def l2s_tactic_int(prover,goals,proof):
     mod = im.module
     goal = goals[0]                  # pick up the first proof goal
     lineno = goal.lineno

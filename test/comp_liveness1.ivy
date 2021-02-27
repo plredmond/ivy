@@ -18,8 +18,7 @@ temporal property [p1] globally ~x
 proof {
     showgoals
     tactic l2s with
-    #    invariant ~x & ~ (globally ~x) & ~($happened$ x) & l2s_d(X:t) & l2s_d(Y:u)
-    invariant l2s_d(X:t) & l2s_d(r)
+    invariant ~x & ~ (globally ~x) & ~($happened$ x)
     showgoals
 }
 

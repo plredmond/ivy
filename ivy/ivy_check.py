@@ -112,15 +112,18 @@ def check_temporals():
     pc = ivy_proof.ProofChecker(mod.labeled_axioms+mod.assumed_invariants,mod.definitions,mod.schemata)
     for prop in props:
         if prop.temporal:
-            print '\n    The following temporal property is being proved:\n'
-            print pretty_lf(prop)
-            if prop.temporal:
-                proof = pmap.get(prop.id,None)
-                model = itmp.normal_program_from_module(im.module)
-                subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,prop.args[1])])
-                subgoals = [subgoal]
-                subgoals = pc.admit_proposition(prop,proof,subgoals)
-                check_subgoals(subgoals)
+            if prop.assumed:
+                pc.admit_axiom(prop)
+            else:
+                print '\n    The following temporal property is being proved:\n'
+                print pretty_lf(prop)
+                if prop.temporal:
+                    proof = pmap.get(prop.id,None)
+                    model = itmp.normal_program_from_module(im.module)
+                    subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,prop.args[1])])
+                    subgoals = [subgoal]
+                    subgoals = pc.admit_proposition(prop,proof,subgoals)
+                    check_subgoals(subgoals)
             
         # else:
         #     # Non-temporal properties have already been proved, so just
@@ -624,10 +627,10 @@ def check_subgoals(goals):
                     mod.labeled_axioms.append(prem)
             # ivy_printer.print_module(mod)
         else:
-            goal = ivy_compiler.theorem_to_property(goal)
+            pgoal = ivy_compiler.theorem_to_property(goal)
             mod = im.module.copy()
             # mod.labeled_axioms.extend(proved)
-            mod.labeled_props = [goal]
+            mod.labeled_props = [pgoal]
             mod.concept_spaces = []
             mod.labeled_conjs = []
             mod.public_actions = set()
@@ -636,7 +639,10 @@ def check_subgoals(goals):
             mod.isolate_proof = None
             mod.isolate_info = None
         with mod:
-            check_isolate()
+            vocab = ivy_proof.goal_vocab(goal)
+            with lg.WithSymbols(vocab.symbols):
+                with lg.WithSorts(vocab.sorts):
+                    check_isolate()
                 
 
 def all_assert_linenos():

@@ -1247,7 +1247,7 @@ def app_ugly(self,prec):
         return res
     if len(args) == 0:  # shouldn't happen
         return name
-    return name + ":" + str(self.func.sort) + '(' + ','.join(args) + ')'
+    return name + '(' + ','.join(args) + ')'
 
 def nary_ugly(op,args,myprec,prec):
     if len(args) == 2:
@@ -1578,8 +1578,8 @@ def rename_vars_no_clash(fmlas1,fmlas2):
 
 class VariableUniqifier(object):
     """ An object that alpha-converts formulas so that all variables are unique. """
-    def __init__(self):
-        self.rn = iu.UniqueRenamer()
+    def __init__(self,used=[]):
+        self.rn = iu.UniqueRenamer(used=used)
         self.invmap = dict()
     def __call__(self,fmla):
         vmap = dict()

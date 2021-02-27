@@ -62,6 +62,11 @@ class ProofChecker(object):
             vocab = goal_vocab(goal)
             self.stale.update(vocab.symbols)
 
+    def admit_axiom(self,ax):
+        self.axioms.append(normalize_goal(ax))
+        if ax.label is not None:
+            self.schemata[ax.name] = ax
+
     def admit_definition(self,defn,proof=None):
         """ Admits a definition if it is non-recursive or match a definition schema. 
             If a proof is given it is used to match the definition to a schema, else
@@ -703,10 +708,21 @@ def compile_expr_vocab(expr,vocab):
                 return il.sig.sorts[expr.rep]
             with il.top_sort_as_default():
                 with ia.ASTContext(expr):
-                    expr = expr.compile()
+                    expr = il.sort_infer_list([expr.compile()] + vocab.variables)[0]
                     return expr
 
 
+# Compile an expression using a vocabulary. The expression could be a formula or a type.
+
+def compile_expr_vocab_ext(expr,vocab):
+    with il.WithSymbols(vocab.symbols):
+        with il.WithSorts(vocab.sorts):
+            if isinstance(expr,ia.Atom) and expr.rep in il.sig.sorts:
+                return il.sig.sorts[expr.rep]
+            with il.top_sort_as_default():
+                with ia.ASTContext(expr):
+                    expr = expr.compile()
+                    return expr
 
 
 def remove_vars_match(mat,fmla):
@@ -1324,7 +1340,7 @@ def skolemize_goal(goal):
 def skolemize_fmla(fmla,pos,renamer,skfuns):
     univs = []
     outer = []
-    var_uniq = il.VariableUniqifier()
+    var_uniq = il.VariableUniqifier(used=renamer.used) # don't capture any free symbols!
     def rec( fmla,pos):
         if isinstance(fmla,il.Not):
             return fmla.clone([rec(fmla.args[0],not pos)])
@@ -1380,7 +1396,7 @@ def compile_with_goal_vocab(expr,goal):
 #    the_goal_vocab = goal_vocab(goal,get_bound_vars=True)
     the_goal_vocab = goal_vocab(goal)
 #    the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
-    return compile_expr_vocab(expr,the_goal_vocab)
+    return compile_expr_vocab_ext(expr,the_goal_vocab)
 
 def match_from_defn(defn):
     vs = set()

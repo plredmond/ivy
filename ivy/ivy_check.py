@@ -599,7 +599,7 @@ def check_isolate():
 # This is a little bit backward. When faced with a subgoal from the prover,
 # we check it by constructing fake isolate.
                 
-def check_subgoals(goals):
+def check_subgoals(goals,method=None):
     mod = im.module
     for goal in goals:
         # print 'goal: {}'.format(goal)
@@ -642,9 +642,19 @@ def check_subgoals(goals):
             vocab = ivy_proof.goal_vocab(goal)
             with lg.WithSymbols(vocab.symbols):
                 with lg.WithSorts(vocab.sorts):
-                    check_isolate()
+                    if method is not None:
+                        with im.module.theory_context():
+                            method()
+                    else:
+                        check_isolate()
                 
+def mc_tactic(prover,goals,proof):
+    check_subgoals(goals[0:1],method=ivy_mc.check_isolate)
+    return goals[1:]
 
+ivy_proof.register_tactic('mc',mc_tactic)
+
+                    
 def all_assert_linenos():
     mod = im.module
     all = []
@@ -683,7 +693,7 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
     im.module.labeled_axioms.extend(lf for lf in im.module.labeled_props if lf.assumed)
     im.module.labeled_props = [lf for lf in im.module.labeled_props if not lf.assumed]
     if im.module.labeled_props:
-        raise IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
+        raise iu.IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
     if not check_separately(isolate):
         with im.module.theory_context():
             meth()

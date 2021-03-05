@@ -66,14 +66,16 @@ def forall(vs, body):
     return lg.ForAll(vs, body) if len(vs) > 0 else body
 
 
-def l2s_tactic(prover,goals,proof):
+def l2s_tactic(prover,goals,proof,full=False):
     vocab = ipr.goal_vocab(goals[0])
     with ilg.WithSymbols(vocab.symbols):
         with ilg.WithSorts(vocab.sorts):
-            return l2s_tactic_int(prover,goals,proof)
+            return l2s_tactic_int(prover,goals,proof,full)
 
+def l2s_tactic_full(prover,goals,proof):
+    return l2s_tactic(prover,goals,proof,full=True)
 
-def l2s_tactic_int(prover,goals,proof):
+def l2s_tactic_int(prover,goals,proof,full):
     mod = im.module
     goal = goals[0]                  # pick up the first proof goal
     lineno = goal.lineno
@@ -223,6 +225,19 @@ def l2s_tactic_int(prover,goals,proof):
 #        print 'binder: {} {} {}'.format(b.name,b.environ,b.body)
         named_binders_conjs[b.name].append((b.variables, b.body))
     named_binders_conjs = defaultdict(list,((k,list(set(v))) for k,v in named_binders_conjs.iteritems()))
+
+    # in full mode, add all the state variables to 'to_save' and all
+    # of the temporal operators to 'to_wait'
+
+    if full:
+        for act in mod.actions.values():
+            for bnd in model.bindings
+            for sym in act.modifies():
+                print 'sym: {}'.format(sym)
+                vs = ilu.sym_placeholders(sym)
+                expr = sym(*vs) if vs else sym
+                named_binders_conjs['l2s_s'].append((vs, expr))
+
     to_wait = [] # list of (variables, term) corresponding to l2s_w in conjectures
     to_wait += named_binders_conjs['l2s_w']
     to_save = [] # list of (variables, term) corresponding to l2s_s in conjectures
@@ -618,9 +633,10 @@ def l2s_tactic_int(prover,goals,proof):
     goals = [goal] + goals[1:]
     return goals
 
-# Register the l2s tactic
+# Register the l2s tactics
 
 ipr.register_tactic('l2s',l2s_tactic)
+ipr.register_tactic('l2s_full',l2s_tactic_full)
 
 
 

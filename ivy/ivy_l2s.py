@@ -59,6 +59,7 @@ import ivy_utils as iu
 import ivy_temporal as itm
 import ivy_proof as ipr
 import ivy_module as im
+import ivy_compiler
 
 debug = iu.BooleanParameter("l2s_debug",False)
 
@@ -233,11 +234,8 @@ def l2s_tactic_int(prover,goals,proof,full):
 #        for act in mod.actions.values():
         seen = set(t for (vs,t) in named_binders_conjs['l2s_s'])
         for bnd in model.bindings:
-            print "name:{}".format(bnd.name)
-            print "action:{}".format(bnd.action.stmt)
             for act in bnd.action.stmt.iter_subactions():
                 for sym in act.modifies():
-                    print 'sym: {}'.format(sym)
                     vs = ilu.sym_placeholders(sym)
                     expr = sym(*vs) if vs else sym
                     if expr not in seen:
@@ -246,7 +244,6 @@ def l2s_tactic_int(prover,goals,proof,full):
         for b in ilu.named_binders_asts([ilu.normalize_named_binders(not_lf)]):
             if b.name == 'l2s_g':
                 vs,t = b.variables,ilu.negate(b.body)
-                print "t:{}".format(t)
                 if t not in seen:
                     named_binders_conjs['l2s_w'].append((vs,t))
                     
@@ -313,6 +310,8 @@ def l2s_tactic_int(prover,goals,proof,full):
     ]
     assert_no_fair_cycle = AssertAction(lg.Not(lg.And(*fair_cycle))).set_lineno(lineno)
     assert_no_fair_cycle.lineno = goal.lineno
+    if proof.tactic_proof:
+        assert_no_fair_cycle = ivy_compiler.apply_assert_proof(prover,assert_no_fair_cycle,proof.tactic_proof)
 
     monitor_edge = lambda s1, s2: [
         AssumeAction(s1).set_lineno(lineno),
@@ -811,9 +810,9 @@ def l2s(mod, lf):
             isinstance(t.sort, lg.FunctionSort) and isinstance(t.sort.range, lg.UninterpretedSort)
         )
     ]
-    assert_no_fair_cycle = AssertAction(lg.Not(lg.And(*fair_cycle)))
+    assert_no_fair_cycle = AssertAction(lg.Not(lg.And(*fair_cycle))).set_lineno(lineno)
     assert_no_fair_cycle.lineno = lf.lineno
-
+                           
     monitor_edge = lambda s1, s2: [
         AssumeAction(s1),
         AssignAction(s1, lg.false),

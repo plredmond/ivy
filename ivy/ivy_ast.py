@@ -826,6 +826,9 @@ class TacticTactic(Tactic):
     @property
     def tactic_decls(self):
         return self.args[1].args
+    @property
+    def tactic_proof(self):
+        return self.args[2] if len(self.args) > 2 else None
     def __str__(self):
         res = 'tactic ' + str(self.args[0]) + str(self.args[1])
 

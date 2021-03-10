@@ -211,7 +211,10 @@ class ProofChecker(object):
         return decls[1:] + decls[0:1]
 
     def let_tactic(self,decls,proof):
-        cond = il.And(*[il.Equals(x,y) for x,y in proof.args])
+        goal = decls[0]
+        vocab = goal_vocab(goal)
+        defs = [compile_expr_vocab(ia.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.args]
+        cond = il.And(*[il.Equals(a.args[0],a.args[1]) for a in defs])
         subgoal = ia.LabeledFormula(decls[0].label,il.Implies(cond,decls[0].formula))
         if not hasattr(decls[0],'lineno'):
             print 'has no line number: {}'.format(decls[0])

@@ -936,10 +936,11 @@ else:
         p[0].lineno = get_lineno(p,1)
 
     def p_proofstep_tactic(p):
-        'proofstep : TACTIC SYMBOL opttacticwith'
+        'proofstep : TACTIC SYMBOL opttacticwith optproofgroup'
         a = Atom(p[2])
         a.lineno = get_lineno(p,2)
-        p[0] = TacticTactic(a,p[3])
+        proof = p[4] if p[4] else NoneAST()
+        p[0] = TacticTactic(a,p[3],proof)
         p[0].lineno = get_lineno(p,1)
     
     def p_proofstep_property(p):

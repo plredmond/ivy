@@ -1814,30 +1814,33 @@ def create_constructor_schemata(mod):
                 raise iu.IvyError(cons,"Cannot define constructor {} for type {} because {} is not a structure type".format(cons,sortname,sortname))
     
         
+def apply_assert_proof(prover,self,pf):
+    cond = self.args[0]
+    goal = ivy_ast.LabeledFormula(None,cond)
+    goal.lineno = self.lineno
+    subgoals = prover.get_subgoals(goal,pf)
+    subgoals = map(theorem_to_property,subgoals)
+    assm = AssumeAction(ivy_logic.close_formula(cond))
+    assm.lineno = self.lineno
+    sgas = [ia.SubgoalAction(sg.formula) for sg in subgoals]
+    for sga in sgas:
+        sga.kind = type(self)
+    asrt = Sequence(*(sgas + [assm]))
+    asrt.lineno = self.lineno
+    for x,y in zip(asrt.args,subgoals):
+        if hasattr(y,'lineno'):
+            x.lineno = y.lineno
+    return asrt
+
 def apply_assert_proofs(mod,prover):
     def recur(self):
         if not isinstance(self,Action):
             return self
         if isinstance(self,AssertAction):
             if len(self.args) > 1:
-                cond = self.args[0]
-                pf = self.args[1]
-                goal = ivy_ast.LabeledFormula(None,cond)
-                goal.lineno = self.lineno
-                subgoals = prover.get_subgoals(goal,pf)
-                subgoals = map(theorem_to_property,subgoals)
-                assm = AssumeAction(ivy_logic.close_formula(cond))
-                assm.lineno = self.lineno
-                sgas = [ia.SubgoalAction(sg.formula) for sg in subgoals]
-                for sga in sgas:
-                    sga.kind = type(self)
-                asrt = Sequence(*(sgas + [assm]))
-                asrt.lineno = self.lineno
-                for x,y in zip(asrt.args,subgoals):
-                    if hasattr(y,'lineno'):
-                        x.lineno = y.lineno
-                return asrt
+                return apply_assert_proof(prover,self,self.args[1])
             return self
+
         if isinstance(self,LocalAction):
             with ivy_logic.WithSymbols(self.args[0:-1]):
                 return self.clone(map(recur,self.args))

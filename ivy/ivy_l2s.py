@@ -230,14 +230,26 @@ def l2s_tactic_int(prover,goals,proof,full):
     # of the temporal operators to 'to_wait'
 
     if full:
-        for act in mod.actions.values():
-            for bnd in model.bindings
-            for sym in act.modifies():
-                print 'sym: {}'.format(sym)
-                vs = ilu.sym_placeholders(sym)
-                expr = sym(*vs) if vs else sym
-                named_binders_conjs['l2s_s'].append((vs, expr))
-
+#        for act in mod.actions.values():
+        seen = set(t for (vs,t) in named_binders_conjs['l2s_s'])
+        for bnd in model.bindings:
+            print "name:{}".format(bnd.name)
+            print "action:{}".format(bnd.action.stmt)
+            for act in bnd.action.stmt.iter_subactions():
+                for sym in act.modifies():
+                    print 'sym: {}'.format(sym)
+                    vs = ilu.sym_placeholders(sym)
+                    expr = sym(*vs) if vs else sym
+                    if expr not in seen:
+                        named_binders_conjs['l2s_s'].append((vs, expr))
+        seen = set(t for (vs,t) in named_binders_conjs['l2s_w'])
+        for b in ilu.named_binders_asts([ilu.normalize_named_binders(not_lf)]):
+            if b.name == 'l2s_g':
+                vs,t = b.variables,ilu.negate(b.body)
+                print "t:{}".format(t)
+                if t not in seen:
+                    named_binders_conjs['l2s_w'].append((vs,t))
+                    
     to_wait = [] # list of (variables, term) corresponding to l2s_w in conjectures
     to_wait += named_binders_conjs['l2s_w']
     to_save = [] # list of (variables, term) corresponding to l2s_s in conjectures

@@ -17,8 +17,7 @@ var r : u
 temporal property [p1] globally ~x
 proof {
     showgoals
-    tactic l2s_full with
-    invariant ~($happened$ x)
+    tactic l2s_full
     showgoals
     tactic mc
 }

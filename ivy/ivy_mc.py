@@ -1448,7 +1448,9 @@ class AigerMatchHandler2(ivy_trace.TraceBase):
             if all(x in inv_env or not my_is_skolem(x) and
                    not tr.is_new(x) and x not in env for x in ilu.used_symbols_ast(decd)):
                 expr = ilu.rename_ast(decd,inv_env)
-                if not tr.is_new(expr.rep):
+#                if isinstance(expr,il.ForAll):
+#                    print "OMG: {}".format(expr)
+                if not il.is_app(expr) or not tr.is_new(expr.rep):
                     if il.is_constant(expr) and expr in il.sig.constructors:
                         return
                     eqns.append(il.Equals(expr,val))

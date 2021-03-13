@@ -20,6 +20,7 @@ import subprocess
 from collections import defaultdict
 import itertools
 import sys
+import os
 
 logfile = None
 
@@ -1586,7 +1587,9 @@ class ModelChecker(object):
 
 class ABCModelChecker(ModelChecker):
     def cmd(self,aigfilename,outfilename):
-        return ['abc','-c','read_aiger {}; pdr; write_aiger_cex  {}'.format(aigfilename,outfilename)]
+        abc_path = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)),'bin'),'abc')
+        print "abc_path: {}".format(abc_path)
+        return [abc_path,'-c','read_aiger {}; pdr; write_aiger_cex  {}'.format(aigfilename,outfilename)]
     def scrape(self,alltext):
         return 'Property proved' in alltext
 
@@ -1624,8 +1627,10 @@ def check_isolate():
     # convert aag to aig format
 
     aigfilename = name.replace('.aag','.aig')
+    aigtoaig_path = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)),'bin'),'aigtoaig')
+    print "aigtoaig_path:{}".format(aigtoaig_path)
     try:
-        ret = subprocess.call(['aigtoaig',name,aigfilename])
+        ret = subprocess.call([aigtoaig_path,name,aigfilename])
     except:
         raise iu.IvyError(None,'failed to run aigtoaig')
     if ret != 0:

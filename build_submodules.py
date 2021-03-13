@@ -150,10 +150,63 @@ def build_v2_compiler():
     do_cmd('IVY_INCLUDE_PATH=../s2/include ../s2/ivyc_s2 ivyc_s3.ivy')
     
     os.chdir(cwd)
+
+def build_aiger():
+
+    cwd = os.getcwd()
+
+    os.chdir('submodules/aiger')
+
+    do_cmd('./configure.sh && make')
+    
+    os.chdir(cwd)
+
+def install_aiger():
+
+    make_dir_exist('ivy/bin')
+    cwd = os.getcwd()
+
+    os.chdir('submodules/aiger')
+
+    do_cmd('cp -a aigtoaig ../../ivy/bin/')
+
+    os.chdir(cwd)
+
+def build_abc():
+
+    cwd = os.getcwd()
+    
+    os.chdir('submodules/abc')
+    
+    do_cmd('make')
+    
+    os.chdir(cwd)
+
+def install_abc():
+
+    make_dir_exist('ivy/bin')
+    cwd = os.getcwd()
+
+    os.chdir('submodules/abc')
+
+    do_cmd('cp -a abc ../../ivy/bin/')
+
+    os.chdir(cwd)
     
 if __name__ == "__main__":
     build_z3()
     install_z3()
     build_picotls()
     install_picotls()
-    
+
+    if platform.system() == 'Windows':
+        print "*******************************************"
+        print "Model checking not supported on Windows"
+        print "*******************************************"
+    else:
+        build_aiger()
+        install_aiger()
+        build_abc()
+        install_abc()
+        
+

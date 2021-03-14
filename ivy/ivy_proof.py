@@ -182,7 +182,7 @@ class ProofChecker(object):
     def tactic_tactic(self,decls,proof):
         tn = proof.tactic_name
         if tn not in registered_tactics:
-            raise IvyError(proof,'unknown tactic: {}'.format(proof.tn))
+            raise iu.IvyError(proof,'unknown tactic: {}'.format(tn))
         tactic = registered_tactics[tn]
         return tactic(self,decls,proof)
     

@@ -48,11 +48,11 @@ def build_v2_compiler():
 
     os.chdir('ivy/ivy2/s1')
     do_cmd('ivyc target=repl ivyc_s1.ivy')
-    do_cmd('g++ -O2 -o ivyc_s1 ivyc_s1.cpp -pthread')
+    do_cmd('g++ -Wno-parentheses-equality -O2 -o ivyc_s1 ivyc_s1.cpp -pthread')
 
     os.chdir('../s2')
     do_cmd('IVY_INCLUDE_PATH=../s1/include ../s1/ivyc_s1 ivyc_s2.ivy')
-    do_cmd('g++ -I../s1/include -O2 -o ivyc_s2 -std=c++17 ivyc_s2.cpp')
+    do_cmd('g++ -I../s1/include -Wno-parentheses-equality -O2 -o ivyc_s2 -std=c++17 ivyc_s2.cpp')
 
     os.chdir('../s3')
     do_cmd('IVY_INCLUDE_PATH=../s2/include ../s2/ivyc_s2 ivyc_s3.ivy')

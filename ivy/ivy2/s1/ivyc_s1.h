@@ -626,7 +626,13 @@ class ivyc_s1 {
     unsigned long long tdepth;
     str first;
     unsigned long long second;
-        size_t __hash() const { return hash_space::hash<bool>()(pair)+hash_space::hash<unsigned long long>()(tdepth)+hash_space::hash<str>()(first)+hash_space::hash<unsigned long long>()(second);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<bool>()(pair);
+hv += hash_space::hash<unsigned long long>()(tdepth);
+hv += hash_space::hash<str>()(first);
+hv += hash_space::hash<unsigned long long>()(second);
+return hv;
+}
     };
     class vector__pretty__token__ : public std::vector<pretty__token>{
         public: size_t __hash() const { return hash_space::hash<std::vector<pretty__token> >()(*this);};
@@ -634,7 +640,11 @@ class ivyc_s1 {
     struct pretty__state {
     unsigned long long begin;
     unsigned long long total;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(begin)+hash_space::hash<unsigned long long>()(total);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(begin);
+hv += hash_space::hash<unsigned long long>()(total);
+return hv;
+}
     };
     class vector__pos__ : public std::vector<unsigned long long>{
         public: size_t __hash() const { return hash_space::hash<std::vector<unsigned long long> >()(*this);};
@@ -654,7 +664,20 @@ class ivyc_s1 {
     unsigned long long space;
     unsigned long long depth;
     bool cppstyle;
-        size_t __hash() const { return hash_space::hash<vector__pretty__token__>()(tokens)+hash_space::hash<pretty__state>()(st)+hash_space::hash<unsigned long long>()(maxline)+hash_space::hash<unsigned long long>()(indent)+hash_space::hash<str>()(whitespace)+hash_space::hash<vector__pretty__state__>()(states)+hash_space::hash<vector__pos__>()(stack)+hash_space::hash<str>()(output)+hash_space::hash<unsigned long long>()(space)+hash_space::hash<unsigned long long>()(depth)+hash_space::hash<bool>()(cppstyle);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__pretty__token__>()(tokens);
+hv += hash_space::hash<pretty__state>()(st);
+hv += hash_space::hash<unsigned long long>()(maxline);
+hv += hash_space::hash<unsigned long long>()(indent);
+hv += hash_space::hash<str>()(whitespace);
+hv += hash_space::hash<vector__pretty__state__>()(states);
+hv += hash_space::hash<vector__pos__>()(stack);
+hv += hash_space::hash<str>()(output);
+hv += hash_space::hash<unsigned long long>()(space);
+hv += hash_space::hash<unsigned long long>()(depth);
+hv += hash_space::hash<bool>()(cppstyle);
+return hv;
+}
     };
 class annot{
 public:
@@ -748,7 +771,12 @@ public:
     vector__str__ comments;
     unsigned long long line;
     str file;
-        size_t __hash() const { return hash_space::hash<vector__str__>()(comments)+hash_space::hash<unsigned long long>()(line)+hash_space::hash<str>()(file);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__str__>()(comments);
+hv += hash_space::hash<unsigned long long>()(line);
+hv += hash_space::hash<str>()(file);
+return hv;
+}
     };
     struct pstate {
     str b;
@@ -756,7 +784,14 @@ public:
     str tok;
     annot_i ann;
     bool ok;
-        size_t __hash() const { return hash_space::hash<str>()(b)+hash_space::hash<unsigned long long>()(p)+hash_space::hash<str>()(tok)+hash_space::hash<annot_i>()(ann)+hash_space::hash<bool>()(ok);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(b);
+hv += hash_space::hash<unsigned long long>()(p);
+hv += hash_space::hash<str>()(tok);
+hv += hash_space::hash<annot_i>()(ann);
+hv += hash_space::hash<bool>()(ok);
+return hv;
+}
     };
     enum ivy__verb{ivy__verb__none,ivy__verb__arrow,ivy__verb__plus,ivy__verb__times,ivy__verb__colon,ivy__verb__app,ivy__verb__empty,ivy__verb__dot,ivy__verb__new,ivy__verb__numeral,ivy__verb__castv,ivy__verb__boolv,ivy__verb__truev,ivy__verb__falsev,ivy__verb__and,ivy__verb__or,ivy__verb__not,ivy__verb__iff,ivy__verb__equals,ivy__verb__notequals,ivy__verb__lt,ivy__verb__leq,ivy__verb__gt,ivy__verb__geq,ivy__verb__minus,ivy__verb__div,ivy__verb__string,ivy__verb__ite,ivy__verb__comma,ivy__verb__varv,ivy__verb__logvar,ivy__verb__isav};
 class ivy__ident{
@@ -854,16 +889,27 @@ public:
     struct ivy__strident {
     str val;
     vector__ivy__ident__ subscrs;
-        size_t __hash() const { return hash_space::hash<str>()(val)+hash_space::hash<vector__ivy__ident__>()(subscrs);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(val);
+hv += hash_space::hash<vector__ivy__ident__>()(subscrs);
+return hv;
+}
     };
     struct ivy__numident {
     unsigned long long val;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(val);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(val);
+return hv;
+}
     };
     struct ivy__dotident {
     ivy__ident namesp;
     ivy__strident member;
-        size_t __hash() const { return hash_space::hash<ivy__ident>()(namesp)+hash_space::hash<ivy__strident>()(member);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident>()(namesp);
+hv += hash_space::hash<ivy__strident>()(member);
+return hv;
+}
     };
 class ivy__expr{
 public:
@@ -960,7 +1006,12 @@ public:
     ivy__ident name;
     ivy__verb vrb;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__ident>()(name)+hash_space::hash<int>()(vrb)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident>()(name);
+hv += hash_space::hash<int>()(vrb);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__ivy__expr__ : public std::vector<ivy__expr>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__expr> >()(*this);};
@@ -969,18 +1020,32 @@ public:
     ivy__expr func;
     vector__ivy__expr__ args;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(func)+hash_space::hash<vector__ivy__expr__>()(args)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(func);
+hv += hash_space::hash<vector__ivy__expr__>()(args);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__variable {
     unsigned long long idx;
     annot ann;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(idx)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(idx);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__pi {
     vector__ivy__expr__ vars;
     ivy__expr body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__ivy__expr__>()(vars)+hash_space::hash<ivy__expr>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__expr__>()(vars);
+hv += hash_space::hash<ivy__expr>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
 class ivy__stmt{
 public:
@@ -1083,37 +1148,64 @@ public:
     ivy__expr lhs;
     ivy__expr rhs;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(lhs)+hash_space::hash<ivy__expr>()(rhs)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(lhs);
+hv += hash_space::hash<ivy__expr>()(rhs);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__sequence {
     ivy__stmt lhs;
     ivy__stmt rhs;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__stmt>()(lhs)+hash_space::hash<ivy__stmt>()(rhs)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__stmt>()(lhs);
+hv += hash_space::hash<ivy__stmt>()(rhs);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__ivy__stmt__ : public std::vector<ivy__stmt>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__stmt> >()(*this);};
     };
     struct ivy__skipst {
     annot ann;
-        size_t __hash() const { return hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__ifst {
     ivy__expr cond;
     ivy__stmt thenst;
     ivy__stmt elsest;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(cond)+hash_space::hash<ivy__stmt>()(thenst)+hash_space::hash<ivy__stmt>()(elsest)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(cond);
+hv += hash_space::hash<ivy__stmt>()(thenst);
+hv += hash_space::hash<ivy__stmt>()(elsest);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__whilest {
     ivy__expr cond;
     ivy__stmt body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(cond)+hash_space::hash<ivy__stmt>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(cond);
+hv += hash_space::hash<ivy__stmt>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__breakst {
     annot ann;
-        size_t __hash() const { return hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
 class ivy__decl{
 public:
@@ -1231,7 +1323,16 @@ public:
     unsigned long long outpos;
     bool is_ref;
     bool is_const;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<bool>()(is_input)+hash_space::hash<unsigned long long>()(inpos)+hash_space::hash<bool>()(is_output)+hash_space::hash<unsigned long long>()(outpos)+hash_space::hash<bool>()(is_ref)+hash_space::hash<bool>()(is_const);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<bool>()(is_input);
+hv += hash_space::hash<unsigned long long>()(inpos);
+hv += hash_space::hash<bool>()(is_output);
+hv += hash_space::hash<unsigned long long>()(outpos);
+hv += hash_space::hash<bool>()(is_ref);
+hv += hash_space::hash<bool>()(is_const);
+return hv;
+}
     };
     class vector__ivy__prototype_argument__ : public std::vector<ivy__prototype_argument>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__prototype_argument> >()(*this);};
@@ -1240,7 +1341,12 @@ public:
     vector__ivy__prototype_argument__ args;
     bool has_ret;
     ivy__prototype_argument ret;
-        size_t __hash() const { return hash_space::hash<vector__ivy__prototype_argument__>()(args)+hash_space::hash<bool>()(has_ret)+hash_space::hash<ivy__prototype_argument>()(ret);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__prototype_argument__>()(args);
+hv += hash_space::hash<bool>()(has_ret);
+hv += hash_space::hash<ivy__prototype_argument>()(ret);
+return hv;
+}
     };
     struct ivy__actdc {
     ivy__expr name;
@@ -1252,7 +1358,18 @@ public:
     annot ann;
     bool has_proto;
     ivy__prototype proto;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<int>()(kind)+hash_space::hash<vector__ivy__expr__>()(inputs)+hash_space::hash<vector__ivy__expr__>()(outputs)+hash_space::hash<bool>()(has_body)+hash_space::hash<ivy__stmt>()(body)+hash_space::hash<annot>()(ann)+hash_space::hash<bool>()(has_proto)+hash_space::hash<ivy__prototype>()(proto);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<int>()(kind);
+hv += hash_space::hash<vector__ivy__expr__>()(inputs);
+hv += hash_space::hash<vector__ivy__expr__>()(outputs);
+hv += hash_space::hash<bool>()(has_body);
+hv += hash_space::hash<ivy__stmt>()(body);
+hv += hash_space::hash<annot>()(ann);
+hv += hash_space::hash<bool>()(has_proto);
+hv += hash_space::hash<ivy__prototype>()(proto);
+return hv;
+}
     };
     class ivy__ident_set : public hash_space::hash_map<ivy__ident,bool>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,bool> >()(*this);};
@@ -1260,7 +1377,11 @@ public:
     struct ivy__varst {
     ivy__expr name;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__ivy__decl__ : public std::vector<ivy__decl>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__decl> >()(*this);};
@@ -1268,7 +1389,11 @@ public:
     struct ivy__groupdc {
     vector__ivy__decl__ decls;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__ivy__decl__>()(decls)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__decl__>()(decls);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
 class ivy__typespec{
 public:
@@ -1360,12 +1485,20 @@ public:
 };    struct ivy__enumspec {
     vector__ivy__expr__ constructors;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__ivy__expr__>()(constructors)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__expr__>()(constructors);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__structspec {
     vector__ivy__expr__ destructors;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__ivy__expr__>()(destructors)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__expr__>()(destructors);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__typedc {
     ivy__expr sort;
@@ -1374,7 +1507,15 @@ public:
     bool has_spec;
     ivy__typespec spec;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(sort)+hash_space::hash<bool>()(has_super)+hash_space::hash<ivy__expr>()(super)+hash_space::hash<bool>()(has_spec)+hash_space::hash<ivy__typespec>()(spec)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(sort);
+hv += hash_space::hash<bool>()(has_super);
+hv += hash_space::hash<ivy__expr>()(super);
+hv += hash_space::hash<bool>()(has_spec);
+hv += hash_space::hash<ivy__typespec>()(spec);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__vardc {
     ivy__expr typing;
@@ -1382,42 +1523,78 @@ public:
     bool has_def;
     ivy__expr def;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(typing)+hash_space::hash<bool>()(is_destructor)+hash_space::hash<bool>()(has_def)+hash_space::hash<ivy__expr>()(def)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(typing);
+hv += hash_space::hash<bool>()(is_destructor);
+hv += hash_space::hash<bool>()(has_def);
+hv += hash_space::hash<ivy__expr>()(def);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__header {
     str filename;
     annot ann;
-        size_t __hash() const { return hash_space::hash<str>()(filename)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(filename);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__interpdc {
     ivy__expr itype;
     ivy__expr ctype;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(itype)+hash_space::hash<ivy__expr>()(ctype)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(itype);
+hv += hash_space::hash<ivy__expr>()(ctype);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__includedc {
     ivy__expr file;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(file)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(file);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__moduledc {
     ivy__expr name;
     vector__ivy__expr__ prms;
     ivy__decl body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<vector__ivy__expr__>()(prms)+hash_space::hash<ivy__decl>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<vector__ivy__expr__>()(prms);
+hv += hash_space::hash<ivy__decl>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__instantiatedc {
     ivy__expr name;
     vector__ivy__expr__ prms;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<vector__ivy__expr__>()(prms)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<vector__ivy__expr__>()(prms);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__objectdc {
     ivy__expr name;
     ivy__decl body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(name)+hash_space::hash<ivy__decl>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(name);
+hv += hash_space::hash<ivy__decl>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__instancedc {
     ivy__expr objname;
@@ -1425,21 +1602,39 @@ public:
     vector__ivy__expr__ prms;
     bool is_auto;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(objname)+hash_space::hash<ivy__expr>()(modname)+hash_space::hash<vector__ivy__expr__>()(prms)+hash_space::hash<bool>()(is_auto)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(objname);
+hv += hash_space::hash<ivy__expr>()(modname);
+hv += hash_space::hash<vector__ivy__expr__>()(prms);
+hv += hash_space::hash<bool>()(is_auto);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__initdc {
     ivy__stmt body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<ivy__stmt>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__stmt>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct ivy__version {
     vector__pos__ nums;
-        size_t __hash() const { return hash_space::hash<vector__pos__>()(nums);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__pos__>()(nums);
+return hv;
+}
     };
     struct ivy__prog {
     ivy__version vers;
     vector__ivy__decl__ decls;
-        size_t __hash() const { return hash_space::hash<ivy__version>()(vers)+hash_space::hash<vector__ivy__decl__>()(decls);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__version>()(vers);
+hv += hash_space::hash<vector__ivy__decl__>()(decls);
+return hv;
+}
     };
 class ivy__error{
 public:
@@ -1549,47 +1744,83 @@ public:
     ivy__expr e;
     ivy__expr t1;
     ivy__expr t2;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(e)+hash_space::hash<ivy__expr>()(t1)+hash_space::hash<ivy__expr>()(t2);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(e);
+hv += hash_space::hash<ivy__expr>()(t1);
+hv += hash_space::hash<ivy__expr>()(t2);
+return hv;
+}
     };
     struct ivy__type_conversion {
     ivy__expr e;
     ivy__expr t1;
     ivy__expr t2;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(e)+hash_space::hash<ivy__expr>()(t1)+hash_space::hash<ivy__expr>()(t2);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(e);
+hv += hash_space::hash<ivy__expr>()(t1);
+hv += hash_space::hash<ivy__expr>()(t2);
+return hv;
+}
     };
     struct ivy__untyped {
     ivy__expr e;
     ivy__expr t1;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(e)+hash_space::hash<ivy__expr>()(t1);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(e);
+hv += hash_space::hash<ivy__expr>()(t1);
+return hv;
+}
     };
     struct ivy__not_first_order {
     ivy__expr e;
     ivy__expr t1;
-        size_t __hash() const { return hash_space::hash<ivy__expr>()(e)+hash_space::hash<ivy__expr>()(t1);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__expr>()(e);
+hv += hash_space::hash<ivy__expr>()(t1);
+return hv;
+}
     };
     struct ivy__file_not_found {
     str n;
-        size_t __hash() const { return hash_space::hash<str>()(n);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(n);
+return hv;
+}
     };
     struct ivy__cannot_write {
     str n;
-        size_t __hash() const { return hash_space::hash<str>()(n);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(n);
+return hv;
+}
     };
     struct ivy__undefined {
     ivy__ident n;
-        size_t __hash() const { return hash_space::hash<ivy__ident>()(n);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident>()(n);
+return hv;
+}
     };
     struct ivy__wrong_number_params {
     unsigned long long n;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(n);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(n);
+return hv;
+}
     };
     struct ivy__syntax_error {
     str tok;
-        size_t __hash() const { return hash_space::hash<str>()(tok);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(tok);
+return hv;
+}
     };
     struct ivy__prog__readst {
     ivy__ident_set have_read;
-        size_t __hash() const { return hash_space::hash<ivy__ident_set>()(have_read);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident_set>()(have_read);
+return hv;
+}
     };
     class ivy__symeval : public hash_space::hash_map<ivy__ident,ivy__expr>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,ivy__expr> >()(*this);};
@@ -1618,7 +1849,23 @@ public:
     ivy__ident_to_instantiatedc autodefs;
     ivy__ident_set autos_pending;
     bool no_undefined;
-        size_t __hash() const { return hash_space::hash<vector__ivy__decl__>()(decls)+hash_space::hash<ivy__ident_to_ident>()(prmvals)+hash_space::hash<ivy__ident_to_moduledc>()(moddecls)+hash_space::hash<ivy__ident_set>()(defs)+hash_space::hash<bool>()(has_root)+hash_space::hash<ivy__ident>()(root)+hash_space::hash<ivy__ident_set>()(locals)+hash_space::hash<ivy__ident_set>()(globals)+hash_space::hash<bool>()(defining)+hash_space::hash<bool>()(absolute)+hash_space::hash<bool>()(dot_rhs)+hash_space::hash<ivy__ident_to_instantiatedc>()(autodefs)+hash_space::hash<ivy__ident_set>()(autos_pending)+hash_space::hash<bool>()(no_undefined);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__decl__>()(decls);
+hv += hash_space::hash<ivy__ident_to_ident>()(prmvals);
+hv += hash_space::hash<ivy__ident_to_moduledc>()(moddecls);
+hv += hash_space::hash<ivy__ident_set>()(defs);
+hv += hash_space::hash<bool>()(has_root);
+hv += hash_space::hash<ivy__ident>()(root);
+hv += hash_space::hash<ivy__ident_set>()(locals);
+hv += hash_space::hash<ivy__ident_set>()(globals);
+hv += hash_space::hash<bool>()(defining);
+hv += hash_space::hash<bool>()(absolute);
+hv += hash_space::hash<bool>()(dot_rhs);
+hv += hash_space::hash<ivy__ident_to_instantiatedc>()(autodefs);
+hv += hash_space::hash<ivy__ident_set>()(autos_pending);
+hv += hash_space::hash<bool>()(no_undefined);
+return hv;
+}
     };
     class ivy__ident_to_exprs : public hash_space::hash_map<ivy__ident,vector__ivy__expr__>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,vector__ivy__expr__> >()(*this);};
@@ -1626,13 +1873,22 @@ public:
     struct ivy__subtypes {
     ivy__ident_to_exprs subtypes_of;
     ivy__symeval supertype_of;
-        size_t __hash() const { return hash_space::hash<ivy__ident_to_exprs>()(subtypes_of)+hash_space::hash<ivy__symeval>()(supertype_of);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident_to_exprs>()(subtypes_of);
+hv += hash_space::hash<ivy__symeval>()(supertype_of);
+return hv;
+}
     };
     struct ivy__global_types {
     ivy__symeval type_of;
     ivy__ident_set is_action;
     bool curried;
-        size_t __hash() const { return hash_space::hash<ivy__symeval>()(type_of)+hash_space::hash<ivy__ident_set>()(is_action)+hash_space::hash<bool>()(curried);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__symeval>()(type_of);
+hv += hash_space::hash<ivy__ident_set>()(is_action);
+hv += hash_space::hash<bool>()(curried);
+return hv;
+}
     };
     class ivy__param_map : public hash_space::hash_map<ivy__ident,unsigned long long>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,unsigned long long> >()(*this);};
@@ -1647,11 +1903,19 @@ public:
     ivy__push_pop_ident_set__map_t map;
     ivy__push_pop_ident_set__vec_t del;
     vector__pos__ stack;
-        size_t __hash() const { return hash_space::hash<ivy__push_pop_ident_set__map_t>()(map)+hash_space::hash<ivy__push_pop_ident_set__vec_t>()(del)+hash_space::hash<vector__pos__>()(stack);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__push_pop_ident_set__map_t>()(map);
+hv += hash_space::hash<ivy__push_pop_ident_set__vec_t>()(del);
+hv += hash_space::hash<vector__pos__>()(stack);
+return hv;
+}
     };
     struct ivy__local_tracker {
     ivy__push_pop_ident_set map;
-        size_t __hash() const { return hash_space::hash<ivy__push_pop_ident_set>()(map);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__push_pop_ident_set>()(map);
+return hv;
+}
     };
     class ivy__decost__map : public hash_space::hash_map<ivy__ident,ivy__expr>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,ivy__expr> >()(*this);};
@@ -1664,20 +1928,37 @@ public:
     bool ok;
     vector__ivy__expr__ failed;
     bool error_reported;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(counter)+hash_space::hash<ivy__decost__map>()(m)+hash_space::hash<ivy__symeval>()(ty)+hash_space::hash<bool>()(member)+hash_space::hash<bool>()(ok)+hash_space::hash<vector__ivy__expr__>()(failed)+hash_space::hash<bool>()(error_reported);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(counter);
+hv += hash_space::hash<ivy__decost__map>()(m);
+hv += hash_space::hash<ivy__symeval>()(ty);
+hv += hash_space::hash<bool>()(member);
+hv += hash_space::hash<bool>()(ok);
+hv += hash_space::hash<vector__ivy__expr__>()(failed);
+hv += hash_space::hash<bool>()(error_reported);
+return hv;
+}
     };
     class ivy__elidest__map : public hash_space::hash_map<ivy__ident,bool>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,bool> >()(*this);};
     };
     struct ivy__elidest {
     ivy__elidest__map seen;
-        size_t __hash() const { return hash_space::hash<ivy__elidest__map>()(seen);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__elidest__map>()(seen);
+return hv;
+}
     };
     struct ivy__type_context__stack_entry {
     ivy__ident id;
     bool any;
     ivy__expr val;
-        size_t __hash() const { return hash_space::hash<ivy__ident>()(id)+hash_space::hash<bool>()(any)+hash_space::hash<ivy__expr>()(val);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident>()(id);
+hv += hash_space::hash<bool>()(any);
+hv += hash_space::hash<ivy__expr>()(val);
+return hv;
+}
     };
     class vector__ivy__type_context__stack_entry__ : public std::vector<ivy__type_context__stack_entry>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__type_context__stack_entry> >()(*this);};
@@ -1685,12 +1966,20 @@ public:
     struct ivy__type_context {
     ivy__symeval m;
     vector__ivy__type_context__stack_entry__ stack;
-        size_t __hash() const { return hash_space::hash<ivy__symeval>()(m)+hash_space::hash<vector__ivy__type_context__stack_entry__>()(stack);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__symeval>()(m);
+hv += hash_space::hash<vector__ivy__type_context__stack_entry__>()(stack);
+return hv;
+}
     };
     struct ivy__typeinferst {
     ivy__type_context tc;
     ivy__subtypes subtype_rel;
-        size_t __hash() const { return hash_space::hash<ivy__type_context>()(tc)+hash_space::hash<ivy__subtypes>()(subtype_rel);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__type_context>()(tc);
+hv += hash_space::hash<ivy__subtypes>()(subtype_rel);
+return hv;
+}
     };
     enum cpp__verb{cpp__verb__none,cpp__verb__arrow,cpp__verb__plus,cpp__verb__times,cpp__verb__colon,cpp__verb__app,cpp__verb__empty,cpp__verb__dot,cpp__verb__new,cpp__verb__numeral,cpp__verb__castv,cpp__verb__boolv,cpp__verb__truev,cpp__verb__falsev,cpp__verb__and,cpp__verb__or,cpp__verb__not,cpp__verb__iff,cpp__verb__equals,cpp__verb__notequals,cpp__verb__lt,cpp__verb__leq,cpp__verb__gt,cpp__verb__geq,cpp__verb__minus,cpp__verb__div,cpp__verb__string,cpp__verb__ite,cpp__verb__comma,cpp__verb__varv,cpp__verb__logvar,cpp__verb__isav};
 class cpp__ident{
@@ -1788,16 +2077,27 @@ public:
     struct cpp__strident {
     str val;
     vector__cpp__ident__ subscrs;
-        size_t __hash() const { return hash_space::hash<str>()(val)+hash_space::hash<vector__cpp__ident__>()(subscrs);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(val);
+hv += hash_space::hash<vector__cpp__ident__>()(subscrs);
+return hv;
+}
     };
     struct cpp__numident {
     unsigned long long val;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(val);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(val);
+return hv;
+}
     };
     struct cpp__dotident {
     cpp__ident namesp;
     cpp__strident member;
-        size_t __hash() const { return hash_space::hash<cpp__ident>()(namesp)+hash_space::hash<cpp__strident>()(member);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__ident>()(namesp);
+hv += hash_space::hash<cpp__strident>()(member);
+return hv;
+}
     };
 class cpp__expr{
 public:
@@ -1894,7 +2194,12 @@ public:
     cpp__ident name;
     cpp__verb vrb;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__ident>()(name)+hash_space::hash<int>()(vrb)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__ident>()(name);
+hv += hash_space::hash<int>()(vrb);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__cpp__expr__ : public std::vector<cpp__expr>{
         public: size_t __hash() const { return hash_space::hash<std::vector<cpp__expr> >()(*this);};
@@ -1903,18 +2208,32 @@ public:
     cpp__expr func;
     vector__cpp__expr__ args;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(func)+hash_space::hash<vector__cpp__expr__>()(args)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(func);
+hv += hash_space::hash<vector__cpp__expr__>()(args);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__variable {
     unsigned long long idx;
     annot ann;
-        size_t __hash() const { return hash_space::hash<unsigned long long>()(idx)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<unsigned long long>()(idx);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__pi {
     vector__cpp__expr__ vars;
     cpp__expr body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__cpp__expr__>()(vars)+hash_space::hash<cpp__expr>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__cpp__expr__>()(vars);
+hv += hash_space::hash<cpp__expr>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
 class cpp__stmt{
 public:
@@ -2019,44 +2338,77 @@ public:
     cpp__expr lhs;
     cpp__expr rhs;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(lhs)+hash_space::hash<cpp__expr>()(rhs)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(lhs);
+hv += hash_space::hash<cpp__expr>()(rhs);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__sequence {
     cpp__stmt lhs;
     cpp__stmt rhs;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__stmt>()(lhs)+hash_space::hash<cpp__stmt>()(rhs)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__stmt>()(lhs);
+hv += hash_space::hash<cpp__stmt>()(rhs);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__cpp__stmt__ : public std::vector<cpp__stmt>{
         public: size_t __hash() const { return hash_space::hash<std::vector<cpp__stmt> >()(*this);};
     };
     struct cpp__skipst {
     annot ann;
-        size_t __hash() const { return hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__ifst {
     cpp__expr cond;
     cpp__stmt thenst;
     cpp__stmt elsest;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(cond)+hash_space::hash<cpp__stmt>()(thenst)+hash_space::hash<cpp__stmt>()(elsest)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(cond);
+hv += hash_space::hash<cpp__stmt>()(thenst);
+hv += hash_space::hash<cpp__stmt>()(elsest);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__whilest {
     cpp__expr cond;
     cpp__stmt body;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(cond)+hash_space::hash<cpp__stmt>()(body)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(cond);
+hv += hash_space::hash<cpp__stmt>()(body);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__breakst {
     annot ann;
-        size_t __hash() const { return hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__simpletype {
     cpp__expr _type;
     cpp__expr name;
     bool is_const;
     bool is_ref;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(_type)+hash_space::hash<cpp__expr>()(name)+hash_space::hash<bool>()(is_const)+hash_space::hash<bool>()(is_ref);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(_type);
+hv += hash_space::hash<cpp__expr>()(name);
+hv += hash_space::hash<bool>()(is_const);
+hv += hash_space::hash<bool>()(is_ref);
+return hv;
+}
     };
     class vector__cpp__simpletype__ : public std::vector<cpp__simpletype>{
         public: size_t __hash() const { return hash_space::hash<std::vector<cpp__simpletype> >()(*this);};
@@ -2067,17 +2419,32 @@ public:
     bool is_const;
     bool has_initializer;
     cpp__expr initializer;
-        size_t __hash() const { return hash_space::hash<cpp__simpletype>()(base)+hash_space::hash<vector__cpp__simpletype__>()(args)+hash_space::hash<bool>()(is_const)+hash_space::hash<bool>()(has_initializer)+hash_space::hash<cpp__expr>()(initializer);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__simpletype>()(base);
+hv += hash_space::hash<vector__cpp__simpletype__>()(args);
+hv += hash_space::hash<bool>()(is_const);
+hv += hash_space::hash<bool>()(has_initializer);
+hv += hash_space::hash<cpp__expr>()(initializer);
+return hv;
+}
     };
     struct cpp__varst {
     cpp__simpletype vtype;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__simpletype>()(vtype)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__simpletype>()(vtype);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__retst {
     cpp__expr val;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(val)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(val);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
 class cpp__decl{
 public:
@@ -2181,23 +2548,40 @@ public:
 };    struct cpp__header {
     str filename;
     annot ann;
-        size_t __hash() const { return hash_space::hash<str>()(filename)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<str>()(filename);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__typedecl {
     cpp__simpletype ttype;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__simpletype>()(ttype)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__simpletype>()(ttype);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__enumdecl {
     cpp__expr name;
     vector__cpp__expr__ elems;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(name)+hash_space::hash<vector__cpp__expr__>()(elems)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(name);
+hv += hash_space::hash<vector__cpp__expr__>()(elems);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__vardecl {
     cpp__simpletype vtype;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__simpletype>()(vtype)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__simpletype>()(vtype);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__funcdecl {
     cpp__functype ftype;
@@ -2206,7 +2590,15 @@ public:
     bool is_static;
     bool is_virtual;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__functype>()(ftype)+hash_space::hash<bool>()(has_body)+hash_space::hash<cpp__stmt>()(body)+hash_space::hash<bool>()(is_static)+hash_space::hash<bool>()(is_virtual)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__functype>()(ftype);
+hv += hash_space::hash<bool>()(has_body);
+hv += hash_space::hash<cpp__stmt>()(body);
+hv += hash_space::hash<bool>()(is_static);
+hv += hash_space::hash<bool>()(is_virtual);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     class vector__cpp__decl__ : public std::vector<cpp__decl>{
         public: size_t __hash() const { return hash_space::hash<std::vector<cpp__decl> >()(*this);};
@@ -2218,37 +2610,69 @@ public:
     bool has_members;
     vector__cpp__decl__ members;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(name)+hash_space::hash<bool>()(has_super)+hash_space::hash<cpp__expr>()(super)+hash_space::hash<bool>()(has_members)+hash_space::hash<vector__cpp__decl__>()(members)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(name);
+hv += hash_space::hash<bool>()(has_super);
+hv += hash_space::hash<cpp__expr>()(super);
+hv += hash_space::hash<bool>()(has_members);
+hv += hash_space::hash<vector__cpp__decl__>()(members);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__namespacedecl {
     cpp__expr name;
     vector__cpp__decl__ members;
     annot ann;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(name)+hash_space::hash<vector__cpp__decl__>()(members)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(name);
+hv += hash_space::hash<vector__cpp__decl__>()(members);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__groupdc {
     vector__cpp__decl__ decls;
     annot ann;
-        size_t __hash() const { return hash_space::hash<vector__cpp__decl__>()(decls)+hash_space::hash<annot>()(ann);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__cpp__decl__>()(decls);
+hv += hash_space::hash<annot>()(ann);
+return hv;
+}
     };
     struct cpp__version {
     vector__pos__ nums;
-        size_t __hash() const { return hash_space::hash<vector__pos__>()(nums);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__pos__>()(nums);
+return hv;
+}
     };
     struct cpp__prog {
     cpp__version vers;
     vector__cpp__decl__ decls;
-        size_t __hash() const { return hash_space::hash<cpp__version>()(vers)+hash_space::hash<vector__cpp__decl__>()(decls);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__version>()(vers);
+hv += hash_space::hash<vector__cpp__decl__>()(decls);
+return hv;
+}
     };
     struct ivy__access_path {
     vector__ivy__ident__ elems;
-        size_t __hash() const { return hash_space::hash<vector__ivy__ident__>()(elems);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<vector__ivy__ident__>()(elems);
+return hv;
+}
     };
     struct ivy__lvalue_count {
     cpp__expr lvalue;
     ivy__access_path path;
     unsigned long long cnt;
-        size_t __hash() const { return hash_space::hash<cpp__expr>()(lvalue)+hash_space::hash<ivy__access_path>()(path)+hash_space::hash<unsigned long long>()(cnt);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<cpp__expr>()(lvalue);
+hv += hash_space::hash<ivy__access_path>()(path);
+hv += hash_space::hash<unsigned long long>()(cnt);
+return hv;
+}
     };
     class ivy__ident_to_declvec : public hash_space::hash_map<ivy__ident,vector__ivy__decl__>{
         public: size_t __hash() const { return hash_space::hash<hash_space::hash_map<ivy__ident,vector__ivy__decl__> >()(*this);};
@@ -2282,7 +2706,28 @@ public:
     ivy__local_tracker locals;
     ivy__ident_set constructors;
     bool dot_rhs;
-        size_t __hash() const { return hash_space::hash<ivy__ident_to_declvec>()(members)+hash_space::hash<ivy__ident_to_cppclass>()(cppclasses)+hash_space::hash<ivy__ident_set>()(objects)+hash_space::hash<ivy__global_types>()(globals)+hash_space::hash<bool>()(is_member)+hash_space::hash<ivy__ident>()(this_ident)+hash_space::hash<bool>()(in_class)+hash_space::hash<bool>()(proto_only)+hash_space::hash<ivy__subtypes>()(subtype_rel)+hash_space::hash<bool>()(native)+hash_space::hash<bool>()(forward)+hash_space::hash<vector__ivy__expr__>()(outputs)+hash_space::hash<vector__cpp__stmt__>()(code)+hash_space::hash<unsigned long long>()(counter)+hash_space::hash<ivy__ident_to_prototype>()(protos)+hash_space::hash<vector__ivy__lvalue_count__>()(dead)+hash_space::hash<ivy__local_tracker>()(locals)+hash_space::hash<ivy__ident_set>()(constructors)+hash_space::hash<bool>()(dot_rhs);}
+        size_t __hash() const { size_t hv = 0;
+hv += hash_space::hash<ivy__ident_to_declvec>()(members);
+hv += hash_space::hash<ivy__ident_to_cppclass>()(cppclasses);
+hv += hash_space::hash<ivy__ident_set>()(objects);
+hv += hash_space::hash<ivy__global_types>()(globals);
+hv += hash_space::hash<bool>()(is_member);
+hv += hash_space::hash<ivy__ident>()(this_ident);
+hv += hash_space::hash<bool>()(in_class);
+hv += hash_space::hash<bool>()(proto_only);
+hv += hash_space::hash<ivy__subtypes>()(subtype_rel);
+hv += hash_space::hash<bool>()(native);
+hv += hash_space::hash<bool>()(forward);
+hv += hash_space::hash<vector__ivy__expr__>()(outputs);
+hv += hash_space::hash<vector__cpp__stmt__>()(code);
+hv += hash_space::hash<unsigned long long>()(counter);
+hv += hash_space::hash<ivy__ident_to_prototype>()(protos);
+hv += hash_space::hash<vector__ivy__lvalue_count__>()(dead);
+hv += hash_space::hash<ivy__local_tracker>()(locals);
+hv += hash_space::hash<ivy__ident_set>()(constructors);
+hv += hash_space::hash<bool>()(dot_rhs);
+return hv;
+}
     };
     class vector__ivy__access_path__ : public std::vector<ivy__access_path>{
         public: size_t __hash() const { return hash_space::hash<std::vector<ivy__access_path> >()(*this);};
@@ -2404,18 +2849,20 @@ public:
     virtual void ext__ivy__ident_to_declvec__get(const ivy__ident_to_declvec& a, ivyc_s1::ivy__ident x, vector__ivy__decl__& y);
     virtual ivyc_s1::ivy__stmt ext__ivy__asgn__make(ivyc_s1::ivy__expr x, ivyc_s1::ivy__expr y, ivyc_s1::annot ann);
     virtual unsigned long long ext__vector__ivy__access_path____domain__next(unsigned long long x);
+    virtual vector__ivy__lvalue_count__ ext__vector__ivy__lvalue_count____empty();
+    virtual void ext__ivy__expr__tup__parse(pstate& st, int prio, vector__ivy__expr__& res);
     virtual ivyc_s1::ivy__decl ext__ivy__vardc__typeinfer(const ivy__vardc& s, ivy__typeinferst& st);
     virtual void ext__vector__ivy__prototype_argument____append(vector__ivy__prototype_argument__& a, const ivy__prototype_argument& v);
     virtual ivyc_s1::cpp__expr ext__ivy__make_cpp_call(ivyc_s1::ivy__expr func, const vector__cpp__expr__& args, ivyc_s1::annot ann, ivy__tocppst& st);
     virtual void ext__ivy__header__flat(const ivy__header& s, ivy__flatst& st);
     virtual void ext__ivy__instantiatedc__flat(const ivy__instantiatedc& s, ivy__flatst& st);
-    virtual void ext__ivy__typedc__build_global_types(const ivy__typedc& s, ivy__global_types& st);
     virtual ivyc_s1::cpp__expr ext__cpp__expr__prefix(ivyc_s1::cpp__expr s, ivyc_s1::cpp__ident pref);
     virtual cpp__verb ext__cpp__verb_from_name(const str& name);
     virtual void ext__ivy__typespec__parse(pstate& st, int prio, ivyc_s1::ivy__typespec& res);
     virtual ivyc_s1::cpp__decl ext__ivy__enum_to_cpp(ivyc_s1::cpp__expr name, ivyc_s1::ivy__typespec spec, ivyc_s1::cpp__decl sd, ivy__tocppst& st);
     virtual bool ext__ivy__initdc__emitted(const ivy__initdc& s, const ivy__tocppst& st);
     virtual ivyc_s1::cpp__expr ext__cpp__inttype(ivyc_s1::annot ann);
+    virtual void ext__ivy__untyped__encode(const ivy__untyped& e, pretty& b);
     virtual ivyc_s1::ivy__stmt ext__ivy__sequence__typeinfer(const ivy__sequence& s, ivy__typeinferst& st);
     virtual void ext__ivy__add_derived_traits(cpp__structdecl& s);
     virtual ivyc_s1::ivy__typespec ext__ivy__typespec__flat(ivyc_s1::ivy__typespec s, ivy__flatst& st);
@@ -2436,9 +2883,8 @@ public:
     virtual ivyc_s1::ivy__ident ext__ivy__ident__flat(ivyc_s1::ivy__ident s, bool rhs, const ivy__flatst& st);
     virtual void ext__ivy__type_context__set(ivy__type_context& s, ivyc_s1::ivy__expr typing);
     virtual ivy__verb ext__ivy__expr__app_verb(ivyc_s1::ivy__expr s);
-    virtual ivyc_s1::cpp__stmt ext__ivy__stmt__to_cpp(ivyc_s1::ivy__stmt s, ivy__tocppst& st);
     virtual ivy__wrong_number_params ext__ivy__wrong_number_params__make(unsigned long long n);
-    virtual void ext__cpp__version__encode(const cpp__version& s, pretty& b);
+    virtual void ext__pretty__extend(pretty& self, const str& string);
     virtual ivyc_s1::cpp__expr ext__cpp__symbol__make(ivyc_s1::cpp__ident name, ivyc_s1::annot ann);
     virtual vector__cpp__expr__ ext__cpp__app__get_args(const cpp__app& s);
     virtual ivy__ident_to_ident ext__ivy__prm_map(const vector__ivy__expr__& fml, const vector__ivy__expr__& act, ivyc_s1::annot ann);
@@ -2448,6 +2894,7 @@ public:
     virtual bool ext__ivy__expr__has_numident(ivyc_s1::ivy__expr e);
     virtual void ext__vector__ivy__access_path____append(vector__ivy__access_path__& a, const ivy__access_path& v);
     virtual bool ext__ivy__ident_set__mem(const ivy__ident_set& a, ivyc_s1::ivy__ident x);
+    virtual unsigned long long ext__vector__cpp__expr____domain__next(unsigned long long x);
     virtual unsigned long long ext__vector__cpp__simpletype____domain__next(unsigned long long x);
     virtual ivy__strident ext__ivy__dotident__get_last(const ivy__dotident& s);
     virtual void ext__cpp__sequence__encode(const cpp__sequence& s, pretty& b, int prio);
@@ -2459,7 +2906,6 @@ public:
     virtual ivyc_s1::ivy__stmt ext__ivy__decl__get_body(ivyc_s1::ivy__decl s);
     virtual bool ext__cpp__app__is(const cpp__app& s, cpp__verb vrb);
     virtual ivy__strident ext__ivy__ident__get_last(ivyc_s1::ivy__ident s);
-    virtual ivyc_s1::ivy__expr ext__ivy__symbol__makestr(const str& name, ivyc_s1::annot ann);
     virtual void ext__ivy__typespec__to_destrs(ivyc_s1::ivy__typespec s, ivy__flatst& st, ivyc_s1::ivy__expr ty);
     virtual vector__ivy__expr__ ext__ivy__app__get_args(const ivy__app& s);
     virtual ivyc_s1::cpp__decl ext__ivy__header__to_cpp(const ivy__header& s, ivy__tocppst& st);
@@ -2475,10 +2921,12 @@ public:
     virtual bool ext__ivy__expr__occurs(ivyc_s1::ivy__expr e, ivyc_s1::ivy__ident n);
     virtual void ext__vector__ivy__lvalue_count____set(vector__ivy__lvalue_count__& a, unsigned long long x, const ivy__lvalue_count& y);
     virtual void ext__vector__pretty__state____append(vector__pretty__state__& a, const pretty__state& v);
-    virtual ivyc_s1::annot ext__ivy__expr__get_ann(ivyc_s1::ivy__expr s);
+    virtual bool ext__ivy__file__exist(const str& fname);
     virtual void imp__ivy__decost__typeinf_show_str(const str& s);
     virtual ivyc_s1::ivy__expr ext__ivy__symbol__make(ivyc_s1::ivy__ident name, ivyc_s1::annot ann);
     virtual void ext__ivy__tocppst__wrap_stmt(ivy__tocppst& s, ivyc_s1::cpp__stmt code, ivyc_s1::annot ann, ivyc_s1::cpp__stmt& res);
+    virtual bool ext__ivy__is_logvar_name(const str& name);
+    virtual ivyc_s1::ivy__ident ext__ivy__dotident__get_namesp(const ivy__dotident& s);
     virtual void ext__cpp__functype__encode(const cpp__functype& s, pretty& b, int prio);
     virtual void ext__ivy__write_file(const str& name, const str& buf);
     virtual ivyc_s1::cpp__expr ext__ivy__make_from_string(ivyc_s1::cpp__expr ty, ivyc_s1::cpp__expr arg, ivyc_s1::annot ann);
@@ -2488,22 +2936,21 @@ public:
     virtual ivyc_s1::annot ext__annot__strip(ivyc_s1::annot s);
     virtual void ext__cpp__ifst__encode(const cpp__ifst& s, pretty& b, int prio);
     virtual void ext__ivy__syntax_error__encode(const ivy__syntax_error& e, pretty& b);
-    virtual void ext__vector__ivy__ident____append(vector__ivy__ident__& a, ivyc_s1::ivy__ident v);
+    virtual str ext__ivy__expr__enc(ivyc_s1::ivy__expr e);
     virtual void ext__cpp__prog__encode(const cpp__prog& s, pretty& b, int prio);
-    virtual bool ext__ivy__expr__is_typed(ivyc_s1::ivy__expr s, ivy__verb vrb);
     virtual bool ext__ivy__ident_to_cppclass__mem(const ivy__ident_to_cppclass& a, ivyc_s1::ivy__ident x);
     virtual ivyc_s1::cpp__ident ext__cpp__ident__get_member(ivyc_s1::cpp__ident s);
     virtual vector__str__ ext__vector__str____empty();
     virtual void ext__cpp__simpletype__tup__encode(const vector__cpp__simpletype__& s, pretty& b, int prio);
     virtual unsigned long long ext__vector__ivy__decl____domain__prev(unsigned long long x);
-    virtual ivy__sequence ext__ivy__sequence__flat_int(const ivy__sequence& s, ivy__flatst& st);
+    virtual ivyc_s1::ivy__stmt ext__ivy__ifst__typeinfer(const ivy__ifst& s, ivy__typeinferst& st);
     virtual bool ext__ivy__ident_to_instantiatedc__mem(const ivy__ident_to_instantiatedc& a, ivyc_s1::ivy__ident x);
     virtual void ext__ivy__unown_path(const ivy__access_path& path, ivy__tocppst& st);
     virtual ivyc_s1::cpp__stmt ext__cpp__asgn__make(ivyc_s1::cpp__expr x, ivyc_s1::cpp__expr y, ivyc_s1::annot ann);
-    virtual void ext__ivy__instancedc__defd(const ivy__instancedc& s, ivy__flatst& st);
+    virtual bool ext__ivy__expr__eq(ivyc_s1::ivy__expr e1, ivyc_s1::ivy__expr e2);
     virtual ivyc_s1::ivy__expr ext__ivy__flat_formal(ivyc_s1::ivy__expr s, ivy__flatst& st);
     virtual ivyc_s1::ivy__decl ext__ivy__groupdc__make(const vector__ivy__decl__& decls);
-    virtual ivy__global_types ext__ivy__prog__get_global_types(const ivy__prog& p, bool curried);
+    virtual bool ext__ivy__is_input_param(const ivy__actdc& s, ivyc_s1::ivy__expr p);
     virtual vector__ivy__expr__ ext__ivy__typespec__get_elems(ivyc_s1::ivy__typespec s);
     virtual ivyc_s1::annot ext__cpp__symbol__get_ann(const cpp__symbol& s);
     virtual ivyc_s1::ivy__ident ext__ivy__ident__get_namesp(ivyc_s1::ivy__ident s);
@@ -2520,7 +2967,6 @@ public:
     virtual void ext__ivy__local_tracker__push_stmt(ivy__local_tracker& s, ivyc_s1::ivy__stmt stm);
     virtual ivyc_s1::ivy__expr ext__ivy__applydot(ivyc_s1::ivy__expr arg, ivyc_s1::ivy__ident member, ivyc_s1::annot ann, const ivy__flatst& st);
     virtual ivyc_s1::ivy__stmt ext__ivy__asgn__typeinfer_desugar(const ivy__asgn& s, bool desugar, ivy__typeinferst& st);
-    virtual vector__ivy__lvalue_count__ ext__vector__ivy__lvalue_count____empty();
     virtual ivy__header ext__ivy__header__flat_int(const ivy__header& s, ivy__flatst& st);
     virtual vector__cpp__expr__ ext__cpp__expr__get_args(ivyc_s1::cpp__expr s);
     virtual ivy__vardc ext__ivy__vardc__typeinfer_int(const ivy__vardc& s, ivy__typeinferst& st);
@@ -2533,9 +2979,10 @@ public:
     virtual ivyc_s1::annot ext__cpp__funcdecl__get_ann(const cpp__funcdecl& d);
     virtual void ext__ivy__strident__parse(pstate& st, ivy__strident& id);
     virtual ivyc_s1::ivy__stmt ext__ivy__sequence__make(ivyc_s1::ivy__stmt x, ivyc_s1::ivy__stmt y, ivyc_s1::annot ann);
-    virtual bool ext__ivy__expr__eq(ivyc_s1::ivy__expr e1, ivyc_s1::ivy__expr e2);
+    virtual ivyc_s1::cpp__stmt ext__ivy__stmt__to_cpp(ivyc_s1::ivy__stmt s, ivy__tocppst& st);
+    virtual void ext__ivy__decl__parse(pstate& st, int prio, ivyc_s1::ivy__decl& res);
     virtual void ext__ivy__ident_to_moduledc__set(ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, const ivy__moduledc& y);
-    virtual void ext__ivy__local_tracker__pop(ivy__local_tracker& s);
+    virtual ivyc_s1::ivy__decl ext__ivy__decl__typeinfer(ivyc_s1::ivy__decl s, ivy__typeinferst& st);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__get_type(ivyc_s1::ivy__expr s);
     virtual void ext__vector__cpp__ident____append(vector__cpp__ident__& a, ivyc_s1::cpp__ident v);
     virtual bool ext__ivy__is_subtype(ivyc_s1::ivy__expr rhsty, ivyc_s1::ivy__expr lhsty, const ivy__typeinferst& st);
@@ -2544,41 +2991,36 @@ public:
     virtual ivy__vardc ext__ivy__vardc__flat_int(const ivy__vardc& s, ivy__flatst& st);
     virtual void ext__ivy__ident_to_cppclass__set(ivy__ident_to_cppclass& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y);
     virtual bool ext__ivy__symbol__occurs(const ivy__symbol& e, ivyc_s1::ivy__ident n);
-    virtual void ext__ivy__auto_flat_rec(ivyc_s1::ivy__expr s, ivy__flatst& st);
+    virtual ivyc_s1::ivy__expr ext__ivy__asgn__get_rhs(const ivy__asgn& s);
     virtual unsigned long long ext__vector__ivy__stmt____domain__prev(unsigned long long x);
     virtual void ext__ivy__make_cast(ivyc_s1::ivy__expr lhsty, ivyc_s1::ivy__expr& rhs, const ivy__typeinferst& st);
     virtual void ext__ivy__objectdc__flat(const ivy__objectdc& s, ivy__flatst& st);
     virtual ivyc_s1::cpp__stmt ext__cpp__ifst__make(ivyc_s1::cpp__expr cond, ivyc_s1::cpp__stmt thenst, ivyc_s1::cpp__stmt elsest, ivyc_s1::annot ann);
+    virtual void ext__ivy__decl__flat(ivyc_s1::ivy__decl s, ivy__flatst& st);
     virtual void ext__cpp__numident__encode(const cpp__numident& s, pretty& b, int prio);
     virtual ivyc_s1::ivy__ident ext__ivy__numident__make(unsigned long long val);
     virtual ivy__verb ext__ivy__verb_from_name(const str& name);
-    virtual str ext__ivy__strident__to_str(const ivy__strident& s);
-    virtual void ext__ivy__untyped__encode(const ivy__untyped& e, pretty& b);
     virtual ivy__moduledc ext__ivy__ident_to_moduledc__get_def(const ivy__ident_to_moduledc& m, ivyc_s1::ivy__ident x, ivyc_s1::annot ann);
     virtual void ext__parse_error(unsigned long long p, const str& tok);
     virtual ivyc_s1::ivy__expr ext__ivy__varv__make(ivyc_s1::ivy__expr arg, ivyc_s1::annot ann);
     virtual void ext__ivy__auto_defd_rec(ivyc_s1::ivy__expr s, ivy__flatst& st);
     virtual ivyc_s1::cpp__ident ext__cpp__strident__make1(const str& val, ivyc_s1::cpp__ident arg);
-    virtual void ext__ivy__objectdc__defd(const ivy__objectdc& s, ivy__flatst& st);
     virtual void ext__vector__ivy__expr____reverse(vector__ivy__expr__& a);
     virtual cpp__strident ext__ivy__strident_to_cpp(const ivy__strident& s, bool native);
     virtual void ext__vector__cpp__simpletype____append(vector__cpp__simpletype__& a, const cpp__simpletype& v);
     virtual ivyc_s1::ivy__expr ext__ivy__times__fold_left(const vector__ivy__expr__& args, ivyc_s1::annot ann);
     virtual ivyc_s1::ivy__expr ext__ivy__symbol__type_fill_in(const ivy__symbol& e, ivy__decost& st);
     virtual void ext__cpp__expr__encode(ivyc_s1::cpp__expr s, pretty& b, int prio);
-    virtual void ext__cpp__funcdecl__encode(const cpp__funcdecl& s, pretty& b, int prio);
     virtual void ext__cpp__pi__encode(const cpp__pi& s, pretty& b, int prio);
     virtual ivyc_s1::cpp__expr ext__ivy__expr__to_cpp(ivyc_s1::ivy__expr s, ivy__tocppst& st);
-    virtual void ext__cpp__groupdc__encode(const cpp__groupdc& s, pretty& b, int prio);
     virtual ivyc_s1::cpp__ident ext__cpp__strident__make(const str& val);
-    virtual ivyc_s1::ivy__ident ext__ivy__strident__make(const str& val);
     virtual ivyc_s1::cpp__expr ext__cpp__comma__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann);
     virtual void ext__cpp__ident__encode(ivyc_s1::cpp__ident s, pretty& b, int prio);
-    virtual ivyc_s1::ivy__expr ext__ivy__asgn__get_rhs(const ivy__asgn& s);
+    virtual void ext__vector__pretty__token____set(vector__pretty__token__& a, unsigned long long x, const pretty__token& y);
     virtual void ext__vector__pos____append(vector__pos__& a, unsigned long long v);
+    virtual void ext__cpp__retst__encode(const cpp__retst& s, pretty& b, int prio);
     virtual void ext__ivy__file__read(const str& fname, str& b, bool& ok);
     virtual void ext__ivy__app__encode(const ivy__app& s, pretty& b, int prio);
-    virtual ivyc_s1::ivy__stmt ext__ivy__ifst__typeinfer(const ivy__ifst& s, ivy__typeinferst& st);
     virtual void ext__ivy__typespec__defd(ivyc_s1::ivy__typespec s, ivy__flatst& st, ivyc_s1::ivy__ident id);
     virtual void ext__get_annot(pstate& st);
     virtual bool ext__ivy__is_cpp_this(ivyc_s1::cpp__expr s);
@@ -2601,14 +3043,14 @@ public:
     virtual ivyc_s1::cpp__decl ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__tocppst& st);
     virtual void ext__ivy__vardc__build_global_types(const ivy__vardc& s, ivy__global_types& st);
     virtual bool ext__ivy__is_variant_type(ivyc_s1::ivy__expr t, const ivy__tocppst& st);
-    virtual void ext__pretty__extend(pretty& self, const str& string);
+    virtual void ext__cpp__version__encode(const cpp__version& s, pretty& b);
     virtual cpp__header ext__ivy__header__to_cpp_int(const ivy__header& s, ivy__tocppst& st);
     virtual ivyc_s1::annot ext__ivy__asgn__get_ann(const ivy__asgn& s);
+    virtual void ext__ivy__auto_flat_rec(ivyc_s1::ivy__expr s, ivy__flatst& st);
     virtual void ext__ivy__make_temp(ivy__tocppst& s, ivyc_s1::ivy__expr ty, ivyc_s1::annot ann, ivyc_s1::cpp__expr& res);
-    virtual void ext__ivy__enumspec__defd(const ivy__enumspec& s, ivy__flatst& st, ivyc_s1::ivy__ident id);
+    virtual ivyc_s1::cpp__expr ext__cpp__plus__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann);
     virtual unsigned long long ext__pos__prev(unsigned long long x);
-    virtual void ext__ivy__member_name(ivyc_s1::cpp__expr& s);
-    virtual void ext__ivy__decl__flat(ivyc_s1::ivy__decl s, ivy__flatst& st);
+    virtual void ext__ivy__push_pop_ident_set__set(ivy__push_pop_ident_set& s, ivyc_s1::ivy__ident id, bool v);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__uncurry(ivyc_s1::ivy__expr ty);
     virtual ivyc_s1::cpp__expr ext__ivy__make_std_tpl(const str& tpl, const str& ty, ivyc_s1::annot ann);
     virtual void ext__cpp__skipst__encode(const cpp__skipst& s, pretty& b, int prio);
@@ -2626,37 +3068,35 @@ public:
     virtual void ext__ivy__actdc__defd(const ivy__actdc& s, ivy__flatst& st);
     virtual void ext__ivy__canon_typing(ivyc_s1::ivy__expr& typing);
     virtual bool ext__ivy__app__has_numident(const ivy__app& s);
+    virtual void ext__ivy__report_error(ivyc_s1::ivy__error e, ivyc_s1::annot ann);
     virtual void ext__ivy__find_ident(ivyc_s1::ivy__ident root, ivyc_s1::ivy__ident& s, const ivy__flatst& st);
     virtual ivyc_s1::ivy__ident ext__ivy__dotident__make(ivyc_s1::ivy__ident namesp, const ivy__strident& member);
     virtual void ext__ivy__prog__typeinfer(ivy__prog& p);
-    virtual void ext__ivy__decl__reg_member(ivyc_s1::ivy__decl s, ivy__tocppst& st);
     virtual void ext__ivy__not_first_order__encode(const ivy__not_first_order& e, pretty& b);
-    virtual ivyc_s1::cpp__decl ext__ivy__vardc__to_cpp(const ivy__vardc& s, ivy__tocppst& st);
+    virtual bool ext__ivy__expr__is_typed(ivyc_s1::ivy__expr s, ivy__verb vrb);
     virtual ivyc_s1::ivy__expr ext__ivy__varst__get_expr(const ivy__varst& s);
     virtual ivyc_s1::cpp__expr ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const vector__ivy__expr__& inputs, ivyc_s1::annot ann, ivy__tocppst& st);
-    virtual void ext__cpp__curly_tup__encode(const vector__cpp__expr__& s, pretty& b, int prio);
-    virtual void ext__ivy__decl__parse(pstate& st, int prio, ivyc_s1::ivy__decl& res);
+    virtual unsigned long long ext__vector__ivy__stmt____domain__next(unsigned long long x);
     virtual void ext__ivy__cannot_infer(ivyc_s1::ivy__expr e, ivyc_s1::ivy__expr t);
     virtual vector__ivy__expr__ ext__ivy__enumspec__get_elems(const ivy__enumspec& s);
     virtual ivyc_s1::cpp__stmt ext__ivy__sequence__to_cpp(const ivy__sequence& s, ivy__tocppst& st);
     virtual unsigned long long ext__vector__cpp__decl____domain__next(unsigned long long x);
     virtual void ext__cpp__sequence__encode_int(const cpp__sequence& s, pretty& b, int prio);
     virtual str ext__ivy__dotident__to_str(const ivy__dotident& s);
+    virtual void ext__ivy__type_clash__encode(const ivy__type_clash& e, pretty& b);
     virtual ivyc_s1::ivy__ident ext__ivy__ident__prefix(ivyc_s1::ivy__ident s, ivyc_s1::ivy__ident pref);
     virtual ivyc_s1::cpp__expr ext__ivy__function_type(ivyc_s1::ivy__expr ty, ivy__tocppst& st);
     virtual bool ext__ivy__is_dead(ivyc_s1::cpp__expr e, const ivy__tocppst& st, unsigned long long cnt);
     virtual ivyc_s1::ivy__ident ext__ivy__strident__flat(const ivy__strident& s, bool rhs, const ivy__flatst& st);
     virtual ivyc_s1::ivy__typespec ext__ivy__enumspec__flat(const ivy__enumspec& s, ivy__flatst& st);
-    virtual ivyc_s1::cpp__expr ext__cpp__plus__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann);
+    virtual void ext__ivy__enumspec__defd(const ivy__enumspec& s, ivy__flatst& st, ivyc_s1::ivy__ident id);
     virtual void ext__ivy__tocppst__get_code(ivy__tocppst& s, ivyc_s1::annot ann, ivyc_s1::cpp__stmt& res);
-    virtual void ext__ivy__report_error(ivyc_s1::ivy__error e, ivyc_s1::annot ann);
     virtual unsigned long long ext__vector__ivy__decl____domain__next(unsigned long long x);
     virtual ivyc_s1::ivy__stmt ext__ivy__skipst__make(ivyc_s1::annot ann);
-    virtual unsigned long long ext__vector__ivy__stmt____domain__next(unsigned long long x);
+    virtual void ext__cpp__curly_tup__encode(const vector__cpp__expr__& s, pretty& b, int prio);
     virtual void ext__ivy__typedc__reg_member(const ivy__typedc& s, ivy__tocppst& st);
     virtual ivy__initdc ext__ivy__initdc__typeinfer_int(const ivy__initdc& s, ivy__typeinferst& st);
     virtual void ext__ivy__elidest__map__set(ivy__elidest__map& a, ivyc_s1::ivy__ident x, bool y);
-    virtual void ext__ivy__type_clash__encode(const ivy__type_clash& e, pretty& b);
     virtual void ext__ivy__set_root(ivy__flatst& st, ivyc_s1::ivy__expr s);
     virtual pretty ext__pretty__make(unsigned long long maxline, unsigned long long indent);
     virtual cpp__skipst ext__ivy__skipst__to_cpp_int(const ivy__skipst& s, ivy__tocppst& st);
@@ -2665,9 +3105,9 @@ public:
     virtual ivy__file_not_found ext__ivy__file_not_found__make(const str& n);
     virtual void ext__ivy__decost__newvar(ivy__decost& s, ivyc_s1::annot ann, ivyc_s1::ivy__expr& res);
     virtual void ext__cpp__varst__encode(const cpp__varst& s, pretty& b, int prio);
-    virtual void ext__ivy__add_namespaces(ivyc_s1::cpp__decl& d, ivyc_s1::ivy__ident id);
+    virtual void ext__ivy__instancedc__defd(const ivy__instancedc& s, ivy__flatst& st);
     virtual void ext__cpp__structdecl__encode(const cpp__structdecl& s, pretty& b, int prio);
-    virtual vector__ivy__ident__ ext__ivy__setup_local_vars(ivyc_s1::ivy__stmt s, ivy__flatst& st);
+    virtual void ext__pretty__flush(pretty& self);
     virtual void ext__ivy__flat_exprvec(vector__ivy__expr__& es, ivy__flatst& st);
     virtual void ext__ivy__typedc__flat(const ivy__typedc& s, ivy__flatst& st);
     virtual ivyc_s1::cpp__ident ext__cpp__dotident__make(ivyc_s1::cpp__ident namesp, const cpp__strident& member);
@@ -2684,17 +3124,24 @@ public:
     virtual ivyc_s1::ivy__decl ext__ivy__vardc__func_to_action(const ivy__vardc& s);
     virtual str ext__annot_i__to_str(const annot_i& s);
     virtual void ext__cpp__app__encode(const cpp__app& s, pretty& b, int prio);
+    virtual ivy__varst ext__ivy__varst__flat_int(const ivy__varst& s, ivy__flatst& st);
+    virtual bool ext__ivy__symbol__has_numident(const ivy__symbol& e);
     virtual ivyc_s1::ivy__expr ext__ivy__arrow__make(ivyc_s1::ivy__expr lhs, ivyc_s1::ivy__expr rhs, ivyc_s1::annot ann);
     virtual ivyc_s1::ivy__expr ext__ivy__symbol__flat(const ivy__symbol& s, ivy__flatst& st);
     virtual cpp__funcdecl ext__ivy__make_virt_destr(const cpp__structdecl& t);
     virtual vector__ivy__expr__ ext__ivy__structspec__get_elems(const ivy__structspec& s);
-    virtual ivyc_s1::cpp__expr ext__cpp__app__make(ivyc_s1::cpp__expr func, const vector__cpp__expr__& args, ivyc_s1::annot ann);
+    virtual ivyc_s1::cpp__expr ext__cpp__symbol__makestr(const str& name, ivyc_s1::annot ann);
     virtual ivy__decost ext__ivy__decost__make();
     virtual ivyc_s1::cpp__stmt ext__ivy__asgn__to_cpp(const ivy__asgn& s, ivy__tocppst& st);
     virtual void ext__cpp__ifst__encode_int(const cpp__ifst& s, pretty& b, int prio);
+    virtual ivyc_s1::ivy__expr ext__ivy__symbol__makestr(const str& name, ivyc_s1::annot ann);
+    virtual void ext__ivy__local_tracker__pop(ivy__local_tracker& s);
     virtual void ext__ivy__vardc__reg_member(const ivy__vardc& s, ivy__tocppst& st);
     virtual void ext__ivy__ident_set__remove(ivy__ident_set& a, ivyc_s1::ivy__ident x);
+    virtual pretty__state ext__vector__pretty__state____back(const vector__pretty__state__& a);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__reduce(ivyc_s1::ivy__expr e, const ivy__symeval& smap);
+    virtual ivyc_s1::cpp__decl ext__ivy__vardc__to_cpp(const ivy__vardc& s, ivy__tocppst& st);
+    virtual ivyc_s1::ivy__expr ext__ivy__app__reduce(const ivy__app& s, const ivy__symeval& smap);
     virtual void ext__ivy__flat_formalvec(vector__ivy__expr__& es, ivy__flatst& st);
     virtual ivyc_s1::cpp__ident ext__ivy__dotident__to_cpp(const ivy__dotident& s, bool native);
     virtual ivyc_s1::ivy__ident ext__ivy__dotident__get_member(const ivy__dotident& s);
@@ -2703,12 +3150,13 @@ public:
     virtual void ext__ivy__actdc__flat(const ivy__actdc& s, ivy__flatst& st);
     virtual ivyc_s1::cpp__expr ext__cpp__empty__make(ivyc_s1::annot ann);
     virtual ivyc_s1::ivy__stmt ext__ivy__asgn__flat(const ivy__asgn& s, ivy__flatst& st);
+    virtual void ext__cpp__groupdc__encode(const cpp__groupdc& s, pretty& b, int prio);
     virtual vector__ivy__expr__ ext__ivy__times__unfold_left(ivyc_s1::ivy__expr s);
     virtual void ext__ivy__decost__unification_failed(ivy__decost& st, ivyc_s1::ivy__expr x, ivyc_s1::ivy__expr y);
     virtual ivyc_s1::ivy__ident ext__ivy__formal_ident(ivyc_s1::ivy__expr s);
     virtual void ext__vector__pretty__token____append(vector__pretty__token__& a, const pretty__token& v);
     virtual void ext__ivy__add_is_zero_pred(cpp__structdecl& s);
-    virtual ivyc_s1::annot ext__cpp__decl__get_ann(ivyc_s1::cpp__decl d);
+    virtual ivyc_s1::cpp__expr ext__cpp__voidtype(ivyc_s1::annot ann);
     virtual ivy__actdc ext__ivy__actdc__flat_int(const ivy__actdc& s, ivy__flatst& st);
     virtual void ext__ivy__decl__build_global_types(ivyc_s1::ivy__decl s, ivy__global_types& st);
     virtual unsigned long long ext__vector__cpp__stmt____domain__prev(unsigned long long x);
@@ -2736,8 +3184,8 @@ public:
     virtual void ext__vector__ivy__type_context__stack_entry____pop_back(vector__ivy__type_context__stack_entry__& a);
     virtual ivy__param_map ext__ivy__param_set(const vector__ivy__expr__& ps);
     virtual void ext__cpp__symbol__encode(const cpp__symbol& s, pretty& b, int prio);
-    virtual void ext__ivy__ident_to_moduledc__get(const ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, ivy__moduledc& y);
     virtual str ext__ivy__testelide(const str& inp);
+    virtual ivy__global_types ext__ivy__prog__get_global_types(const ivy__prog& p, bool curried);
     virtual void ext__ivy__push_pop_ident_set__map_t__set(ivy__push_pop_ident_set__map_t& a, ivyc_s1::ivy__ident x, bool y);
     virtual void ext__ivy__decost__find(ivy__decost& st, ivyc_s1::ivy__expr x, ivyc_s1::ivy__expr& res);
     virtual ivyc_s1::cpp__expr ext__cpp__app__make0(ivyc_s1::cpp__expr func, ivyc_s1::annot ann);
@@ -2750,7 +3198,7 @@ public:
     virtual void ext__ivy__numident__encode(const ivy__numident& s, pretty& b, int prio);
     virtual void ext__ivy__symeval__remove(ivy__symeval& a, ivyc_s1::ivy__ident x);
     virtual ivy__subtypes ext__ivy__prog__get_subtypes(const ivy__prog& p);
-    virtual ivyc_s1::ivy__ident ext__ivy__symbol__get_name(const ivy__symbol& s);
+    virtual void ext__ivy__groupdc__flat(const ivy__groupdc& s, ivy__flatst& st);
     virtual void ext__str__append(str& a, int v);
     virtual ivyc_s1::ivy__ident ext__ivy__dotident__flat(const ivy__dotident& s, bool rhs, const ivy__flatst& st);
     virtual ivyc_s1::ivy__stmt ext__ivy__stmt__typeinfer_desugar(ivyc_s1::ivy__stmt s, bool desugar, ivy__typeinferst& st);
@@ -2762,11 +3210,9 @@ public:
     virtual ivy__prog ext__ivy__prog__read_file(const str& name);
     virtual ivyc_s1::ivy__stmt ext__ivy__ifst__flat(const ivy__ifst& s, ivy__flatst& st);
     virtual bool ext__ivy__ident_to_exprs__mem(const ivy__ident_to_exprs& a, ivyc_s1::ivy__ident x);
-    virtual ivyc_s1::annot ext__cpp__header__get_ann(const cpp__header& d);
     virtual void ext__ivy__type_error(ivyc_s1::ivy__expr e, ivy__decost& st);
-    virtual bool ext__ivy__file__exist(const str& fname);
+    virtual ivyc_s1::annot ext__ivy__expr__get_ann(ivyc_s1::ivy__expr s);
     virtual ivyc_s1::cpp__expr ext__cpp__decl__get_name(ivyc_s1::cpp__decl d);
-    virtual void ext__ivy__cannot_write__encode(const ivy__cannot_write& e, pretty& b);
     virtual ivy__asgn ext__ivy__asgn__flat_int(const ivy__asgn& s, ivy__flatst& st);
     virtual void ext__ivy__typedc__defd(const ivy__typedc& s, ivy__flatst& st);
     virtual void ext__ivy__fix_object_clash(ivyc_s1::ivy__ident& id, const ivy__tocppst& st);
@@ -2774,20 +3220,22 @@ public:
     virtual ivyc_s1::ivy__expr ext__ivy__expr__type_fill_in(ivyc_s1::ivy__expr e, ivy__decost& st);
     virtual void ext__pretty__print(pretty& self, const pretty__token& tok);
     virtual ivyc_s1::cpp__expr ext__cpp__vardecl__get_type(const cpp__vardecl& d);
-    virtual void ext__pretty__flush(pretty& self);
-    virtual bool ext__ivy__is_logvar_name(const str& name);
-    virtual ivy__varst ext__ivy__varst__flat_int(const ivy__varst& s, ivy__flatst& st);
     virtual void ext__ivy__ident__encode(ivyc_s1::ivy__ident s, pretty& b, int prio);
     virtual ivy__verb ext__ivy__ident__get_verb(ivyc_s1::ivy__ident s);
-    virtual ivyc_s1::ivy__ident ext__ivy__dotident__get_namesp(const ivy__dotident& s);
+    virtual void ext__ivy__symeval__set(ivy__symeval& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y);
     virtual cpp__prog ext__ivy__prog__to_cpp(const ivy__prog& sp);
+    virtual void ext__cpp__decl__encode(ivyc_s1::cpp__decl s, pretty& b, int prio);
+    virtual ivyc_s1::annot ext__cpp__decl__get_ann(ivyc_s1::cpp__decl d);
+    virtual void ext__cpp__funcdecl__encode(const cpp__funcdecl& s, pretty& b, int prio);
     virtual ivy__cannot_write ext__ivy__cannot_write__make(const str& n);
-    virtual void ext__ivy__groupdc__flat(const ivy__groupdc& s, ivy__flatst& st);
+    virtual ivyc_s1::ivy__ident ext__ivy__symbol__get_name(const ivy__symbol& s);
     virtual ivyc_s1::annot ext__annot_i__strip(const annot_i& s);
     virtual void ext__cpp__enumdecl__encode(const cpp__enumdecl& s, pretty& b, int prio);
+    virtual ivyc_s1::annot ext__cpp__header__get_ann(const cpp__header& d);
     virtual ivyc_s1::ivy__ident ext__ivy__dotident__prefix(const ivy__dotident& s, ivyc_s1::ivy__ident pref);
     virtual ivyc_s1::annot ext__cpp__app__get_ann(const cpp__app& s);
     virtual void ext__ivy__decost__map__get(const ivy__decost__map& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr& y);
+    virtual void ext__ivy__set_built_in_type(ivy__verb vrb, const str& ty, bool m, bool io, bool oi, bool fi);
     virtual void ext__ivy__decost__unify(ivy__decost& st, ivyc_s1::ivy__expr x0, ivyc_s1::ivy__expr y0);
     virtual void ext__cpp__header__encode(const cpp__header& s, pretty& b, int prio);
     virtual ivyc_s1::cpp__expr ext__cpp__namedtype(ivyc_s1::cpp__ident name, ivyc_s1::annot ann);
@@ -2799,7 +3247,6 @@ public:
     virtual cpp__funcdecl ext__ivy__make_upcast_method(const cpp__structdecl& t);
     virtual bool ext__ivy__param_map__mem(const ivy__param_map& a, ivyc_s1::ivy__ident x);
     virtual void ext__cpp__breakst__encode_int(const cpp__breakst& s, pretty& b, int prio);
-    virtual unsigned long long ext__vector__cpp__expr____domain__next(unsigned long long x);
     virtual ivyc_s1::cpp__ident ext__ivy__ident__to_cpp(ivyc_s1::ivy__ident s, bool native);
     virtual unsigned long long ext__vector__ivy__ident____domain__next(unsigned long long x);
     virtual void ext__pstate__consume(pstate& st);
@@ -2817,9 +3264,8 @@ public:
     virtual ivyc_s1::cpp__expr ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocppst& st);
     virtual void ext__ivy__unown_func_args(const vector__ivy__expr__& args, ivy__tocppst& st);
     virtual ivyc_s1::ivy__expr ext__ivy__app__get_func(const ivy__app& s);
-    virtual ivyc_s1::cpp__expr ext__cpp__plus__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
-    virtual ivyc_s1::cpp__expr ext__cpp__symbol__makestr(const str& name, ivyc_s1::annot ann);
-    virtual void ext__ivy__file_not_found__encode(const ivy__file_not_found& e, pretty& b);
+    virtual ivy__verb ext__ivy__expr__get_verb(ivyc_s1::ivy__expr s);
+    virtual ivyc_s1::cpp__expr ext__cpp__app__make(ivyc_s1::cpp__expr func, const vector__cpp__expr__& args, ivyc_s1::annot ann);
     virtual void imp__parse_error(unsigned long long p, const str& tok);
     virtual ivy__whilest ext__ivy__whilest__flat_int(const ivy__whilest& s, ivy__flatst& st);
     virtual ivyc_s1::ivy__expr ext__ivy__colon__make(ivyc_s1::ivy__expr lhs, ivyc_s1::ivy__expr rhs, ivyc_s1::annot ann);
@@ -2835,6 +3281,7 @@ public:
     virtual void ext__pstate__get_ann(pstate& st, ivyc_s1::annot& ann);
     virtual ivyc_s1::cpp__expr ext__ivy__make_md_vector_type(const vector__ivy__expr__& dom, ivyc_s1::ivy__expr rng, ivy__tocppst& st);
     virtual void ext__ivy__add_is_seq_pred(cpp__structdecl& s);
+    virtual void ext__ivy__cannot_write__encode(const ivy__cannot_write& e, pretty& b);
     virtual void ext__ivy__actdc__build_global_types(const ivy__actdc& s, ivy__global_types& st);
     virtual ivyc_s1::ivy__expr ext__ivy__stmt__get_lhs(ivyc_s1::ivy__stmt s);
     virtual ivyc_s1::cpp__ident ext__cpp__dotident__prefix(const cpp__dotident& s, ivyc_s1::cpp__ident pref);
@@ -2843,7 +3290,7 @@ public:
     virtual void ext__ivy__ident_to_ident__set(ivy__ident_to_ident& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__ident y);
     virtual void ext__stdio__write(const str& s);
     virtual void ext__annot__encode(ivyc_s1::annot s, pretty& b);
-    virtual ivyc_s1::ivy__expr ext__ivy__app__reduce(const ivy__app& s, const ivy__symeval& smap);
+    virtual void ext__ivy__local_tracker__push(ivy__local_tracker& s);
     virtual str ext__ivy__ident__to_str(ivyc_s1::ivy__ident s);
     virtual ivyc_s1::ivy__expr ext__ivy__app__get_type(const ivy__app& s);
     virtual str ext__annot__to_str(ivyc_s1::annot s);
@@ -2853,8 +3300,7 @@ public:
     virtual void ext__ivy__add_upcast_method(cpp__structdecl& s);
     virtual void ext__ivy__prog__find_include(str& name);
     virtual bool ext__cpp__expr__eq(ivyc_s1::cpp__expr e1, ivyc_s1::cpp__expr e2);
-    virtual void ext__ivy__set_built_in_type(ivy__verb vrb, const str& ty, bool m, bool io, bool oi, bool fi);
-    virtual unsigned long long ext__pos__next(unsigned long long x);
+    virtual void ext__ivy__objectdc__defd(const ivy__objectdc& s, ivy__flatst& st);
     virtual ivyc_s1::cpp__expr ext__ivy__fix_tpl_param(ivyc_s1::ivy__expr s, ivy__tocppst& st);
     virtual void ext__ivy__path__change_extension(str& path, const str& ext);
     virtual bool ext__ivy__path_may_alias(const ivy__access_path& v, const ivy__access_path& w);
@@ -2868,31 +3314,28 @@ public:
     virtual void ext__ivy__add_sizet_conv(cpp__structdecl& s);
     virtual void ext__ivy__typedc__build_subtypes(const ivy__typedc& s, ivy__subtypes& st);
     virtual ivyc_s1::cpp__ident ext__ivy__strident__to_cpp(const ivy__strident& s, bool native);
-    virtual str ext__ivy__expr__enc(ivyc_s1::ivy__expr e);
+    virtual void ext__vector__ivy__ident____append(vector__ivy__ident__& a, ivyc_s1::ivy__ident v);
     virtual void ext__cpp__stmt__encode(ivyc_s1::cpp__stmt s, pretty& b, int prio);
     virtual ivyc_s1::ivy__stmt ext__ivy__sequence__flat(const ivy__sequence& s, ivy__flatst& st);
-    virtual void ext__ivy__moduledc__defd(const ivy__moduledc& s, ivy__flatst& st);
+    virtual void ext__ivy__decl__reg_member(ivyc_s1::ivy__decl s, ivy__tocppst& st);
     virtual ivyc_s1::ivy__stmt ext__ivy__stmt__flat(ivyc_s1::ivy__stmt s, ivy__flatst& st);
     virtual unsigned long long ext__vector__pos____domain__next(unsigned long long x);
     virtual vector__ivy__expr__ ext__ivy__comma__unfold_left(ivyc_s1::ivy__expr s);
-    virtual pretty__state ext__vector__pretty__state____back(const vector__pretty__state__& a);
     virtual ivyc_s1::cpp__expr ext__cpp__new__make(ivyc_s1::cpp__expr arg, ivyc_s1::annot ann);
+    virtual ivyc_s1::ivy__decl ext__ivy__decl__func_to_action(ivyc_s1::ivy__decl s);
     virtual void ext__ivy__param_map__set(ivy__param_map& a, ivyc_s1::ivy__ident x, unsigned long long y);
     virtual void ext__vector__ivy__error____append(vector__ivy__error__& a, ivyc_s1::ivy__error v);
     virtual void ext__cpp__strident__encode(const cpp__strident& s, pretty& b, int prio);
     virtual void ext__ivy__instantiatedc__defd(const ivy__instantiatedc& s, ivy__flatst& st);
     virtual void ext__ivy__ident_to_prototype__set(ivy__ident_to_prototype& a, ivyc_s1::ivy__ident x, const ivy__prototype& y);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__type_decorate(ivyc_s1::ivy__expr e, ivy__decost& st, const ivy__symeval& m, ivyc_s1::ivy__expr& ty);
-    virtual void ext__vector__pretty__token____set(vector__pretty__token__& a, unsigned long long x, const pretty__token& y);
     virtual bool ext__ivy__subtypes__is_subtype(const ivy__subtypes& s, ivyc_s1::ivy__expr sub, ivyc_s1::ivy__expr super);
     virtual void ext__ivy__type_context__push(ivy__type_context& s, ivyc_s1::ivy__expr typing);
     virtual void ext__ivy__elidest__map__get(const ivy__elidest__map& a, ivyc_s1::ivy__ident x, bool& y);
     virtual ivyc_s1::cpp__expr ext__cpp__and__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
     virtual void ext__cpp__asgn__encode(const cpp__asgn& s, pretty& b, int prio);
-    virtual void ext__cpp__decl__encode(ivyc_s1::cpp__decl s, pretty& b, int prio);
     virtual void ext__vector__cpp__decl____append(vector__cpp__decl__& a, ivyc_s1::cpp__decl v);
     virtual ivyc_s1::ivy__stmt ext__ivy__actdc__get_body(const ivy__actdc& s);
-    virtual void ext__ivy__expr__tup__parse(pstate& st, int prio, vector__ivy__expr__& res);
     virtual ivyc_s1::ivy__ident ext__ivy__ident__get_member(ivyc_s1::ivy__ident s);
     virtual ivyc_s1::ivy__ident ext__ivy__expr__get_name(ivyc_s1::ivy__expr s);
     virtual void ext__ivy__remove_local_vars(const vector__ivy__ident__& del, ivy__flatst& st);
@@ -2901,22 +3344,23 @@ public:
     virtual void ext__read_string_literal(pstate& st);
     virtual unsigned long long ext__vector__pretty__token____domain__prev(unsigned long long x);
     virtual ivyc_s1::ivy__stmt ext__ivy__initdc__get_body(const ivy__initdc& s);
-    virtual bool ext__ivy__is_input_param(const ivy__actdc& s, ivyc_s1::ivy__expr p);
     virtual void ext__vector__ivy__type_context__stack_entry____append(vector__ivy__type_context__stack_entry__& a, const ivy__type_context__stack_entry& v);
     virtual ivyc_s1::cpp__expr ext__cpp__dot__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
-    virtual ivy__verb ext__ivy__expr__get_verb(ivyc_s1::ivy__expr s);
+    virtual ivyc_s1::cpp__expr ext__cpp__plus__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
     virtual void ext__ivy__add_standard_traits(cpp__structdecl& s);
     virtual ivyc_s1::cpp__ident ext__cpp__ident__prefix(ivyc_s1::cpp__ident s, ivyc_s1::cpp__ident pref);
     virtual void ext__ivy__vardc__flat(const ivy__vardc& s, ivy__flatst& st);
     virtual void ext__ivy__structspec__auto_flat_spec(const ivy__structspec& s, ivy__flatst& st, ivyc_s1::ivy__expr ty);
     virtual unsigned long long ext__vector__cpp__stmt____domain__next(unsigned long long x);
     virtual ivyc_s1::cpp__decl ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__tocppst& st);
+    virtual void ext__ivy__ident_to_moduledc__get(const ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, ivy__moduledc& y);
     virtual str ext__cpp__dotident__to_str(const cpp__dotident& s);
     virtual ivyc_s1::cpp__ident ext__cpp__dotident__get_member(const cpp__dotident& s);
     virtual ivyc_s1::ivy__expr ext__ivy__isaop__make(ivyc_s1::ivy__expr lhs, ivyc_s1::ivy__expr rhs, ivyc_s1::annot ann);
+    virtual void ext__ivy__expr__encode(ivyc_s1::ivy__expr s, pretty& b, int prio);
     virtual void ext__ivy__setup_formals(const vector__ivy__expr__& es, bool val, ivy__typeinferst& st);
     virtual ivyc_s1::ivy__expr ext__ivy__app__make1(ivyc_s1::ivy__expr func, ivyc_s1::ivy__expr arg0, ivyc_s1::annot ann);
-    virtual void ext__ivy__local_tracker__push(ivy__local_tracker& s);
+    virtual void ext__ivy__add_namespaces(ivyc_s1::cpp__decl& d, ivyc_s1::ivy__ident id);
     virtual str ext__cpp__strident__to_str(const cpp__strident& s);
     virtual void ext__ivy__ident_to_exprs__add(ivy__ident_to_exprs& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y);
     virtual void ext__ivy__bottom_up_types(vector__ivy__expr__& es, ivyc_s1::ivy__expr func, const ivy__typeinferst& st, bool& ok);
@@ -2937,6 +3381,7 @@ public:
     virtual ivyc_s1::cpp__stmt ext__cpp__sequence__make(ivyc_s1::cpp__stmt x, ivyc_s1::cpp__stmt y, ivyc_s1::annot ann);
     virtual bool ext__ivy__decl__emitted(ivyc_s1::ivy__decl s, const ivy__tocppst& st);
     virtual ivyc_s1::annot ext__ivy__symbol__get_ann(const ivy__symbol& s);
+    virtual unsigned long long ext__pos__next(unsigned long long x);
     virtual void ext__ivy__decost__map__set(ivy__decost__map& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y);
     virtual void ext__ivy__add_derived_cons(cpp__structdecl& s, ivyc_s1::cpp__expr t, bool constref);
     virtual bool ext__ivy__app__is(const ivy__app& s, ivy__verb vrb);
@@ -2958,9 +3403,8 @@ public:
     virtual void ext__ivy__ident_set__set(ivy__ident_set& a, ivyc_s1::ivy__ident x, bool y);
     virtual ivyc_s1::ivy__expr ext__ivy__stmt__get_rhs(ivyc_s1::ivy__stmt s);
     virtual ivyc_s1::cpp__expr ext__cpp__not__make(ivyc_s1::cpp__expr arg, ivyc_s1::annot ann);
-    virtual ivyc_s1::ivy__decl ext__ivy__decl__typeinfer(ivyc_s1::ivy__decl s, ivy__typeinferst& st);
+    virtual ivyc_s1::ivy__ident ext__ivy__strident__make(const str& val);
     virtual ivyc_s1::ivy__expr ext__ivy__app__type_elide_int(const ivy__app& e, bool b0, const ivy__symeval& m, ivy__elidest& st);
-    virtual void ext__cpp__retst__encode(const cpp__retst& s, pretty& b, int prio);
     virtual ivyc_s1::cpp__expr ext__cpp__symbol__prefix(const cpp__symbol& s, ivyc_s1::cpp__ident pref);
     virtual ivyc_s1::ivy__decl ext__ivy__vardc__make(ivyc_s1::ivy__expr typing, bool is_destructor, ivyc_s1::annot ann);
     virtual ivy__verb ext__ivy__symbol__get_verb(const ivy__symbol& s);
@@ -2970,35 +3414,34 @@ public:
     virtual void ext__vector__pos____pop_back(vector__pos__& a);
     virtual void ext__ivy__symbol__encode(const ivy__symbol& s, pretty& b, int prio);
     virtual ivyc_s1::annot ext__cpp__enumdecl__get_ann(const cpp__enumdecl& d);
-    virtual void ext__ivy__expr__encode(ivyc_s1::ivy__expr s, pretty& b, int prio);
+    virtual void ext__ivy__member_name(ivyc_s1::cpp__expr& s);
     virtual str ext__cpp__prog__enc(const cpp__prog& e);
     virtual ivyc_s1::cpp__stmt ext__ivy__whilest__to_cpp(const ivy__whilest& s, ivy__tocppst& st);
+    virtual void ext__ivy__moduledc__defd(const ivy__moduledc& s, ivy__flatst& st);
     virtual void ext__ivy__prog__flat(ivy__prog& p);
     virtual void ext__ivy__auto_flat(ivyc_s1::ivy__expr s, ivy__flatst& st);
     virtual bool ext__ivy__app__is_typed(const ivy__app& s, ivy__verb vrb);
-    virtual void ext__ivy__push_pop_ident_set__set(ivy__push_pop_ident_set& s, ivyc_s1::ivy__ident id, bool v);
     virtual void ext__ivy__local_vec(const vector__ivy__expr__& es, bool val, ivy__flatst& st);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__type_elide_int(ivyc_s1::ivy__expr e, bool b, const ivy__symeval& m, ivy__elidest& st);
     virtual ivyc_s1::cpp__stmt ext__cpp__retst__make(ivyc_s1::cpp__expr val, ivyc_s1::annot ann);
     virtual void ext__ivy__push_pop_ident_set__push(ivy__push_pop_ident_set& s);
     virtual void ext__ivy__structspec__to_destrs(const ivy__structspec& s, ivy__flatst& st, ivyc_s1::ivy__expr ty);
     virtual ivyc_s1::ivy__expr ext__ivy__app__make(ivyc_s1::ivy__expr func, const vector__ivy__expr__& args, ivyc_s1::annot ann);
-    virtual bool ext__ivy__symbol__has_numident(const ivy__symbol& e);
     virtual void ext__vector__ivy__expr____extend(vector__ivy__expr__& a, const vector__ivy__expr__& b);
     virtual void ext__ivy__interpdc__reg_member(const ivy__interpdc& s, ivy__tocppst& st);
     virtual void ext__ivy__decost__typeinf_show_str(const str& s);
-    virtual void ext__ivy__symeval__set(ivy__symeval& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y);
+    virtual str ext__ivy__strident__to_str(const ivy__strident& s);
+    virtual vector__ivy__ident__ ext__ivy__setup_local_vars(ivyc_s1::ivy__stmt s, ivy__flatst& st);
     virtual str ext__env__get(const str& name);
     virtual void ext__pretty__nest(pretty& self);
     virtual bool ext__ivy__interpdc__emitted(const ivy__interpdc& s, const ivy__tocppst& st);
     virtual cpp__verb ext__cpp__expr__get_verb(ivyc_s1::cpp__expr s);
     virtual ivyc_s1::ivy__expr ext__ivy__symbol__makenum(unsigned long long num, ivyc_s1::annot ann);
-    virtual ivyc_s1::cpp__expr ext__cpp__voidtype(ivyc_s1::annot ann);
     virtual ivyc_s1::ivy__expr ext__ivy__symbol__type_decorate(const ivy__symbol& e, ivy__decost& st, const ivy__symeval& m, ivyc_s1::ivy__expr& ty);
+    virtual void ext__ivy__typedc__build_global_types(const ivy__typedc& s, ivy__global_types& st);
     virtual ivyc_s1::cpp__expr ext__cpp__app__get_func(const cpp__app& s);
     virtual ivyc_s1::ivy__expr ext__ivy__app__type_decorate(const ivy__app& e, ivy__decost& st, const ivy__symeval& m, ivyc_s1::ivy__expr& ty);
     virtual ivyc_s1::cpp__expr ext__cpp__equals__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
-    virtual ivyc_s1::ivy__decl ext__ivy__decl__func_to_action(ivyc_s1::ivy__decl s);
     virtual void ext__ivy__ident_to_ident__get(const ivy__ident_to_ident& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__ident& y);
     virtual void ext__cpp__typedecl__encode(const cpp__typedecl& s, pretty& b, int prio);
     virtual void ext__cpp__whilest__encode_int(const cpp__whilest& s, pretty& b, int prio);
@@ -3023,6 +3466,7 @@ public:
     virtual ivyc_s1::cpp__ident ext__cpp__symbol__get_name(const cpp__symbol& s);
     virtual ivyc_s1::ivy__expr ext__ivy__expr__get_func(ivyc_s1::ivy__expr s);
     virtual ivyc_s1::ivy__expr ext__ivy__app__type_fill_in(const ivy__app& e, ivy__decost& st);
+    virtual ivy__sequence ext__ivy__sequence__flat_int(const ivy__sequence& s, ivy__flatst& st);
     virtual ivyc_s1::cpp__stmt ext__cpp__breakst__make(ivyc_s1::annot ann);
     virtual void ext__cpp__retst__encode_int(const cpp__retst& s, pretty& b, int prio);
     virtual void ext__vector__ivy__expr____set(vector__ivy__expr__& a, unsigned long long x, ivyc_s1::ivy__expr y);
@@ -3030,6 +3474,7 @@ public:
     virtual ivy__undefined ext__ivy__undefined__make(ivyc_s1::ivy__ident n);
     virtual ivyc_s1::cpp__expr ext__cpp__arrow__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann);
     virtual str ext__ivy__mangle(ivyc_s1::cpp__ident s);
+    virtual void ext__ivy__file_not_found__encode(const ivy__file_not_found& e, pretty& b);
     virtual void ext__ivy__objectdc__reg_member(const ivy__objectdc& s, ivy__tocppst& st);
     virtual ivyc_s1::cpp__ident ext__cpp__ident__get_namesp(ivyc_s1::cpp__ident s);
     virtual unsigned long long ext__vector__ivy__expr____domain__next(unsigned long long x);

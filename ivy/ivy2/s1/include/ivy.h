@@ -775,7 +775,7 @@ namespace ivy {
         return res;
     }
 
-    template <class N, class D> static inline void read_file(const N &name, D &data, __bool &ok) {
+    template <class N, class D> static inline void read_file(const N &name, D &data, native_bool &ok) {
         std::string sname;
         for (std::size_t idx = 0; idx < ((std::size_t) name.end); idx ++) {
             sname.push_back(name.value(idx));

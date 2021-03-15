@@ -7041,13 +7041,52 @@ unsigned long long ivyc_s1::ext__vector__ivy__access_path____domain__next(unsign
     }
     return y;
 }
+ivyc_s1::vector__ivy__lvalue_count__ ivyc_s1::ext__vector__ivy__lvalue_count____empty(){
+    ivyc_s1::vector__ivy__lvalue_count__ a;
+    {
+        
+    }
+    return a;
+}
+void ivyc_s1::ext__ivy__expr__tup__parse(pstate& st, int prio, vector__ivy__expr__& res){
+    if((st.tok == __lit<str>("("))){
+        {
+            ext__pstate__consume(st);
+            {
+                ivyc_s1::ivy__expr loc__s;
+                {
+                    ext__ivy__expr__parse(st, prio, loc__s);
+                    ext__vector__ivy__expr____append(res, loc__s);
+                    while((st.ok && (st.tok == __lit<str>(",")))){
+                        {
+                            ext__pstate__consume(st);
+                            ext__ivy__expr__parse(st, prio, loc__s);
+                            ext__vector__ivy__expr____append(res, loc__s);
+                        }
+                    }
+                    if((st.ok && (st.tok == __lit<str>(")")))){
+                        {
+                            ext__pstate__consume(st);
+                        }
+                    }
+                    else {
+                        st.ok = false;
+                    }
+                }
+            }
+        }
+    }
+    else {
+        st.ok = false;
+    }
+}
 ivyc_s1::ivy__decl ivyc_s1::ext__ivy__vardc__typeinfer(const ivy__vardc& s, ivy__typeinferst& st){
     ivyc_s1::ivy__decl res;
     {
         {
             ivy__vardc loc__t;
-    loc__t.is_destructor = (bool)___ivy_choose(0,"loc:t",15496);
-    loc__t.has_def = (bool)___ivy_choose(0,"loc:t",15496);
+    loc__t.is_destructor = (bool)___ivy_choose(0,"loc:t",15497);
+    loc__t.has_def = (bool)___ivy_choose(0,"loc:t",15497);
             {
                 loc__t = ext__ivy__vardc__typeinfer_int(s, st);
                 loc__t.ann = s.ann;
@@ -7067,7 +7106,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__make_cpp_call(ivyc_s1::ivy__expr func, con
     ivyc_s1::cpp__expr res;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15503);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15504);
         {
             loc__0 = ext__ivy__func_is_member(func);
             if(loc__0){
@@ -7163,9 +7202,9 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__make_cpp_call(ivyc_s1::ivy__expr func, con
                                                         ivyc_s1::ivy__expr loc__0;
                                                         ivyc_s1::ivy__expr loc__1;
                                                         bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",15497);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",15498);
                                                         bool loc__3;
-    loc__3 = (bool)___ivy_choose(0,"loc:3",15497);
+    loc__3 = (bool)___ivy_choose(0,"loc:3",15498);
                                                         {
                                                             {
                                                                 ivy__app self__COLON__ivy__app;
@@ -7352,76 +7391,6 @@ void ivyc_s1::ext__ivy__instantiatedc__flat(const ivy__instantiatedc& s, ivy__fl
         }
     }
 }
-void ivyc_s1::ext__ivy__typedc__build_global_types(const ivy__typedc& s, ivy__global_types& st){
-    if(s.has_spec){
-        if(((s.spec).tag == 0)){
-            {
-                ivyc_s1::ivy__decl loc__foobar;
-                {
-                    loc__foobar = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(s));
-                    {
-                        vector__ivy__expr__ loc__0;
-                        {
-                            {
-                                ivy__structspec self__COLON__ivy__structspec;
-                                if (((s.spec).tag == 1)) self__COLON__ivy__structspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__structspec >(s.spec);
-                                if(((s.spec).tag == 1)){
-                                    loc__0 = ext__ivy__structspec__get_elems(self__COLON__ivy__structspec);
-                                }
-                                else {
-                                    {
-                                        ivy__enumspec self__COLON__ivy__enumspec;
-                                        if (((s.spec).tag == 0)) self__COLON__ivy__enumspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__enumspec >(s.spec);
-                                        if(((s.spec).tag == 0)){
-                                            loc__0 = ext__ivy__enumspec__get_elems(self__COLON__ivy__enumspec);
-                                        }
-                                        else {
-                                            loc__0 = ext__ivy__typespec__get_elems(s.spec);
-                                        }
-                                    }
-                                }
-                            }
-                            {
-                                vector__ivy__expr__ loc__conss;
-                                {
-                                    loc__conss = loc__0;
-                                    {
-                                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15506);
-                                        {
-                                            loc__idx = vector__ivy__expr____begin(loc__conss);
-                                            while((loc__idx < vector__ivy__expr____end(loc__conss))){
-                                                {
-                                                    {
-                                                        ivyc_s1::ivy__ident loc__0;
-                                                        {
-                                                            {
-                                                                ivy__symbol self__COLON__ivy__symbol;
-                                                                if (((vector__ivy__expr____value(loc__conss,loc__idx)).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(vector__ivy__expr____value(loc__conss,loc__idx));
-                                                                if(((vector__ivy__expr____value(loc__conss,loc__idx)).tag == 0)){
-                                                                    loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                                                                }
-                                                                else {
-                                                                    loc__0 = ext__ivy__expr__get_name(vector__ivy__expr____value(loc__conss,loc__idx));
-                                                                }
-                                                            }
-                                                            ext__ivy__symeval__set(st.type_of, loc__0, s.sort);
-                                                        }
-                                                    }
-                                                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__expr__prefix(ivyc_s1::cpp__expr s, ivyc_s1::cpp__ident pref){
     ivyc_s1::cpp__expr res;
     {
@@ -7441,7 +7410,7 @@ ivyc_s1::cpp__verb ivyc_s1::ext__cpp__verb_from_name(const str& name){
         else {
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15510);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15506);
                 {
                     loc__0 = ext__cpp__is_logvar_name(name);
                     if(loc__0){
@@ -7547,7 +7516,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__enum_to_cpp(ivyc_s1::cpp__expr name, ivyc_
                                 loc__cnstrs = loc__0;
                                 {
                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15517);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15513);
                                     {
                                         loc__idx = vector__ivy__expr____begin(loc__cnstrs);
                                         while((loc__idx < vector__ivy__expr____end(loc__cnstrs))){
@@ -7645,6 +7614,93 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__inttype(ivyc_s1::annot ann){
     }
     return res;
 }
+void ivyc_s1::ext__ivy__untyped__encode(const ivy__untyped& e, pretty& b){
+    {
+        ext__pretty__extend(b, __lit<str>("Cannot infer the type of this term:"));
+        ext__pretty__extend(b, __lit<str>(" "));
+        ext__pretty__newline(b);
+        {
+            ivy__pi self__COLON__ivy__pi;
+            if (((e.e).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e.e);
+            if(((e.e).tag == 3)){
+                ext__ivy__pi__encode(self__COLON__ivy__pi, b, 0);
+            }
+            else {
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((e.e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e.e);
+                    if(((e.e).tag == 1)){
+                        ext__ivy__app__encode(self__COLON__ivy__app, b, 0);
+                    }
+                    else {
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((e.e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.e);
+                            if(((e.e).tag == 0)){
+                                ext__ivy__symbol__encode(self__COLON__ivy__symbol, b, 0);
+                            }
+                            else {
+                                ext__ivy__expr__encode(e.e, b, 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        {
+            ivy__verb loc__0;
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15518);
+            {
+                {
+                    ivy__symbol self__COLON__ivy__symbol;
+                    if (((e.t1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.t1);
+                    if(((e.t1).tag == 0)){
+                        loc__0 = ext__ivy__symbol__get_verb(self__COLON__ivy__symbol);
+                    }
+                    else {
+                        loc__0 = ext__ivy__expr__get_verb(e.t1);
+                    }
+                }
+                if(!(loc__0 == ivy__verb__empty)){
+                    {
+                        ext__pretty__extend(b, __lit<str>(" "));
+                        ext__pretty__newline(b);
+                        ext__pretty__extend(b, __lit<str>("Incomplete type:"));
+                        ext__pretty__extend(b, __lit<str>(" "));
+                        {
+                            ivy__pi self__COLON__ivy__pi;
+                            if (((e.t1).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e.t1);
+                            if(((e.t1).tag == 3)){
+                                ext__ivy__pi__encode(self__COLON__ivy__pi, b, 0);
+                            }
+                            else {
+                                {
+                                    ivy__app self__COLON__ivy__app;
+                                    if (((e.t1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e.t1);
+                                    if(((e.t1).tag == 1)){
+                                        ext__ivy__app__encode(self__COLON__ivy__app, b, 0);
+                                    }
+                                    else {
+                                        {
+                                            ivy__symbol self__COLON__ivy__symbol;
+                                            if (((e.t1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.t1);
+                                            if(((e.t1).tag == 0)){
+                                                ext__ivy__symbol__encode(self__COLON__ivy__symbol, b, 0);
+                                            }
+                                            else {
+                                                ext__ivy__expr__encode(e.t1, b, 0);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__sequence__typeinfer(const ivy__sequence& s, ivy__typeinferst& st){
     ivyc_s1::ivy__stmt ress;
     {
@@ -7669,7 +7725,7 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__sequence__typeinfer(const ivy__sequence& s
                             loc__vsts = ext__ivy__desugar_asgn(loc__res.lhs);
                             {
                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15524);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15521);
                                 {
                                     loc__idx = vector__ivy__stmt____begin(loc__vsts);
                                     while((loc__idx < vector__ivy__stmt____end(loc__vsts))){
@@ -7959,13 +8015,13 @@ void ivyc_s1::ext__ivy__add_derived_traits(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15528);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15528);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15525);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15525);
             {
                 loc__0 = ext__ivy__make_cpp_cons(s);
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__0)));
@@ -8047,7 +8103,7 @@ void ivyc_s1::ext__cpp__namespacedecl__encode(const cpp__namespacedecl& s, prett
         ext__pretty__nest(b);
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15530);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15527);
             {
                 loc__idx = vector__cpp__decl____begin(s.members);
                 while((loc__idx < vector__cpp__decl____end(s.members))){
@@ -8148,13 +8204,13 @@ void ivyc_s1::ext__ivy__add_base_conversion(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__abc;
-    loc__abc.ftype.base.is_const = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.ftype.is_const = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.ftype.has_initializer = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.has_body = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.is_static = (bool)___ivy_choose(0,"loc:abc",15534);
-    loc__abc.is_virtual = (bool)___ivy_choose(0,"loc:abc",15534);
+    loc__abc.ftype.base.is_const = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.ftype.is_const = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.ftype.has_initializer = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.has_body = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.is_static = (bool)___ivy_choose(0,"loc:abc",15531);
+    loc__abc.is_virtual = (bool)___ivy_choose(0,"loc:abc",15531);
             {
                 {
                     str loc__op;
@@ -8289,7 +8345,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__symbol__to_cpp(const ivy__symbol& s, ivy__
     ivyc_s1::cpp__expr res;
     {
         cpp__symbol loc__t;
-    loc__t.vrb = (cpp__verb)___ivy_choose(0,"loc:t",15535);
+    loc__t.vrb = (cpp__verb)___ivy_choose(0,"loc:t",15532);
         {
             loc__t = ext__ivy__symbol__to_cpp_int(s, st);
             loc__t.ann = s.ann;
@@ -8320,7 +8376,7 @@ void ivyc_s1::ext__ivy__strident__encode(const ivy__strident& s, pretty& b, int 
                     ext__pretty__extend(b, __lit<str>("< "));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15536);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15533);
                         {
                             loc__idx = vector__ivy__ident____begin(s.subscrs);
                             while((loc__idx < vector__ivy__ident____end(s.subscrs))){
@@ -8370,7 +8426,7 @@ void ivyc_s1::ext__ivy__strident__encode(const ivy__strident& s, pretty& b, int 
         else {
             {
                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15537);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15534);
                 {
                     loc__idx = vector__ivy__ident____begin(s.subscrs);
                     while((loc__idx < vector__ivy__ident____end(s.subscrs))){
@@ -8535,12 +8591,6 @@ ivyc_s1::ivy__verb ivyc_s1::ext__ivy__expr__app_verb(ivyc_s1::ivy__expr s){
     }
     return res;
 }
-ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__stmt__to_cpp(ivyc_s1::ivy__stmt s, ivy__tocppst& st){
-    ivyc_s1::cpp__stmt res;
-    {
-    }
-    return res;
-}
 ivyc_s1::ivy__wrong_number_params ivyc_s1::ext__ivy__wrong_number_params__make(unsigned long long n){
     ivyc_s1::ivy__wrong_number_params res;
     res.n = (unsigned long long)___ivy_choose(0,"fml:res",0);
@@ -8549,30 +8599,27 @@ ivyc_s1::ivy__wrong_number_params ivyc_s1::ext__ivy__wrong_number_params__make(u
     }
     return res;
 }
-void ivyc_s1::ext__cpp__version__encode(const cpp__version& s, pretty& b){
+void ivyc_s1::ext__pretty__extend(pretty& self, const str& string){
     {
-        ext__pretty__extend(b, __lit<str>("#lang ivy"));
+        pretty__token loc__tok;
+    loc__tok.pair = (bool)___ivy_choose(0,"loc:tok",15536);
+    loc__tok.tdepth = (unsigned long long)___ivy_choose(0,"loc:tok",15536);
+    loc__tok.second = (unsigned long long)___ivy_choose(0,"loc:tok",15536);
         {
-            unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15542);
-            {
-                loc__idx = vector__pos____begin(s.nums);
-                while((loc__idx < vector__pos____end(s.nums))){
-                    {
-                        if((vector__pos____begin(s.nums) < loc__idx)){
-                            ext__pretty__extend(b, __lit<str>("."));
-                        }
-                        {
-                            str loc__0;
-                            {
-                                loc__0 = ext__pos__to_str(vector__pos____value(s.nums,loc__idx));
-                                ext__pretty__extend(b, loc__0);
-                            }
-                        }
-                        loc__idx = ext__vector__pos____domain__next(loc__idx);
-                    }
+            loc__tok.pair = false;
+            loc__tok.tdepth = self.depth;
+            loc__tok.first = string;
+            if(((string == self.whitespace))){
+                {
+                    loc__tok.pair = true;
+                    loc__tok.second = str__end(string);
                 }
             }
+            else {
+                ext__pretty__add_length(self, str__end(string), vector__pretty__token____end(self.tokens));
+            }
+            ext__vector__pretty__token____append(self.tokens, loc__tok);
+            self.st.total = (self.st.total + str__end(string));
         }
     }
 }
@@ -8580,7 +8627,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__symbol__make(ivyc_s1::cpp__ident name, ivy
     ivyc_s1::cpp__expr res;
     {
         cpp__symbol loc__s;
-    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",15543);
+    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",15537);
         {
             loc__s.name = name;
             loc__s.vrb = cpp__verb__none;
@@ -8601,7 +8648,7 @@ ivyc_s1::ivy__ident_to_ident ivyc_s1::ext__ivy__prm_map(const vector__ivy__expr_
         {
             {
                 ivy__wrong_number_params loc__0;
-    loc__0.n = (unsigned long long)___ivy_choose(0,"loc:0",15544);
+    loc__0.n = (unsigned long long)___ivy_choose(0,"loc:0",15538);
                 {
                     loc__0 = ext__ivy__wrong_number_params__make(vector__ivy__expr____end(fml));
                     ext__ivy__report_error(ivyc_s1::ivy__error(7, new ivyc_s1::ivy__error::twrap<ivyc_s1::ivy__wrong_number_params>(loc__0)), ann);
@@ -8612,7 +8659,7 @@ ivyc_s1::ivy__ident_to_ident ivyc_s1::ext__ivy__prm_map(const vector__ivy__expr_
     else {
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15546);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15540);
             {
                 loc__idx = vector__ivy__expr____begin(fml);
                 while((loc__idx < vector__ivy__expr____end(fml))){
@@ -8667,7 +8714,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_dom0(ivyc_s1::ivy__expr ty){
         }
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15548);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15542);
             {
                 {
                     ivy__app self__COLON__ivy__app;
@@ -8681,7 +8728,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_dom0(ivyc_s1::ivy__expr ty){
                 }
                 {
                     bool loc__b;
-    loc__b = (bool)___ivy_choose(0,"loc:b",15547);
+    loc__b = (bool)___ivy_choose(0,"loc:b",15541);
                     {
                         loc__b = loc__0;
                         while(loc__b){
@@ -8724,7 +8771,7 @@ void ivyc_s1::ext__annot_i__encode(const annot_i& s, pretty& b){
         }
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15549);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15543);
             {
                 loc__idx = vector__str____begin(s.comments);
                 while((loc__idx < vector__str____end(s.comments))){
@@ -8774,6 +8821,14 @@ bool ivyc_s1::ext__ivy__ident_set__mem(const ivy__ident_set& a, ivyc_s1::ivy__id
         res = (it != a.end());
     }
     return res;
+}
+unsigned long long ivyc_s1::ext__vector__cpp__expr____domain__next(unsigned long long x){
+    unsigned long long y;
+    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
+    {
+        y = (x + 1);
+    }
+    return y;
 }
 unsigned long long ivyc_s1::ext__vector__cpp__simpletype____domain__next(unsigned long long x){
     unsigned long long y;
@@ -8833,12 +8888,12 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__sequence__fold_right(const vector__ivy__st
     if((0 < vector__ivy__stmt____end(args))){
         {
             unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15552);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15546);
             {
                 loc__0 = ext__vector__ivy__stmt____domain__prev(vector__ivy__stmt____end(args));
                 {
                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15551);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15545);
                     {
                         loc__idx = loc__0;
                         res = vector__ivy__stmt____value(args,loc__idx);
@@ -8889,7 +8944,7 @@ bool ivyc_s1::ext__cpp__app__is(const cpp__app& s, cpp__verb vrb){
     {
         {
             cpp__verb loc__0;
-    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",15554);
+    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",15548);
             {
                 {
                     cpp__symbol self__COLON__cpp__symbol;
@@ -8910,20 +8965,6 @@ bool ivyc_s1::ext__cpp__app__is(const cpp__app& s, cpp__verb vrb){
 ivyc_s1::ivy__strident ivyc_s1::ext__ivy__ident__get_last(ivyc_s1::ivy__ident s){
     ivyc_s1::ivy__strident res;
     {
-    }
-    return res;
-}
-ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__makestr(const str& name, ivyc_s1::annot ann){
-    ivyc_s1::ivy__expr res;
-    {
-        ivy__symbol loc__s;
-    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",15555);
-        {
-            loc__s.name = ext__ivy__strident__make(name);
-            loc__s.vrb = ext__ivy__verb_from_name(name);
-            loc__s.ann = ann;
-            res = ivyc_s1::ivy__expr(0, new ivyc_s1::ivy__expr::twrap<ivyc_s1::ivy__symbol>(loc__s));
-        }
     }
     return res;
 }
@@ -8965,21 +9006,21 @@ void ivyc_s1::ext__ivy__add_eq_pred(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__eq;
-    loc__eq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.ftype.is_const = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.has_body = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.is_static = (bool)___ivy_choose(0,"loc:eq",15569);
-    loc__eq.is_virtual = (bool)___ivy_choose(0,"loc:eq",15569);
+    loc__eq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.ftype.is_const = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.has_body = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.is_static = (bool)___ivy_choose(0,"loc:eq",15562);
+    loc__eq.is_virtual = (bool)___ivy_choose(0,"loc:eq",15562);
             {
                 loc__eq.ftype.base._type = ext__cpp__symbol__makestr(__lit<str>("ivy::native_bool"), s.ann);
                 loc__eq.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("operator =="), s.ann);
                 loc__eq.ftype.is_const = true;
                 {
                     cpp__simpletype loc__eqarg0;
-    loc__eqarg0.is_const = (bool)___ivy_choose(0,"loc:eqarg0",15568);
-    loc__eqarg0.is_ref = (bool)___ivy_choose(0,"loc:eqarg0",15568);
+    loc__eqarg0.is_const = (bool)___ivy_choose(0,"loc:eqarg0",15561);
+    loc__eqarg0.is_ref = (bool)___ivy_choose(0,"loc:eqarg0",15561);
                     {
                         loc__eqarg0._type = s.name;
                         loc__eqarg0.is_const = true;
@@ -8992,7 +9033,7 @@ void ivyc_s1::ext__ivy__add_eq_pred(cpp__structdecl& s){
                             {
                                 {
                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15566);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15559);
                                     {
                                         loc__idx = vector__cpp__decl____begin(s.members);
                                         while((loc__idx < vector__cpp__decl____end(s.members))){
@@ -9305,11 +9346,16 @@ void ivyc_s1::ext__vector__pretty__state____append(vector__pretty__state__& a, c
         a.push_back(v);
     }
 }
-ivyc_s1::annot ivyc_s1::ext__ivy__expr__get_ann(ivyc_s1::ivy__expr s){
-    ivyc_s1::annot res;
-    {
-    }
-    return res;
+bool ivyc_s1::ext__ivy__file__exist(const str& fname){
+    bool ok;
+    ok = (bool)___ivy_choose(0,"fml:ok",0);
+
+
+    std::string fn;
+    for (size_t i = 0; i < fname.size(); i++)
+    fn.push_back(fname[i]);
+    ok = ::access(fn.c_str(),F_OK) != -1;
+    return ok;
 }
 void ivyc_s1::imp__ivy__decost__typeinf_show_str(const str& s){
     {
@@ -9319,7 +9365,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__make(ivyc_s1::ivy__ident name, ivy
     ivyc_s1::ivy__expr res;
     {
         ivy__symbol loc__s;
-    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",15571);
+    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",15565);
         {
             loc__s.name = name;
             loc__s.vrb = ivy__verb__none;
@@ -9334,6 +9380,41 @@ void ivyc_s1::ext__ivy__tocppst__wrap_stmt(ivy__tocppst& s, ivyc_s1::cpp__stmt c
         ext__ivy__tocppst__add_stmt(s, code);
         ext__ivy__tocppst__get_code(s, ann, res);
     }
+}
+bool ivyc_s1::ext__ivy__is_logvar_name(const str& name){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
+    if(char__is_capital(str__value(name,0))){
+        {
+            res = true;
+            {
+                unsigned long long loc__0;
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15567);
+                {
+                    loc__0 = ext__pos__next(str__begin(name));
+                    {
+                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15566);
+                        {
+                            loc__idx = loc__0;
+                            while((res && (loc__idx < str__end(name)))){
+                                res = char__is_digit(str__value(name,loc__idx));
+                            }
+                            loc__idx = ext__pos__next(loc__idx);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+ivyc_s1::ivy__ident ivyc_s1::ext__ivy__dotident__get_namesp(const ivy__dotident& s){
+    ivyc_s1::ivy__ident res;
+    {
+        res = s.namesp;
+    }
+    return res;
 }
 void ivyc_s1::ext__cpp__functype__encode(const cpp__functype& s, pretty& b, int prio){
     {
@@ -9395,12 +9476,12 @@ void ivyc_s1::ext__cpp__functype__encode(const cpp__functype& s, pretty& b, int 
 void ivyc_s1::ext__ivy__write_file(const str& name, const str& buf){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15575);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15571);
         {
             loc__0 = ext__ivy__file__write(name, buf);
             {
                 bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15574);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15570);
                 {
                     loc__ok = loc__0;
                     if(!loc__ok){
@@ -9642,7 +9723,7 @@ void ivyc_s1::ext__ivy__lvalue_path(ivyc_s1::ivy__expr s, ivy__access_path& path
     if(((s).tag == 0)){
         {
             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15585);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15581);
             {
                 {
                     ivy__symbol self__COLON__ivy__symbol;
@@ -9682,7 +9763,7 @@ void ivyc_s1::ext__ivy__lvalue_path(ivyc_s1::ivy__expr s, ivy__access_path& path
         if(((s).tag == 1)){
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15592);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15588);
                 {
                     {
                         ivy__app self__COLON__ivy__app;
@@ -9715,7 +9796,7 @@ void ivyc_s1::ext__ivy__lvalue_path(ivyc_s1::ivy__expr s, ivy__access_path& path
                     else {
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15591);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15587);
                             {
                                 {
                                     ivy__app self__COLON__ivy__app;
@@ -9792,7 +9873,7 @@ void ivyc_s1::ext__ivy__lvalue_path(ivyc_s1::ivy__expr s, ivy__access_path& path
                                 else {
                                     {
                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15590);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15586);
                                         {
                                             {
                                                 ivy__app self__COLON__ivy__app;
@@ -9878,11 +9959,66 @@ void ivyc_s1::ext__ivy__syntax_error__encode(const ivy__syntax_error& e, pretty&
         ext__pretty__newline(b);
     }
 }
-void ivyc_s1::ext__vector__ivy__ident____append(vector__ivy__ident__& a, ivyc_s1::ivy__ident v){
+ivyc_s1::str ivyc_s1::ext__ivy__expr__enc(ivyc_s1::ivy__expr e){
+    ivyc_s1::str s;
     {
-
-        a.push_back(v);
+        pretty loc__0;
+    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",15590);
+    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",15590);
+        {
+            loc__0 = ext__pretty__make(100, 4);
+            {
+                pretty loc__p;
+    loc__p.st.begin = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.st.total = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.maxline = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.indent = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.space = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.depth = (unsigned long long)___ivy_choose(0,"loc:p",15589);
+    loc__p.cppstyle = (bool)___ivy_choose(0,"loc:p",15589);
+                {
+                    loc__p = loc__0;
+                    loc__p.cppstyle = false;
+                    {
+                        ivy__pi self__COLON__ivy__pi;
+                        if (((e).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e);
+                        if(((e).tag == 3)){
+                            ext__ivy__pi__encode(self__COLON__ivy__pi, loc__p, 0);
+                        }
+                        else {
+                            {
+                                ivy__app self__COLON__ivy__app;
+                                if (((e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e);
+                                if(((e).tag == 1)){
+                                    ext__ivy__app__encode(self__COLON__ivy__app, loc__p, 0);
+                                }
+                                else {
+                                    {
+                                        ivy__symbol self__COLON__ivy__symbol;
+                                        if (((e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e);
+                                        if(((e).tag == 0)){
+                                            ext__ivy__symbol__encode(self__COLON__ivy__symbol, loc__p, 0);
+                                        }
+                                        else {
+                                            ext__ivy__expr__encode(e, loc__p, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ext__pretty__flush(loc__p);
+                    s = loc__p.output;
+                }
+            }
+        }
     }
+    return s;
 }
 void ivyc_s1::ext__cpp__prog__encode(const cpp__prog& s, pretty& b, int prio){
     {
@@ -9892,7 +10028,7 @@ void ivyc_s1::ext__cpp__prog__encode(const cpp__prog& s, pretty& b, int prio){
         ext__pretty__newline(b);
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15593);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15591);
             {
                 loc__idx = vector__cpp__decl____begin(s.decls);
                 while((loc__idx < vector__cpp__decl____end(s.decls))){
@@ -9978,14 +10114,6 @@ void ivyc_s1::ext__cpp__prog__encode(const cpp__prog& s, pretty& b, int prio){
         }
     }
 }
-bool ivyc_s1::ext__ivy__expr__is_typed(ivyc_s1::ivy__expr s, ivy__verb vrb){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    {
-        res = false;
-    }
-    return res;
-}
 bool ivyc_s1::ext__ivy__ident_to_cppclass__mem(const ivy__ident_to_cppclass& a, ivyc_s1::ivy__ident x){
     bool res;
     res = (bool)___ivy_choose(0,"fml:res",0);
@@ -10017,12 +10145,12 @@ void ivyc_s1::ext__cpp__simpletype__tup__encode(const vector__cpp__simpletype__&
             ext__cpp__simpletype__encode(vector__cpp__simpletype____value(s,0), b, 0);
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15595);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15593);
                 {
                     loc__0 = ext__vector__cpp__simpletype____domain__next(vector__cpp__simpletype____begin(s));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15594);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15592);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__cpp__simpletype____end(s))){
@@ -10052,303 +10180,15 @@ unsigned long long ivyc_s1::ext__vector__ivy__decl____domain__prev(unsigned long
     }
     return y;
 }
-ivyc_s1::ivy__sequence ivyc_s1::ext__ivy__sequence__flat_int(const ivy__sequence& s, ivy__flatst& st){
-    ivyc_s1::ivy__sequence res;
+ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__ifst__typeinfer(const ivy__ifst& s, ivy__typeinferst& st){
+    ivyc_s1::ivy__stmt res;
     {
-        res = s;
-        if(((res.lhs).tag == 0)){
+        {
+            ivy__ifst loc__t;
             {
-                {
-                    vector__ivy__ident__ loc__del;
-                    {
-                        loc__del = ext__ivy__setup_local_vars(res.lhs, st);
-                        {
-                            ivy__varst self__COLON__ivy__varst;
-                            if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
-                            if(((res.lhs).tag == 6)){
-                                res.lhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
-                            }
-                            else {
-                                {
-                                    ivy__whilest self__COLON__ivy__whilest;
-                                    if (((res.lhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.lhs);
-                                    if(((res.lhs).tag == 4)){
-                                        res.lhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__ifst self__COLON__ivy__ifst;
-                                            if (((res.lhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.lhs);
-                                            if(((res.lhs).tag == 3)){
-                                                res.lhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__sequence self__COLON__ivy__sequence;
-                                                    if (((res.lhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.lhs);
-                                                    if(((res.lhs).tag == 1)){
-                                                        res.lhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__asgn self__COLON__ivy__asgn;
-                                                            if (((res.lhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.lhs);
-                                                            if(((res.lhs).tag == 0)){
-                                                                res.lhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
-                                                            }
-                                                            else {
-                                                                res.lhs = ext__ivy__stmt__flat(res.lhs, st);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        {
-                            ivy__varst self__COLON__ivy__varst;
-                            if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
-                            if(((res.rhs).tag == 6)){
-                                res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
-                            }
-                            else {
-                                {
-                                    ivy__whilest self__COLON__ivy__whilest;
-                                    if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
-                                    if(((res.rhs).tag == 4)){
-                                        res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__ifst self__COLON__ivy__ifst;
-                                            if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
-                                            if(((res.rhs).tag == 3)){
-                                                res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__sequence self__COLON__ivy__sequence;
-                                                    if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
-                                                    if(((res.rhs).tag == 1)){
-                                                        res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__asgn self__COLON__ivy__asgn;
-                                                            if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
-                                                            if(((res.rhs).tag == 0)){
-                                                                res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
-                                                            }
-                                                            else {
-                                                                res.rhs = ext__ivy__stmt__flat(res.rhs, st);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        ext__ivy__remove_local_vars(loc__del, st);
-                    }
-                }
-            }
-        }
-        else {
-            {
-                {
-                    ivy__varst self__COLON__ivy__varst;
-                    if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
-                    if(((res.lhs).tag == 6)){
-                        res.lhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
-                    }
-                    else {
-                        {
-                            ivy__whilest self__COLON__ivy__whilest;
-                            if (((res.lhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.lhs);
-                            if(((res.lhs).tag == 4)){
-                                res.lhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
-                            }
-                            else {
-                                {
-                                    ivy__ifst self__COLON__ivy__ifst;
-                                    if (((res.lhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.lhs);
-                                    if(((res.lhs).tag == 3)){
-                                        res.lhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__sequence self__COLON__ivy__sequence;
-                                            if (((res.lhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.lhs);
-                                            if(((res.lhs).tag == 1)){
-                                                res.lhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__asgn self__COLON__ivy__asgn;
-                                                    if (((res.lhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.lhs);
-                                                    if(((res.lhs).tag == 0)){
-                                                        res.lhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
-                                                    }
-                                                    else {
-                                                        res.lhs = ext__ivy__stmt__flat(res.lhs, st);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if(((res.lhs).tag == 6)){
-                    {
-                        {
-                            vector__ivy__ident__ loc__del;
-                            {
-                                {
-                                    ivyc_s1::ivy__expr loc__0;
-                                    ivyc_s1::ivy__ident loc__1;
-                                    {
-                                        {
-                                            ivy__varst self__COLON__ivy__varst;
-                                            if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
-                                            if(((res.lhs).tag == 6)){
-                                                loc__0 = ext__ivy__varst__get_expr(self__COLON__ivy__varst);
-                                            }
-                                            else {
-                                                loc__0 = ext__ivy__stmt__get_expr(res.lhs);
-                                            }
-                                        }
-                                        loc__1 = ext__ivy__formal_ident(loc__0);
-                                        {
-                                            ivyc_s1::ivy__ident loc__id;
-                                            {
-                                                loc__id = loc__1;
-                                                {
-                                                    bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15601);
-                                                    {
-                                                        loc__0 = ext__ivy__ident_set__mem(st.locals, loc__id);
-                                                        if(!loc__0){
-                                                            {
-                                                                ext__vector__ivy__ident____append(loc__del, loc__id);
-                                                                ext__ivy__ident_set__set(st.locals, loc__id, true);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                {
-                                                    ivy__varst self__COLON__ivy__varst;
-                                                    if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
-                                                    if(((res.rhs).tag == 6)){
-                                                        res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__whilest self__COLON__ivy__whilest;
-                                                            if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
-                                                            if(((res.rhs).tag == 4)){
-                                                                res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
-                                                            }
-                                                            else {
-                                                                {
-                                                                    ivy__ifst self__COLON__ivy__ifst;
-                                                                    if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
-                                                                    if(((res.rhs).tag == 3)){
-                                                                        res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
-                                                                    }
-                                                                    else {
-                                                                        {
-                                                                            ivy__sequence self__COLON__ivy__sequence;
-                                                                            if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
-                                                                            if(((res.rhs).tag == 1)){
-                                                                                res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
-                                                                            }
-                                                                            else {
-                                                                                {
-                                                                                    ivy__asgn self__COLON__ivy__asgn;
-                                                                                    if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
-                                                                                    if(((res.rhs).tag == 0)){
-                                                                                        res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
-                                                                                    }
-                                                                                    else {
-                                                                                        res.rhs = ext__ivy__stmt__flat(res.rhs, st);
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                ext__ivy__remove_local_vars(loc__del, st);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else {
-                    {
-                        {
-                            ivy__varst self__COLON__ivy__varst;
-                            if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
-                            if(((res.rhs).tag == 6)){
-                                res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
-                            }
-                            else {
-                                {
-                                    ivy__whilest self__COLON__ivy__whilest;
-                                    if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
-                                    if(((res.rhs).tag == 4)){
-                                        res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__ifst self__COLON__ivy__ifst;
-                                            if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
-                                            if(((res.rhs).tag == 3)){
-                                                res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__sequence self__COLON__ivy__sequence;
-                                                    if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
-                                                    if(((res.rhs).tag == 1)){
-                                                        res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__asgn self__COLON__ivy__asgn;
-                                                            if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
-                                                            if(((res.rhs).tag == 0)){
-                                                                res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
-                                                            }
-                                                            else {
-                                                                res.rhs = ext__ivy__stmt__flat(res.rhs, st);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                loc__t = ext__ivy__ifst__typeinfer_int(s, st);
+                loc__t.ann = s.ann;
+                res = ivyc_s1::ivy__stmt(3, new ivyc_s1::ivy__stmt::twrap<ivyc_s1::ivy__ifst>(loc__t));
             }
         }
     }
@@ -10367,18 +10207,18 @@ bool ivyc_s1::ext__ivy__ident_to_instantiatedc__mem(const ivy__ident_to_instanti
 void ivyc_s1::ext__ivy__unown_path(const ivy__access_path& path, ivy__tocppst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15607);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15597);
         {
             loc__idx = vector__ivy__lvalue_count____begin(st.dead);
             while((loc__idx < vector__ivy__lvalue_count____end(st.dead))){
                 {
                     ivy__lvalue_count loc__lc;
-    loc__lc.cnt = (unsigned long long)___ivy_choose(0,"loc:lc",15606);
+    loc__lc.cnt = (unsigned long long)___ivy_choose(0,"loc:lc",15596);
                     {
                         loc__lc = vector__ivy__lvalue_count____value(st.dead,loc__idx);
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15605);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15595);
                             {
                                 loc__0 = ext__ivy__path_may_alias(path, loc__lc.path);
                                 if(loc__0){
@@ -10411,82 +10251,129 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__cpp__asgn__make(ivyc_s1::cpp__expr x, ivyc_s1::
     }
     return res;
 }
-void ivyc_s1::ext__ivy__instancedc__defd(const ivy__instancedc& s, ivy__flatst& st){
-    if(s.is_auto){
-        {
-            ext__ivy__auto_instance_defd(s, st);
+bool ivyc_s1::ext__ivy__expr__eq(ivyc_s1::ivy__expr e1, ivyc_s1::ivy__expr e2){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
+    if(((e1).tag == 0)){
+        if(((e2).tag == 0)){
+            {
+                {
+                    ivyc_s1::ivy__ident loc__0;
+                    ivyc_s1::ivy__ident loc__1;
+                    {
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((e1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e1);
+                            if(((e1).tag == 0)){
+                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                            }
+                            else {
+                                loc__0 = ext__ivy__expr__get_name(e1);
+                            }
+                        }
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((e2).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e2);
+                            if(((e2).tag == 0)){
+                                loc__1 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                            }
+                            else {
+                                loc__1 = ext__ivy__expr__get_name(e2);
+                            }
+                        }
+                        res = (loc__0 == loc__1);
+                    }
+                }
+            }
         }
     }
     else {
-        {
+        if(((e1).tag == 1)){
             {
-                ivyc_s1::ivy__decl loc__0;
+                ivyc_s1::ivy__expr loc__0;
+                ivyc_s1::ivy__expr loc__1;
+                bool loc__2;
+    loc__2 = (bool)___ivy_choose(0,"loc:2",15606);
                 {
-                    loc__0 = ext__ivy__instancedc__desugar(s);
                     {
-                        ivyc_s1::ivy__decl loc__ds;
+                        ivy__app self__COLON__ivy__app;
+                        if (((e1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e1);
+                        if(((e1).tag == 1)){
+                            loc__0 = ext__ivy__app__get_func(self__COLON__ivy__app);
+                        }
+                        else {
+                            loc__0 = ext__ivy__expr__get_func(e1);
+                        }
+                    }
+                    {
+                        ivy__app self__COLON__ivy__app;
+                        if (((e2).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e2);
+                        if(((e2).tag == 1)){
+                            loc__1 = ext__ivy__app__get_func(self__COLON__ivy__app);
+                        }
+                        else {
+                            loc__1 = ext__ivy__expr__get_func(e2);
+                        }
+                    }
+                    loc__2 = ext__ivy__expr__eq(loc__0, loc__1);
+                    if(loc__2){
                         {
-                            loc__ds = loc__0;
+                            vector__ivy__expr__ loc__0;
                             {
-                                ivy__instancedc self__COLON__ivy__instancedc;
-                                if (((loc__ds).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(loc__ds);
-                                if(((loc__ds).tag == 10)){
-                                    ext__ivy__instancedc__defd(self__COLON__ivy__instancedc, st);
+                                {
+                                    ivy__app self__COLON__ivy__app;
+                                    if (((e1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e1);
+                                    if(((e1).tag == 1)){
+                                        loc__0 = ext__ivy__app__get_args(self__COLON__ivy__app);
+                                    }
+                                    else {
+                                        loc__0 = ext__ivy__expr__get_args(e1);
+                                    }
                                 }
-                                else {
+                                {
+                                    vector__ivy__expr__ loc__args1;
                                     {
-                                        ivy__objectdc self__COLON__ivy__objectdc;
-                                        if (((loc__ds).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(loc__ds);
-                                        if(((loc__ds).tag == 9)){
-                                            ext__ivy__objectdc__defd(self__COLON__ivy__objectdc, st);
-                                        }
-                                        else {
+                                        loc__args1 = loc__0;
+                                        {
+                                            vector__ivy__expr__ loc__0;
                                             {
-                                                ivy__instantiatedc self__COLON__ivy__instantiatedc;
-                                                if (((loc__ds).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(loc__ds);
-                                                if(((loc__ds).tag == 8)){
-                                                    ext__ivy__instantiatedc__defd(self__COLON__ivy__instantiatedc, st);
+                                                {
+                                                    ivy__app self__COLON__ivy__app;
+                                                    if (((e2).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e2);
+                                                    if(((e2).tag == 1)){
+                                                        loc__0 = ext__ivy__app__get_args(self__COLON__ivy__app);
+                                                    }
+                                                    else {
+                                                        loc__0 = ext__ivy__expr__get_args(e2);
+                                                    }
                                                 }
-                                                else {
+                                                {
+                                                    vector__ivy__expr__ loc__args2;
                                                     {
-                                                        ivy__moduledc self__COLON__ivy__moduledc;
-                                                        if (((loc__ds).tag == 7)) self__COLON__ivy__moduledc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__moduledc >(loc__ds);
-                                                        if(((loc__ds).tag == 7)){
-                                                            ext__ivy__moduledc__defd(self__COLON__ivy__moduledc, st);
-                                                        }
-                                                        else {
+                                                        loc__args2 = loc__0;
+                                                        if((vector__ivy__expr____end(loc__args1) == vector__ivy__expr____end(loc__args2))){
                                                             {
-                                                                ivy__vardc self__COLON__ivy__vardc;
-                                                                if (((loc__ds).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(loc__ds);
-                                                                if(((loc__ds).tag == 3)){
-                                                                    ext__ivy__vardc__defd(self__COLON__ivy__vardc, st);
-                                                                }
-                                                                else {
+                                                                res = true;
+                                                                {
+                                                                    unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15601);
                                                                     {
-                                                                        ivy__typedc self__COLON__ivy__typedc;
-                                                                        if (((loc__ds).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(loc__ds);
-                                                                        if(((loc__ds).tag == 2)){
-                                                                            ext__ivy__typedc__defd(self__COLON__ivy__typedc, st);
-                                                                        }
-                                                                        else {
+                                                                        loc__idx = vector__ivy__expr____begin(loc__args1);
+                                                                        while((res && (loc__idx < vector__ivy__expr____end(loc__args1)))){
                                                                             {
-                                                                                ivy__groupdc self__COLON__ivy__groupdc;
-                                                                                if (((loc__ds).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(loc__ds);
-                                                                                if(((loc__ds).tag == 1)){
-                                                                                    ext__ivy__groupdc__defd(self__COLON__ivy__groupdc, st);
-                                                                                }
-                                                                                else {
+                                                                                {
+                                                                                    bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15600);
                                                                                     {
-                                                                                        ivy__actdc self__COLON__ivy__actdc;
-                                                                                        if (((loc__ds).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(loc__ds);
-                                                                                        if(((loc__ds).tag == 0)){
-                                                                                            ext__ivy__actdc__defd(self__COLON__ivy__actdc, st);
-                                                                                        }
-                                                                                        else {
-                                                                                            ext__ivy__decl__defd(loc__ds, st);
+                                                                                        loc__0 = ext__ivy__expr__eq(vector__ivy__expr____value(loc__args1,loc__idx), vector__ivy__expr____value(loc__args2,loc__idx));
+                                                                                        if(!loc__0){
+                                                                                            {
+                                                                                                res = false;
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }
+                                                                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
                                                                             }
                                                                         }
                                                                     }
@@ -10506,6 +10393,7 @@ void ivyc_s1::ext__ivy__instancedc__defd(const ivy__instancedc& s, ivy__flatst& 
             }
         }
     }
+    return res;
 }
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__flat_formal(ivyc_s1::ivy__expr s, ivy__flatst& st){
     ivyc_s1::ivy__expr res;
@@ -10513,7 +10401,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__flat_formal(ivyc_s1::ivy__expr s, ivy__fla
         res = s;
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15620);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15610);
             {
                 {
                     ivy__app self__COLON__ivy__app;
@@ -10620,53 +10508,23 @@ ivyc_s1::ivy__decl ivyc_s1::ext__ivy__groupdc__make(const vector__ivy__decl__& d
     }
     return res;
 }
-ivyc_s1::ivy__global_types ivyc_s1::ext__ivy__prog__get_global_types(const ivy__prog& p, bool curried){
-    ivyc_s1::ivy__global_types s;
-    s.curried = (bool)___ivy_choose(0,"fml:s",0);
+bool ivyc_s1::ext__ivy__is_input_param(const ivy__actdc& s, ivyc_s1::ivy__expr p){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
     {
-        s.curried = curried;
+        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15612);
         {
-            unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15622);
-            {
-                loc__idx = vector__ivy__decl____begin(p.decls);
-                while((loc__idx < vector__ivy__decl____end(p.decls))){
-                    {
-                        {
-                            ivy__vardc self__COLON__ivy__vardc;
-                            if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(vector__ivy__decl____value(p.decls,loc__idx));
-                            if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 3)){
-                                ext__ivy__vardc__build_global_types(self__COLON__ivy__vardc, s);
-                            }
-                            else {
-                                {
-                                    ivy__typedc self__COLON__ivy__typedc;
-                                    if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(vector__ivy__decl____value(p.decls,loc__idx));
-                                    if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 2)){
-                                        ext__ivy__typedc__build_global_types(self__COLON__ivy__typedc, s);
-                                    }
-                                    else {
-                                        {
-                                            ivy__actdc self__COLON__ivy__actdc;
-                                            if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(vector__ivy__decl____value(p.decls,loc__idx));
-                                            if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 0)){
-                                                ext__ivy__actdc__build_global_types(self__COLON__ivy__actdc, s);
-                                            }
-                                            else {
-                                                ext__ivy__decl__build_global_types(vector__ivy__decl____value(p.decls,loc__idx), s);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        loc__idx = ext__vector__ivy__decl____domain__next(loc__idx);
-                    }
+            loc__idx = vector__ivy__expr____begin(s.inputs);
+            while((!res && (loc__idx < vector__ivy__expr____end(s.inputs)))){
+                {
+                    res = ext__ivy__expr__eq(vector__ivy__expr____value(s.inputs,loc__idx), p);
+                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
                 }
             }
         }
     }
-    return s;
+    return res;
 }
 ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__typespec__get_elems(ivyc_s1::ivy__typespec s){
     ivyc_s1::vector__ivy__expr__ res;
@@ -10934,7 +10792,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__flat(const ivy__app& s, ivy__flatst& 
             }
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15638);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15628);
                 {
                     loc__0 = ext__ivy__app__is(s, ivy__verb__dot);
                     if(loc__0){
@@ -10978,7 +10836,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__flat(const ivy__app& s, ivy__flatst& 
                     else {
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15637);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15627);
                             {
                                 loc__0 = ext__ivy__app__is(s, ivy__verb__varv);
                                 if(loc__0){
@@ -10995,12 +10853,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__flat(const ivy__app& s, ivy__flatst& 
                                                 ext__vector__ivy__expr____append(loc__args, loc__arg0);
                                                 {
                                                     unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15635);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15625);
                                                     {
                                                         loc__0 = ext__vector__ivy__expr____domain__next(vector__ivy__expr____begin(s.args));
                                                         {
                                                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15634);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15624);
                                                             {
                                                                 loc__idx = loc__0;
                                                                 while((loc__idx < vector__ivy__expr____end(s.args))){
@@ -11077,7 +10935,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_app(ivyc_s1::ivy__expr s, vector__ivy_
     ivyc_s1::ivy__expr func;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15648);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15638);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -11166,7 +11024,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_app(ivyc_s1::ivy__expr s, vector__ivy_
                     }
                     {
                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15646);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15636);
                         {
                             {
                                 ivy__app self__COLON__ivy__app;
@@ -11225,13 +11083,13 @@ void ivyc_s1::ext__ivy__add_virtual_destructor(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15649);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15649);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15639);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15639);
             {
                 loc__0 = ext__ivy__make_upcast_method(s);
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__0)));
@@ -11239,13 +11097,13 @@ void ivyc_s1::ext__ivy__add_virtual_destructor(cpp__structdecl& s){
         }
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15650);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15650);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",15640);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",15640);
             {
                 loc__0 = ext__ivy__make_virt_destr(s);
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__0)));
@@ -11321,13 +11179,13 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__applydot(ivyc_s1::ivy__expr arg, ivyc_s1::
                         {
                             ivyc_s1::ivy__ident loc__0;
                             bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",15653);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",15643);
                             ivyc_s1::ivy__ident loc__2;
                             bool loc__3;
-    loc__3 = (bool)___ivy_choose(0,"loc:3",15653);
+    loc__3 = (bool)___ivy_choose(0,"loc:3",15643);
                             ivyc_s1::ivy__ident loc__4;
                             bool loc__5;
-    loc__5 = (bool)___ivy_choose(0,"loc:5",15653);
+    loc__5 = (bool)___ivy_choose(0,"loc:5",15643);
                             {
                                 {
                                     ivy__symbol self__COLON__ivy__symbol;
@@ -11409,7 +11267,7 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__asgn__typeinfer_desugar(const ivy__asgn& s
             loc__res = s;
             {
                 bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15663);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15653);
                 {
                     loc__ok = true;
                     ext__ivy__bottom_up_type(loc__res.lhs, st, loc__ok);
@@ -11418,7 +11276,7 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__asgn__typeinfer_desugar(const ivy__asgn& s
                         {
                             {
                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15660);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15650);
                                 ivyc_s1::ivy__expr loc__1;
                                 {
                                     {
@@ -11447,7 +11305,7 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__asgn__typeinfer_desugar(const ivy__asgn& s
                                             loc__lhs = (loc__0 ? loc__1 : loc__res.lhs);
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15658);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15648);
                                                 {
                                                     {
                                                         ivy__app self__COLON__ivy__app;
@@ -11535,13 +11393,6 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__asgn__typeinfer_desugar(const ivy__asgn& s
     }
     return ress;
 }
-ivyc_s1::vector__ivy__lvalue_count__ ivyc_s1::ext__vector__ivy__lvalue_count____empty(){
-    ivyc_s1::vector__ivy__lvalue_count__ a;
-    {
-        
-    }
-    return a;
-}
 ivyc_s1::ivy__header ivyc_s1::ext__ivy__header__flat_int(const ivy__header& s, ivy__flatst& st){
     ivyc_s1::ivy__header res;
     {
@@ -11573,7 +11424,7 @@ ivyc_s1::ivy__vardc ivyc_s1::ext__ivy__vardc__typeinfer_int(const ivy__vardc& s,
                             ext__ivy__setup_formals(loc__prms, true, st);
                             {
                                 bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15668);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15658);
                                 {
                                     loc__ok = true;
                                     ext__ivy__bottom_up_type(res.def, st, loc__ok);
@@ -11582,7 +11433,7 @@ ivyc_s1::ivy__vardc ivyc_s1::ext__ivy__vardc__typeinfer_int(const ivy__vardc& s,
                                         {
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15666);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15656);
                                                 {
                                                     {
                                                         ivy__app self__COLON__ivy__app;
@@ -11644,7 +11495,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__fix_variant_type(ivyc_s1::ivy__expr t, ivy
     ivyc_s1::cpp__expr res;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15675);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15665);
         {
             loc__0 = ext__ivy__is_variant_type(t, st);
             if(loc__0){
@@ -11792,18 +11643,18 @@ ivyc_s1::ivy__prototype ivyc_s1::ext__ivy__actdc__get_proto(const ivy__actdc& s)
                                         loc__outs = loc__0;
                                         {
                                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15684);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15674);
                                             {
                                                 loc__idx = vector__ivy__expr____begin(s.inputs);
                                                 while((loc__idx < vector__ivy__expr____end(s.inputs))){
                                                     {
                                                         ivy__prototype_argument loc__arg;
-    loc__arg.is_input = (bool)___ivy_choose(0,"loc:arg",15678);
-    loc__arg.inpos = (unsigned long long)___ivy_choose(0,"loc:arg",15678);
-    loc__arg.is_output = (bool)___ivy_choose(0,"loc:arg",15678);
-    loc__arg.outpos = (unsigned long long)___ivy_choose(0,"loc:arg",15678);
-    loc__arg.is_ref = (bool)___ivy_choose(0,"loc:arg",15678);
-    loc__arg.is_const = (bool)___ivy_choose(0,"loc:arg",15678);
+    loc__arg.is_input = (bool)___ivy_choose(0,"loc:arg",15668);
+    loc__arg.inpos = (unsigned long long)___ivy_choose(0,"loc:arg",15668);
+    loc__arg.is_output = (bool)___ivy_choose(0,"loc:arg",15668);
+    loc__arg.outpos = (unsigned long long)___ivy_choose(0,"loc:arg",15668);
+    loc__arg.is_ref = (bool)___ivy_choose(0,"loc:arg",15668);
+    loc__arg.is_const = (bool)___ivy_choose(0,"loc:arg",15668);
                                                         {
                                                             loc__arg.name = vector__ivy__expr____value(s.inputs,loc__idx);
                                                             {
@@ -11859,7 +11710,7 @@ ivyc_s1::ivy__prototype ivyc_s1::ext__ivy__actdc__get_proto(const ivy__actdc& s)
                                                     ivyc_s1::ivy__expr loc__0;
                                                     ivyc_s1::ivy__ident loc__1;
                                                     bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",15683);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",15673);
                                                     {
                                                         {
                                                             ivy__app self__COLON__ivy__app;
@@ -11896,12 +11747,12 @@ ivyc_s1::ivy__prototype ivyc_s1::ext__ivy__actdc__get_proto(const ivy__actdc& s)
                                                                 while((loc__idx < vector__ivy__expr____end(s.outputs))){
                                                                     {
                                                                         ivy__prototype_argument loc__arg;
-    loc__arg.is_input = (bool)___ivy_choose(0,"loc:arg",15682);
-    loc__arg.inpos = (unsigned long long)___ivy_choose(0,"loc:arg",15682);
-    loc__arg.is_output = (bool)___ivy_choose(0,"loc:arg",15682);
-    loc__arg.outpos = (unsigned long long)___ivy_choose(0,"loc:arg",15682);
-    loc__arg.is_ref = (bool)___ivy_choose(0,"loc:arg",15682);
-    loc__arg.is_const = (bool)___ivy_choose(0,"loc:arg",15682);
+    loc__arg.is_input = (bool)___ivy_choose(0,"loc:arg",15672);
+    loc__arg.inpos = (unsigned long long)___ivy_choose(0,"loc:arg",15672);
+    loc__arg.is_output = (bool)___ivy_choose(0,"loc:arg",15672);
+    loc__arg.outpos = (unsigned long long)___ivy_choose(0,"loc:arg",15672);
+    loc__arg.is_ref = (bool)___ivy_choose(0,"loc:arg",15672);
+    loc__arg.is_const = (bool)___ivy_choose(0,"loc:arg",15672);
                                                                         {
                                                                             loc__arg.name = vector__ivy__expr____value(s.outputs,loc__idx);
                                                                             {
@@ -11934,7 +11785,7 @@ ivyc_s1::ivy__prototype ivyc_s1::ext__ivy__actdc__get_proto(const ivy__actdc& s)
                                                                                             loc__id = loc__1;
                                                                                             {
                                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15679);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15669);
                                                                                                 {
                                                                                                     loc__0 = ext__ivy__param_map__mem(loc__inps, loc__id);
                                                                                                     if(!loc__0){
@@ -12035,7 +11886,7 @@ ivyc_s1::ivy__instantiatedc ivyc_s1::ext__ivy__find_auto_inst(ivyc_s1::ivy__iden
                     loc__key = ext__ivy__make_auto_key(id, true, loc__pmap);
                     {
                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15690);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15680);
                         {
                             loc__0 = ext__ivy__ident_to_instantiatedc__mem(st.autodefs, loc__key);
                             if(loc__0){
@@ -12063,9 +11914,9 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
     if(((e).tag == 0)){
         {
             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15699);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15689);
             ivy__verb loc__1;
-    loc__1 = (ivy__verb)___ivy_choose(0,"loc:1",15699);
+    loc__1 = (ivy__verb)___ivy_choose(0,"loc:1",15689);
             {
                 {
                     ivy__symbol self__COLON__ivy__symbol;
@@ -12107,7 +11958,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                     loc__name = loc__0;
                                     {
                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15694);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15684);
                                         {
                                             loc__0 = ext__ivy__symeval__mem(st.tc.m, loc__name);
                                             if(loc__0){
@@ -12147,7 +11998,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                 else {
                     {
                         ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15698);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15688);
                         {
                             {
                                 ivy__symbol self__COLON__ivy__symbol;
@@ -12196,7 +12047,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
         if(((e).tag == 1)){
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15734);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15724);
                 {
                     {
                         ivy__app self__COLON__ivy__app;
@@ -12272,7 +12123,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                     else {
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15733);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15723);
                             {
                                 {
                                     ivy__app self__COLON__ivy__app;
@@ -12351,7 +12202,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                                                 }
                                                                 {
                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15719);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15709);
                                                                     {
                                                                         {
                                                                             ivy__app self__COLON__ivy__app;
@@ -12432,7 +12283,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                                                                                                 loc__name = loc__2;
                                                                                                                 {
                                                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15712);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15702);
                                                                                                                     {
                                                                                                                         loc__0 = ext__ivy__symeval__mem(st.tc.m, loc__name);
                                                                                                                         if(loc__0){
@@ -12496,7 +12347,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                                                                                                                             }
                                                                                                                                             {
                                                                                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15708);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15698);
                                                                                                                                                 {
                                                                                                                                                     {
                                                                                                                                                         ivy__app self__COLON__ivy__app;
@@ -12763,7 +12614,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                                     }
                                                     {
                                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15730);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15720);
                                                         {
                                                             {
                                                                 ivy__app self__COLON__ivy__app;
@@ -12795,7 +12646,7 @@ void ivyc_s1::ext__ivy__bottom_up_type(ivyc_s1::ivy__expr& e, const ivy__typeinf
                                                                                 loc__ty = loc__0;
                                                                                 {
                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15727);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15717);
                                                                                     {
                                                                                         {
                                                                                             ivy__app self__COLON__ivy__app;
@@ -12931,131 +12782,344 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__sequence__make(ivyc_s1::ivy__stmt x, ivyc_
     }
     return res;
 }
-bool ivyc_s1::ext__ivy__expr__eq(ivyc_s1::ivy__expr e1, ivyc_s1::ivy__expr e2){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    if(((e1).tag == 0)){
-        if(((e2).tag == 0)){
+ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__stmt__to_cpp(ivyc_s1::ivy__stmt s, ivy__tocppst& st){
+    ivyc_s1::cpp__stmt res;
+    {
+    }
+    return res;
+}
+void ivyc_s1::ext__ivy__decl__parse(pstate& st, int prio, ivyc_s1::ivy__decl& res){
+    if((st.tok == __lit<str>("{"))){
+        {
+            ext__pstate__consume(st);
             {
+                ivy__groupdc loc__s;
                 {
-                    ivyc_s1::ivy__ident loc__0;
-                    ivyc_s1::ivy__ident loc__1;
-                    {
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((e1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e1);
-                            if(((e1).tag == 0)){
-                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                            }
-                            else {
-                                loc__0 = ext__ivy__expr__get_name(e1);
-                            }
-                        }
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((e2).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e2);
-                            if(((e2).tag == 0)){
-                                loc__1 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                            }
-                            else {
-                                loc__1 = ext__ivy__expr__get_name(e2);
-                            }
-                        }
-                        res = (loc__0 == loc__1);
+                    ext__pstate__get_ann(st, loc__s.ann);
+                    if((st.tok == __lit<str>("..."))){
+                        ext__pstate__consume(st);
                     }
+                    ext__ivy__decl__parse_list(st, 0, loc__s.decls);
+                    if((st.tok == __lit<str>("}"))){
+                        {
+                            ext__pstate__consume(st);
+                        }
+                    }
+                    else {
+                        st.ok = false;
+                    }
+                    res = ivyc_s1::ivy__decl(1, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__groupdc>(loc__s));
                 }
             }
         }
     }
     else {
-        if(((e1).tag == 1)){
-            {
-                ivyc_s1::ivy__expr loc__0;
-                ivyc_s1::ivy__expr loc__1;
-                bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",15616);
+        if((st.tok == __lit<str>("action"))){
+            ext__ivy__parse_action(st, prio, ivy__action_kind__internal, res);
+        }
+        else {
+            if((st.tok == __lit<str>("type"))){
                 {
+                    ext__pstate__consume(st);
                     {
-                        ivy__app self__COLON__ivy__app;
-                        if (((e1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e1);
-                        if(((e1).tag == 1)){
-                            loc__0 = ext__ivy__app__get_func(self__COLON__ivy__app);
-                        }
-                        else {
-                            loc__0 = ext__ivy__expr__get_func(e1);
-                        }
-                    }
-                    {
-                        ivy__app self__COLON__ivy__app;
-                        if (((e2).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e2);
-                        if(((e2).tag == 1)){
-                            loc__1 = ext__ivy__app__get_func(self__COLON__ivy__app);
-                        }
-                        else {
-                            loc__1 = ext__ivy__expr__get_func(e2);
-                        }
-                    }
-                    loc__2 = ext__ivy__expr__eq(loc__0, loc__1);
-                    if(loc__2){
+                        ivy__typedc loc__s;
+    loc__s.has_super = (bool)___ivy_choose(0,"loc:s",15961);
+    loc__s.has_spec = (bool)___ivy_choose(0,"loc:s",15961);
                         {
-                            vector__ivy__expr__ loc__0;
-                            {
+                            ext__pstate__get_ann(st, loc__s.ann);
+                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.sort);
+                            if((st.ok && (st.tok == __lit<str>("=")))){
                                 {
-                                    ivy__app self__COLON__ivy__app;
-                                    if (((e1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e1);
-                                    if(((e1).tag == 1)){
-                                        loc__0 = ext__ivy__app__get_args(self__COLON__ivy__app);
-                                    }
-                                    else {
-                                        loc__0 = ext__ivy__expr__get_args(e1);
+                                    ext__pstate__consume(st);
+                                    loc__s.has_spec = true;
+                                    ext__ivy__typespec__parse(st, 0, loc__s.spec);
+                                }
+                            }
+                            res = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(loc__s));
+                        }
+                    }
+                }
+            }
+            else {
+                if(((st.tok == __lit<str>("var")) || (st.tok == __lit<str>("destructor")) || (st.tok == __lit<str>("function")))){
+                    {
+                        ivy__vardc loc__s;
+    loc__s.is_destructor = (bool)___ivy_choose(0,"loc:s",15962);
+    loc__s.has_def = (bool)___ivy_choose(0,"loc:s",15962);
+                        {
+                            loc__s.is_destructor = (st.tok == __lit<str>("destructor"));
+                            ext__pstate__consume(st);
+                            ext__pstate__get_ann(st, loc__s.ann);
+                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.typing);
+                            if((st.ok && (st.tok == __lit<str>("=")))){
+                                {
+                                    ext__pstate__consume(st);
+                                    loc__s.has_def = true;
+                                    ext__ivy__expr__parse(st, 0, loc__s.def);
+                                }
+                            }
+                            res = ivyc_s1::ivy__decl(3, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__vardc>(loc__s));
+                        }
+                    }
+                }
+                else {
+                    if((st.tok == __lit<str>("header"))){
+                        {
+                            ivy__header loc__s;
+                            {
+                                ext__pstate__get_ann(st, loc__s.ann);
+                                ext__pstate__consume(st);
+                                if((st.ok && (0 < str__end(st.tok)) && (str__value(st.tok,0) == 34))){
+                                    {
+                                        loc__s.filename = st.tok;
+                                        ext__pstate__consume(st);
                                     }
                                 }
+                                else {
+                                    st.ok = false;
+                                }
+                                res = ivyc_s1::ivy__decl(4, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__header>(loc__s));
+                            }
+                        }
+                    }
+                    else {
+                        if((st.tok == __lit<str>("interpret"))){
+                            {
+                                ivy__interpdc loc__s;
                                 {
-                                    vector__ivy__expr__ loc__args1;
-                                    {
-                                        loc__args1 = loc__0;
+                                    ext__pstate__get_ann(st, loc__s.ann);
+                                    ext__pstate__consume(st);
+                                    if((st.ok && (0 < str__end(st.tok)))){
                                         {
-                                            vector__ivy__expr__ loc__0;
-                                            {
+                                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__arrow], loc__s.itype);
+                                            if((st.ok && (st.tok == __lit<str>("->")))){
                                                 {
-                                                    ivy__app self__COLON__ivy__app;
-                                                    if (((e2).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e2);
-                                                    if(((e2).tag == 1)){
-                                                        loc__0 = ext__ivy__app__get_args(self__COLON__ivy__app);
-                                                    }
-                                                    else {
-                                                        loc__0 = ext__ivy__expr__get_args(e2);
+                                                    ext__pstate__consume(st);
+                                                    ext__ivy__expr__parse(st, 0, loc__s.ctype);
+                                                }
+                                            }
+                                            else {
+                                                st.ok = false;
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        st.ok = false;
+                                    }
+                                    res = ivyc_s1::ivy__decl(5, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__interpdc>(loc__s));
+                                }
+                            }
+                        }
+                        else {
+                            if((st.tok == __lit<str>("include"))){
+                                {
+                                    ivy__includedc loc__s;
+                                    {
+                                        ext__pstate__get_ann(st, loc__s.ann);
+                                        ext__pstate__consume(st);
+                                        ext__ivy__expr__parse(st, 0, loc__s.file);
+                                        res = ivyc_s1::ivy__decl(6, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__includedc>(loc__s));
+                                    }
+                                }
+                            }
+                            else {
+                                if((st.tok == __lit<str>("module"))){
+                                    {
+                                        {
+                                            ivy__moduledc loc__s;
+                                            {
+                                                ext__pstate__get_ann(st, loc__s.ann);
+                                                ext__pstate__consume(st);
+                                                ext__ivy__expr__parse(st, 99, loc__s.name);
+                                                if((st.ok && (st.tok == __lit<str>("(")))){
+                                                    {
+                                                        ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
                                                     }
                                                 }
-                                                {
-                                                    vector__ivy__expr__ loc__args2;
+                                                if((st.ok && (st.tok == __lit<str>("=")))){
                                                     {
-                                                        loc__args2 = loc__0;
-                                                        if((vector__ivy__expr____end(loc__args1) == vector__ivy__expr____end(loc__args2))){
+                                                        ext__pstate__consume(st);
+                                                        ext__ivy__decl__parse(st, 0, loc__s.body);
+                                                    }
+                                                }
+                                                else {
+                                                    st.ok = false;
+                                                }
+                                                res = ivyc_s1::ivy__decl(7, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__moduledc>(loc__s));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    if((st.tok == __lit<str>("instantiate"))){
+                                        {
+                                            ivy__instantiatedc loc__s;
+                                            {
+                                                ext__pstate__get_ann(st, loc__s.ann);
+                                                ext__pstate__consume(st);
+                                                ext__ivy__expr__parse(st, 99, loc__s.name);
+                                                if((st.ok && (st.tok == __lit<str>("(")))){
+                                                    {
+                                                        ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
+                                                    }
+                                                }
+                                                res = ivyc_s1::ivy__decl(8, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__instantiatedc>(loc__s));
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        if((st.tok == __lit<str>("object"))){
+                                            {
+                                                ivy__objectdc loc__s;
+                                                {
+                                                    ext__pstate__get_ann(st, loc__s.ann);
+                                                    ext__pstate__consume(st);
+                                                    ext__ivy__expr__parse(st, 99, loc__s.name);
+                                                    if((st.ok && (st.tok == __lit<str>("=")))){
+                                                        {
+                                                            ext__pstate__consume(st);
+                                                        }
+                                                    }
+                                                    if((st.ok && (st.tok == __lit<str>("{")))){
+                                                        {
+                                                            ext__ivy__decl__parse(st, 0, loc__s.body);
+                                                        }
+                                                    }
+                                                    res = ivyc_s1::ivy__decl(9, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__objectdc>(loc__s));
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            if(((st.tok == __lit<str>("instance")) || (st.tok == __lit<str>("autoinstance")))){
+                                                {
+                                                    ivy__instancedc loc__s;
+    loc__s.is_auto = (bool)___ivy_choose(0,"loc:s",15969);
+                                                    {
+                                                        loc__s.is_auto = (st.tok == __lit<str>("autoinstance"));
+                                                        ext__pstate__get_ann(st, loc__s.ann);
+                                                        ext__pstate__consume(st);
+                                                        ext__ivy__expr__parse(st, 99, loc__s.objname);
+                                                        if((st.ok && (st.tok == __lit<str>(":")))){
                                                             {
-                                                                res = true;
-                                                                {
-                                                                    unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15611);
+                                                                ext__pstate__consume(st);
+                                                            }
+                                                        }
+                                                        if(st.ok){
+                                                            ext__ivy__expr__parse(st, 99, loc__s.modname);
+                                                        }
+                                                        if((st.ok && (st.tok == __lit<str>("(")))){
+                                                            {
+                                                                ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
+                                                            }
+                                                        }
+                                                        res = ivyc_s1::ivy__decl(10, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__instancedc>(loc__s));
+                                                    }
+                                                }
+                                            }
+                                            else {
+                                                if((st.tok == __lit<str>("variant"))){
+                                                    {
+                                                        ext__pstate__consume(st);
+                                                        {
+                                                            ivy__typedc loc__s;
+    loc__s.has_super = (bool)___ivy_choose(0,"loc:s",15970);
+    loc__s.has_spec = (bool)___ivy_choose(0,"loc:s",15970);
+                                                            {
+                                                                loc__s.has_super = true;
+                                                                ext__pstate__get_ann(st, loc__s.ann);
+                                                                ext__ivy__expr__parse(st, 0, loc__s.sort);
+                                                                if((st.ok && (st.tok == __lit<str>("of")))){
+                                                                    ext__pstate__consume(st);
+                                                                }
+                                                                else {
+                                                                    st.ok = false;
+                                                                }
+                                                                ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.super);
+                                                                if((st.ok && (st.tok == __lit<str>("=")))){
                                                                     {
-                                                                        loc__idx = vector__ivy__expr____begin(loc__args1);
-                                                                        while((res && (loc__idx < vector__ivy__expr____end(loc__args1)))){
+                                                                        ext__pstate__consume(st);
+                                                                        loc__s.has_spec = true;
+                                                                        ext__ivy__typespec__parse(st, 0, loc__s.spec);
+                                                                    }
+                                                                }
+                                                                res = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(loc__s));
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                else {
+                                                    if((st.tok == __lit<str>("extern"))){
+                                                        {
+                                                            ext__pstate__consume(st);
+                                                            ext__ivy__parse_action(st, prio, ivy__action_kind__external, res);
+                                                        }
+                                                    }
+                                                    else {
+                                                        if((st.tok == __lit<str>("import"))){
+                                                            {
+                                                                ext__pstate__consume(st);
+                                                                ext__ivy__parse_action(st, prio, ivy__action_kind__imported, res);
+                                                            }
+                                                        }
+                                                        else {
+                                                            if((st.tok == __lit<str>("export"))){
+                                                                {
+                                                                    ext__pstate__consume(st);
+                                                                    ext__ivy__parse_action(st, prio, ivy__action_kind__exported, res);
+                                                                }
+                                                            }
+                                                            else {
+                                                                if((st.tok == __lit<str>("init"))){
+                                                                    {
+                                                                        {
+                                                                            ivy__initdc loc__s;
                                                                             {
-                                                                                {
-                                                                                    bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15610);
+                                                                                ext__pstate__get_ann(st, loc__s.ann);
+                                                                                ext__pstate__consume(st);
+                                                                                if((st.tok == __lit<str>("{"))){
                                                                                     {
-                                                                                        loc__0 = ext__ivy__expr__eq(vector__ivy__expr____value(loc__args1,loc__idx), vector__ivy__expr____value(loc__args2,loc__idx));
-                                                                                        if(!loc__0){
-                                                                                            {
-                                                                                                res = false;
-                                                                                            }
-                                                                                        }
+                                                                                        ext__ivy__stmt__parse(st, 1, loc__s.body);
                                                                                     }
                                                                                 }
-                                                                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                                                                                else {
+                                                                                    st.ok = false;
+                                                                                }
+                                                                                res = ivyc_s1::ivy__decl(11, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__initdc>(loc__s));
                                                                             }
                                                                         }
+                                                                    }
+                                                                }
+                                                                else {
+                                                                    if((st.tok == __lit<str>("after"))){
+                                                                        {
+                                                                            {
+                                                                                ivy__initdc loc__s;
+                                                                                {
+                                                                                    ext__pstate__get_ann(st, loc__s.ann);
+                                                                                    ext__pstate__consume(st);
+                                                                                    if((st.tok == __lit<str>("init"))){
+                                                                                        {
+                                                                                            ext__pstate__consume(st);
+                                                                                        }
+                                                                                    }
+                                                                                    else {
+                                                                                        st.ok = false;
+                                                                                    }
+                                                                                    if((st.ok && (st.tok == __lit<str>("{")))){
+                                                                                        {
+                                                                                            ext__ivy__stmt__parse(st, 1, loc__s.body);
+                                                                                        }
+                                                                                    }
+                                                                                    else {
+                                                                                        st.ok = false;
+                                                                                    }
+                                                                                    res = ivyc_s1::ivy__decl(11, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__initdc>(loc__s));
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    else {
+                                                                        st.ok = false;
                                                                     }
                                                                 }
                                                             }
@@ -13073,7 +13137,6 @@ bool ivyc_s1::ext__ivy__expr__eq(ivyc_s1::ivy__expr e1, ivyc_s1::ivy__expr e2){
             }
         }
     }
-    return res;
 }
 void ivyc_s1::ext__ivy__ident_to_moduledc__set(ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, const ivy__moduledc& y){
     {
@@ -13081,8 +13144,12 @@ void ivyc_s1::ext__ivy__ident_to_moduledc__set(ivy__ident_to_moduledc& a, ivyc_s
         a[x] = y;
     }
 }
-void ivyc_s1::ext__ivy__local_tracker__pop(ivy__local_tracker& s){
-    ext__ivy__push_pop_ident_set__push(s.map);
+ivyc_s1::ivy__decl ivyc_s1::ext__ivy__decl__typeinfer(ivyc_s1::ivy__decl s, ivy__typeinferst& st){
+    ivyc_s1::ivy__decl res;
+    {
+        res = s;
+    }
+    return res;
 }
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__get_type(ivyc_s1::ivy__expr s){
     ivyc_s1::ivy__expr res;
@@ -13101,7 +13168,7 @@ bool ivyc_s1::ext__ivy__is_subtype(ivyc_s1::ivy__expr rhsty, ivyc_s1::ivy__expr 
     res = (bool)___ivy_choose(0,"fml:res",0);
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15742);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15731);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -13116,7 +13183,7 @@ bool ivyc_s1::ext__ivy__is_subtype(ivyc_s1::ivy__expr rhsty, ivyc_s1::ivy__expr 
             if(loc__0){
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15740);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15729);
                     {
                         {
                             ivy__app self__COLON__ivy__app;
@@ -13133,11 +13200,11 @@ bool ivyc_s1::ext__ivy__is_subtype(ivyc_s1::ivy__expr rhsty, ivyc_s1::ivy__expr 
                                 ivyc_s1::ivy__expr loc__0;
                                 ivyc_s1::ivy__expr loc__1;
                                 bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",15739);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",15728);
                                 ivyc_s1::ivy__expr loc__3;
                                 ivyc_s1::ivy__expr loc__4;
                                 bool loc__5;
-    loc__5 = (bool)___ivy_choose(0,"loc:5",15739);
+    loc__5 = (bool)___ivy_choose(0,"loc:5",15728);
                                 {
                                     {
                                         ivy__app self__COLON__ivy__app;
@@ -13191,7 +13258,7 @@ bool ivyc_s1::ext__ivy__is_subtype(ivyc_s1::ivy__expr rhsty, ivyc_s1::ivy__expr 
             else {
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15741);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15730);
                     {
                         {
                             ivy__app self__COLON__ivy__app;
@@ -13309,156 +13376,12 @@ bool ivyc_s1::ext__ivy__symbol__occurs(const ivy__symbol& e, ivyc_s1::ivy__ident
     res = (e.name == n);
     return res;
 }
-void ivyc_s1::ext__ivy__auto_flat_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
+ivyc_s1::ivy__expr ivyc_s1::ext__ivy__asgn__get_rhs(const ivy__asgn& s){
+    ivyc_s1::ivy__expr res;
     {
-        {
-            bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15794);
-            {
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
-                    if(((s).tag == 1)){
-                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__dot);
-                    }
-                    else {
-                        loc__0 = ext__ivy__expr__is(s, ivy__verb__dot);
-                    }
-                }
-                if(loc__0){
-                    {
-                        {
-                            ivyc_s1::ivy__expr loc__0;
-                            {
-                                {
-                                    ivy__app self__COLON__ivy__app;
-                                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
-                                    if(((s).tag == 1)){
-                                        loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
-                                    }
-                                    else {
-                                        loc__0 = ext__ivy__expr__get_arg(s, 0);
-                                    }
-                                }
-                                ext__ivy__auto_flat_rec(loc__0, st);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        {
-            bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15803);
-            {
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
-                    if(((s).tag == 1)){
-                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__dot);
-                    }
-                    else {
-                        loc__0 = ext__ivy__expr__is(s, ivy__verb__dot);
-                    }
-                }
-                if((loc__0 || ((s).tag == 0))){
-                    {
-                        ivyc_s1::ivy__expr loc__e;
-                        {
-                            st.no_undefined = true;
-                            {
-                                ivy__app self__COLON__ivy__app;
-                                if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
-                                if(((s).tag == 1)){
-                                    loc__e = ext__ivy__app__flat(self__COLON__ivy__app, st);
-                                }
-                                else {
-                                    {
-                                        ivy__symbol self__COLON__ivy__symbol;
-                                        if (((s).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s);
-                                        if(((s).tag == 0)){
-                                            loc__e = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
-                                        }
-                                        else {
-                                            loc__e = ext__ivy__expr__flat(s, st);
-                                        }
-                                    }
-                                }
-                            }
-                            st.no_undefined = false;
-                            {
-                                ivyc_s1::ivy__ident loc__0;
-                                {
-                                    {
-                                        ivy__symbol self__COLON__ivy__symbol;
-                                        if (((loc__e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__e);
-                                        if(((loc__e).tag == 0)){
-                                            loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                                        }
-                                        else {
-                                            loc__0 = ext__ivy__expr__get_name(loc__e);
-                                        }
-                                    }
-                                    {
-                                        ivyc_s1::ivy__ident loc__id;
-                                        {
-                                            loc__id = loc__0;
-                                            {
-                                                bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15799);
-                                                {
-                                                    loc__0 = ext__ivy__ident_set__mem(st.autos_pending, loc__id);
-                                                    if(loc__0){
-                                                        {
-                                                            ext__ivy__ident_set__remove(st.autos_pending, loc__id);
-                                                            {
-                                                                bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15798);
-                                                                {
-                                                                    {
-                                                                        ivy__instantiatedc loc__idc;
-                                                                        {
-                                                                            loc__idc = ext__ivy__find_auto_inst(loc__id, st, loc__ok);
-                                                                            if(loc__ok){
-                                                                                {
-                                                                                    {
-                                                                                        bool loc__old_has_root;
-    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15796);
-                                                                                        {
-                                                                                            loc__old_has_root = st.has_root;
-                                                                                            {
-                                                                                                ivyc_s1::ivy__ident loc__old_root;
-                                                                                                {
-                                                                                                    loc__old_root = st.root;
-                                                                                                    st.has_root = true;
-                                                                                                    st.root = loc__id;
-                                                                                                    ext__ivy__instantiatedc__flat(loc__idc, st);
-                                                                                                    st.has_root = loc__old_has_root;
-                                                                                                    st.root = loc__old_root;
-                                                                                                }
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        res = s.rhs;
     }
+    return res;
 }
 unsigned long long ivyc_s1::ext__vector__ivy__stmt____domain__prev(unsigned long long x){
     unsigned long long y;
@@ -13475,7 +13398,7 @@ unsigned long long ivyc_s1::ext__vector__ivy__stmt____domain__prev(unsigned long
 void ivyc_s1::ext__ivy__make_cast(ivyc_s1::ivy__expr lhsty, ivyc_s1::ivy__expr& rhs, const ivy__typeinferst& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15755);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15753);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -13507,14 +13430,14 @@ void ivyc_s1::ext__ivy__make_cast(ivyc_s1::ivy__expr lhsty, ivyc_s1::ivy__expr& 
                                 loc__rhsty = loc__0;
                                 {
                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15752);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15750);
                                     {
                                         loc__0 = ext__ivy__expr__eq(lhsty, loc__rhsty);
                                         if(!loc__0){
                                             {
                                                 {
                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15746);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15744);
                                                     {
                                                         loc__0 = ext__ivy__is_subtype(loc__rhsty, lhsty, st);
                                                         if(!loc__0){
@@ -13677,7 +13600,7 @@ void ivyc_s1::ext__ivy__objectdc__flat(const ivy__objectdc& s, ivy__flatst& st){
     {
         {
             bool loc__old_has_root;
-    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15759);
+    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15757);
             {
                 loc__old_has_root = st.has_root;
                 {
@@ -13832,6 +13755,10 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__cpp__ifst__make(ivyc_s1::cpp__expr cond, ivyc_s
     }
     return res;
 }
+void ivyc_s1::ext__ivy__decl__flat(ivyc_s1::ivy__decl s, ivy__flatst& st){
+    {
+    }
+}
 void ivyc_s1::ext__cpp__numident__encode(const cpp__numident& s, pretty& b, int prio){
     {
         ext__pretty__extend(b, __lit<str>("["));
@@ -13849,7 +13776,7 @@ ivyc_s1::ivy__ident ivyc_s1::ext__ivy__numident__make(unsigned long long val){
     ivyc_s1::ivy__ident res;
     {
         ivy__numident loc__s;
-    loc__s.val = (unsigned long long)___ivy_choose(0,"loc:s",15761);
+    loc__s.val = (unsigned long long)___ivy_choose(0,"loc:s",15760);
         {
             loc__s.val = val;
             res = ivyc_s1::ivy__ident(1, new ivyc_s1::ivy__ident::twrap<ivyc_s1::ivy__numident>(loc__s));
@@ -13870,7 +13797,7 @@ ivyc_s1::ivy__verb ivyc_s1::ext__ivy__verb_from_name(const str& name){
         else {
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15762);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15761);
                 {
                     loc__0 = ext__ivy__is_logvar_name(name);
                     if(loc__0){
@@ -13889,196 +13816,11 @@ ivyc_s1::ivy__verb ivyc_s1::ext__ivy__verb_from_name(const str& name){
     }
     return vrb;
 }
-ivyc_s1::str ivyc_s1::ext__ivy__strident__to_str(const ivy__strident& s){
-    ivyc_s1::str b;
-    {
-        b = s.val;
-        if(false){
-            if((0 < vector__ivy__ident____end(s.subscrs))){
-                {
-                    ext__str__extend(b, __lit<str>("< "));
-                    {
-                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15764);
-                        {
-                            loc__idx = vector__ivy__ident____begin(s.subscrs);
-                            while((loc__idx < vector__ivy__ident____end(s.subscrs))){
-                                {
-                                    if((0 < loc__idx)){
-                                        {
-                                            ext__str__extend(b, __lit<str>(","));
-                                        }
-                                    }
-                                    {
-                                        str loc__0;
-                                        {
-                                            {
-                                                ivy__dotident self__COLON__ivy__dotident;
-                                                if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                                if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)){
-                                                    loc__0 = ext__ivy__dotident__to_str(self__COLON__ivy__dotident);
-                                                }
-                                                else {
-                                                    {
-                                                        ivy__strident self__COLON__ivy__strident;
-                                                        if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                                        if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)){
-                                                            loc__0 = ext__ivy__strident__to_str(self__COLON__ivy__strident);
-                                                        }
-                                                        else {
-                                                            loc__0 = ext__ivy__ident__to_str(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            ext__str__extend(b, loc__0);
-                                        }
-                                    }
-                                    loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
-                                }
-                            }
-                            ext__str__extend(b, __lit<str>(" >"));
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            {
-                unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15766);
-                {
-                    loc__idx = vector__ivy__ident____begin(s.subscrs);
-                    while((loc__idx < vector__ivy__ident____end(s.subscrs))){
-                        {
-                            ext__str__extend(b, __lit<str>("["));
-                            {
-                                str loc__0;
-                                {
-                                    {
-                                        ivy__dotident self__COLON__ivy__dotident;
-                                        if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                        if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)){
-                                            loc__0 = ext__ivy__dotident__to_str(self__COLON__ivy__dotident);
-                                        }
-                                        else {
-                                            {
-                                                ivy__strident self__COLON__ivy__strident;
-                                                if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                                if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)){
-                                                    loc__0 = ext__ivy__strident__to_str(self__COLON__ivy__strident);
-                                                }
-                                                else {
-                                                    loc__0 = ext__ivy__ident__to_str(vector__ivy__ident____value(s.subscrs,loc__idx));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    ext__str__extend(b, loc__0);
-                                }
-                            }
-                            ext__str__extend(b, __lit<str>("]"));
-                            loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return b;
-}
-void ivyc_s1::ext__ivy__untyped__encode(const ivy__untyped& e, pretty& b){
-    {
-        ext__pretty__extend(b, __lit<str>("Cannot infer the type of this term:"));
-        ext__pretty__extend(b, __lit<str>(" "));
-        ext__pretty__newline(b);
-        {
-            ivy__pi self__COLON__ivy__pi;
-            if (((e.e).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e.e);
-            if(((e.e).tag == 3)){
-                ext__ivy__pi__encode(self__COLON__ivy__pi, b, 0);
-            }
-            else {
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((e.e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e.e);
-                    if(((e.e).tag == 1)){
-                        ext__ivy__app__encode(self__COLON__ivy__app, b, 0);
-                    }
-                    else {
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((e.e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.e);
-                            if(((e.e).tag == 0)){
-                                ext__ivy__symbol__encode(self__COLON__ivy__symbol, b, 0);
-                            }
-                            else {
-                                ext__ivy__expr__encode(e.e, b, 0);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        {
-            ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15767);
-            {
-                {
-                    ivy__symbol self__COLON__ivy__symbol;
-                    if (((e.t1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.t1);
-                    if(((e.t1).tag == 0)){
-                        loc__0 = ext__ivy__symbol__get_verb(self__COLON__ivy__symbol);
-                    }
-                    else {
-                        loc__0 = ext__ivy__expr__get_verb(e.t1);
-                    }
-                }
-                if(!(loc__0 == ivy__verb__empty)){
-                    {
-                        ext__pretty__extend(b, __lit<str>(" "));
-                        ext__pretty__newline(b);
-                        ext__pretty__extend(b, __lit<str>("Incomplete type:"));
-                        ext__pretty__extend(b, __lit<str>(" "));
-                        {
-                            ivy__pi self__COLON__ivy__pi;
-                            if (((e.t1).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e.t1);
-                            if(((e.t1).tag == 3)){
-                                ext__ivy__pi__encode(self__COLON__ivy__pi, b, 0);
-                            }
-                            else {
-                                {
-                                    ivy__app self__COLON__ivy__app;
-                                    if (((e.t1).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e.t1);
-                                    if(((e.t1).tag == 1)){
-                                        ext__ivy__app__encode(self__COLON__ivy__app, b, 0);
-                                    }
-                                    else {
-                                        {
-                                            ivy__symbol self__COLON__ivy__symbol;
-                                            if (((e.t1).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e.t1);
-                                            if(((e.t1).tag == 0)){
-                                                ext__ivy__symbol__encode(self__COLON__ivy__symbol, b, 0);
-                                            }
-                                            else {
-                                                ext__ivy__expr__encode(e.t1, b, 0);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 ivyc_s1::ivy__moduledc ivyc_s1::ext__ivy__ident_to_moduledc__get_def(const ivy__ident_to_moduledc& m, ivyc_s1::ivy__ident x, ivyc_s1::annot ann){
     ivyc_s1::ivy__moduledc y;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15769);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15765);
         {
             loc__0 = ext__ivy__ident_to_moduledc__mem(m, x);
             if(!loc__0){
@@ -14119,7 +13861,7 @@ void ivyc_s1::ext__ivy__auto_defd_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
     {
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15772);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15768);
             {
                 {
                     ivy__app self__COLON__ivy__app;
@@ -14155,7 +13897,7 @@ void ivyc_s1::ext__ivy__auto_defd_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
         }
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15782);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15778);
             {
                 {
                     ivy__app self__COLON__ivy__app;
@@ -14211,13 +13953,13 @@ void ivyc_s1::ext__ivy__auto_defd_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
                                             loc__id = loc__0;
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15778);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15774);
                                                 {
                                                     loc__0 = ext__ivy__ident_set__mem(st.defs, loc__id);
                                                     if(!loc__0){
                                                         {
                                                             bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15777);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15773);
                                                             {
                                                                 {
                                                                     ivy__instantiatedc loc__idc;
@@ -14235,7 +13977,7 @@ void ivyc_s1::ext__ivy__auto_defd_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
                                                                                         ext__ivy__ident_set__set(st.autos_pending, loc__id, true);
                                                                                         {
                                                                                             bool loc__old_has_root;
-    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15774);
+    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15770);
                                                                                             {
                                                                                                 loc__old_has_root = st.has_root;
                                                                                                 {
@@ -14285,100 +14027,6 @@ ivyc_s1::cpp__ident ivyc_s1::ext__cpp__strident__make1(const str& val, ivyc_s1::
     }
     return res;
 }
-void ivyc_s1::ext__ivy__objectdc__defd(const ivy__objectdc& s, ivy__flatst& st){
-    {
-        ext__ivy__add_def(s.name, st, false);
-        {
-            bool loc__old_has_root;
-    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15785);
-            {
-                loc__old_has_root = st.has_root;
-                {
-                    ivyc_s1::ivy__ident loc__old_root;
-                    {
-                        loc__old_root = st.root;
-                        ext__ivy__set_root(st, s.name);
-                        {
-                            ivy__instancedc self__COLON__ivy__instancedc;
-                            if (((s.body).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(s.body);
-                            if(((s.body).tag == 10)){
-                                ext__ivy__instancedc__defd(self__COLON__ivy__instancedc, st);
-                            }
-                            else {
-                                {
-                                    ivy__objectdc self__COLON__ivy__objectdc;
-                                    if (((s.body).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(s.body);
-                                    if(((s.body).tag == 9)){
-                                        ext__ivy__objectdc__defd(self__COLON__ivy__objectdc, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__instantiatedc self__COLON__ivy__instantiatedc;
-                                            if (((s.body).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(s.body);
-                                            if(((s.body).tag == 8)){
-                                                ext__ivy__instantiatedc__defd(self__COLON__ivy__instantiatedc, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__moduledc self__COLON__ivy__moduledc;
-                                                    if (((s.body).tag == 7)) self__COLON__ivy__moduledc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__moduledc >(s.body);
-                                                    if(((s.body).tag == 7)){
-                                                        ext__ivy__moduledc__defd(self__COLON__ivy__moduledc, st);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__vardc self__COLON__ivy__vardc;
-                                                            if (((s.body).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(s.body);
-                                                            if(((s.body).tag == 3)){
-                                                                ext__ivy__vardc__defd(self__COLON__ivy__vardc, st);
-                                                            }
-                                                            else {
-                                                                {
-                                                                    ivy__typedc self__COLON__ivy__typedc;
-                                                                    if (((s.body).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(s.body);
-                                                                    if(((s.body).tag == 2)){
-                                                                        ext__ivy__typedc__defd(self__COLON__ivy__typedc, st);
-                                                                    }
-                                                                    else {
-                                                                        {
-                                                                            ivy__groupdc self__COLON__ivy__groupdc;
-                                                                            if (((s.body).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(s.body);
-                                                                            if(((s.body).tag == 1)){
-                                                                                ext__ivy__groupdc__defd(self__COLON__ivy__groupdc, st);
-                                                                            }
-                                                                            else {
-                                                                                {
-                                                                                    ivy__actdc self__COLON__ivy__actdc;
-                                                                                    if (((s.body).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(s.body);
-                                                                                    if(((s.body).tag == 0)){
-                                                                                        ext__ivy__actdc__defd(self__COLON__ivy__actdc, st);
-                                                                                    }
-                                                                                    else {
-                                                                                        ext__ivy__decl__defd(s.body, st);
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        st.has_root = loc__old_has_root;
-                        st.root = loc__old_root;
-                    }
-                }
-            }
-        }
-    }
-}
 void ivyc_s1::ext__vector__ivy__expr____reverse(vector__ivy__expr__& a){
     {
 
@@ -14403,7 +14051,7 @@ ivyc_s1::cpp__strident ivyc_s1::ext__ivy__strident_to_cpp(const ivy__strident& s
         }
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16034);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15783);
             {
                 loc__idx = vector__ivy__ident____begin(s.subscrs);
                 while((loc__idx < vector__ivy__ident____end(s.subscrs))){
@@ -14474,12 +14122,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__times__fold_left(const vector__ivy__expr__
             res = vector__ivy__expr____value(args,0);
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15787);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15785);
                 {
                     loc__0 = ext__vector__ivy__expr____domain__next(vector__ivy__expr____begin(args));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15786);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15784);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__ivy__expr____end(args))){
@@ -14535,120 +14183,6 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__type_fill_in(const ivy__symbol& e,
 }
 void ivyc_s1::ext__cpp__expr__encode(ivyc_s1::cpp__expr s, pretty& b, int prio){
     {
-    }
-}
-void ivyc_s1::ext__cpp__funcdecl__encode(const cpp__funcdecl& s, pretty& b, int prio){
-    {
-        {
-            annot_i self__COLON__annot_i;
-            if (((s.ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(s.ann);
-            if(((s.ann).tag == 0)){
-                ext__annot_i__encode(self__COLON__annot_i, b);
-            }
-            else {
-                ext__annot__encode(s.ann, b);
-            }
-        }
-        ext__pretty__nest(b);
-        if(s.is_static){
-            {
-                ext__pretty__extend(b, __lit<str>("static"));
-                ext__pretty__extend(b, __lit<str>(" "));
-            }
-        }
-        if(s.is_virtual){
-            {
-                ext__pretty__extend(b, __lit<str>("virtual"));
-                ext__pretty__extend(b, __lit<str>(" "));
-            }
-        }
-        ext__cpp__functype__encode(s.ftype, b, 0);
-        if(s.has_body){
-            {
-                ext__pretty__unnest(b);
-                ext__pretty__extend(b, __lit<str>(" "));
-                {
-                    cpp__retst self__COLON__cpp__retst;
-                    if (((s.body).tag == 7)) self__COLON__cpp__retst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__retst >(s.body);
-                    if(((s.body).tag == 7)){
-                        ext__cpp__retst__encode(self__COLON__cpp__retst, b, 2);
-                    }
-                    else {
-                        {
-                            cpp__varst self__COLON__cpp__varst;
-                            if (((s.body).tag == 6)) self__COLON__cpp__varst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__varst >(s.body);
-                            if(((s.body).tag == 6)){
-                                ext__cpp__varst__encode(self__COLON__cpp__varst, b, 2);
-                            }
-                            else {
-                                {
-                                    cpp__breakst self__COLON__cpp__breakst;
-                                    if (((s.body).tag == 5)) self__COLON__cpp__breakst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__breakst >(s.body);
-                                    if(((s.body).tag == 5)){
-                                        ext__cpp__breakst__encode(self__COLON__cpp__breakst, b, 2);
-                                    }
-                                    else {
-                                        {
-                                            cpp__whilest self__COLON__cpp__whilest;
-                                            if (((s.body).tag == 4)) self__COLON__cpp__whilest = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__whilest >(s.body);
-                                            if(((s.body).tag == 4)){
-                                                ext__cpp__whilest__encode(self__COLON__cpp__whilest, b, 2);
-                                            }
-                                            else {
-                                                {
-                                                    cpp__ifst self__COLON__cpp__ifst;
-                                                    if (((s.body).tag == 3)) self__COLON__cpp__ifst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__ifst >(s.body);
-                                                    if(((s.body).tag == 3)){
-                                                        ext__cpp__ifst__encode(self__COLON__cpp__ifst, b, 2);
-                                                    }
-                                                    else {
-                                                        {
-                                                            cpp__skipst self__COLON__cpp__skipst;
-                                                            if (((s.body).tag == 2)) self__COLON__cpp__skipst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__skipst >(s.body);
-                                                            if(((s.body).tag == 2)){
-                                                                ext__cpp__skipst__encode(self__COLON__cpp__skipst, b, 2);
-                                                            }
-                                                            else {
-                                                                {
-                                                                    cpp__sequence self__COLON__cpp__sequence;
-                                                                    if (((s.body).tag == 1)) self__COLON__cpp__sequence = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__sequence >(s.body);
-                                                                    if(((s.body).tag == 1)){
-                                                                        ext__cpp__sequence__encode(self__COLON__cpp__sequence, b, 2);
-                                                                    }
-                                                                    else {
-                                                                        {
-                                                                            cpp__asgn self__COLON__cpp__asgn;
-                                                                            if (((s.body).tag == 0)) self__COLON__cpp__asgn = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__asgn >(s.body);
-                                                                            if(((s.body).tag == 0)){
-                                                                                ext__cpp__asgn__encode(self__COLON__cpp__asgn, b, 2);
-                                                                            }
-                                                                            else {
-                                                                                ext__cpp__stmt__encode(s.body, b, 2);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            {
-                ext__pretty__extend(b, __lit<str>(";"));
-                ext__pretty__unnest(b);
-                ext__pretty__newline(b);
-            }
-        }
     }
 }
 void ivyc_s1::ext__cpp__pi__encode(const cpp__pi& s, pretty& b, int prio){
@@ -14707,96 +14241,6 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__expr__to_cpp(ivyc_s1::ivy__expr s, ivy__to
     }
     return res;
 }
-void ivyc_s1::ext__cpp__groupdc__encode(const cpp__groupdc& s, pretty& b, int prio){
-    {
-        {
-            unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15789);
-            {
-                loc__idx = vector__cpp__decl____begin(s.decls);
-                while((loc__idx < vector__cpp__decl____end(s.decls))){
-                    {
-                        ext__pretty__newline(b);
-                        {
-                            cpp__groupdc self__COLON__cpp__groupdc;
-                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 7)) self__COLON__cpp__groupdc = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__groupdc >(vector__cpp__decl____value(s.decls,loc__idx));
-                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 7)){
-                                ext__cpp__groupdc__encode(self__COLON__cpp__groupdc, b, 0);
-                            }
-                            else {
-                                {
-                                    cpp__namespacedecl self__COLON__cpp__namespacedecl;
-                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 6)) self__COLON__cpp__namespacedecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__namespacedecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 6)){
-                                        ext__cpp__namespacedecl__encode(self__COLON__cpp__namespacedecl, b, 0);
-                                    }
-                                    else {
-                                        {
-                                            cpp__structdecl self__COLON__cpp__structdecl;
-                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 5)) self__COLON__cpp__structdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__structdecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 5)){
-                                                ext__cpp__structdecl__encode(self__COLON__cpp__structdecl, b, 0);
-                                            }
-                                            else {
-                                                {
-                                                    cpp__funcdecl self__COLON__cpp__funcdecl;
-                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 4)) self__COLON__cpp__funcdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__funcdecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 4)){
-                                                        ext__cpp__funcdecl__encode(self__COLON__cpp__funcdecl, b, 0);
-                                                    }
-                                                    else {
-                                                        {
-                                                            cpp__vardecl self__COLON__cpp__vardecl;
-                                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 3)) self__COLON__cpp__vardecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__vardecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 3)){
-                                                                ext__cpp__vardecl__encode(self__COLON__cpp__vardecl, b, 0);
-                                                            }
-                                                            else {
-                                                                {
-                                                                    cpp__enumdecl self__COLON__cpp__enumdecl;
-                                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 2)) self__COLON__cpp__enumdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__enumdecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 2)){
-                                                                        ext__cpp__enumdecl__encode(self__COLON__cpp__enumdecl, b, 0);
-                                                                    }
-                                                                    else {
-                                                                        {
-                                                                            cpp__typedecl self__COLON__cpp__typedecl;
-                                                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 1)) self__COLON__cpp__typedecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__typedecl >(vector__cpp__decl____value(s.decls,loc__idx));
-                                                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 1)){
-                                                                                ext__cpp__typedecl__encode(self__COLON__cpp__typedecl, b, 0);
-                                                                            }
-                                                                            else {
-                                                                                {
-                                                                                    cpp__header self__COLON__cpp__header;
-                                                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 0)) self__COLON__cpp__header = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__header >(vector__cpp__decl____value(s.decls,loc__idx));
-                                                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 0)){
-                                                                                        ext__cpp__header__encode(self__COLON__cpp__header, b, 0);
-                                                                                    }
-                                                                                    else {
-                                                                                        ext__cpp__decl__encode(vector__cpp__decl____value(s.decls,loc__idx), b, 0);
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        loc__idx = ext__vector__cpp__decl____domain__next(loc__idx);
-                    }
-                }
-            }
-        }
-    }
-}
 ivyc_s1::cpp__ident ivyc_s1::ext__cpp__strident__make(const str& val){
     ivyc_s1::cpp__ident res;
     {
@@ -14808,17 +14252,6 @@ ivyc_s1::cpp__ident ivyc_s1::ext__cpp__strident__make(const str& val){
     }
     return res;
 }
-ivyc_s1::ivy__ident ivyc_s1::ext__ivy__strident__make(const str& val){
-    ivyc_s1::ivy__ident res;
-    {
-        ivy__strident loc__s;
-        {
-            loc__s.val = val;
-            res = ivyc_s1::ivy__ident(0, new ivyc_s1::ivy__ident::twrap<ivyc_s1::ivy__strident>(loc__s));
-        }
-    }
-    return res;
-}
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__comma__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann){
     ivyc_s1::cpp__expr res;
     if((0 < vector__cpp__expr____end(args))){
@@ -14826,12 +14259,12 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__comma__fold_left(const vector__cpp__expr__
             res = vector__cpp__expr____value(args,0);
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15792);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15790);
                 {
                     loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(args));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15791);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15789);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__cpp__expr____end(args))){
@@ -14857,17 +14290,46 @@ void ivyc_s1::ext__cpp__ident__encode(ivyc_s1::cpp__ident s, pretty& b, int prio
     {
     }
 }
-ivyc_s1::ivy__expr ivyc_s1::ext__ivy__asgn__get_rhs(const ivy__asgn& s){
-    ivyc_s1::ivy__expr res;
+void ivyc_s1::ext__vector__pretty__token____set(vector__pretty__token__& a, unsigned long long x, const pretty__token& y){
     {
-        res = s.rhs;
+
+        if (0 <= x && x < (unsigned long long)a.size())
+            a[x] = y;
     }
-    return res;
 }
 void ivyc_s1::ext__vector__pos____append(vector__pos__& a, unsigned long long v){
     {
 
         a.push_back(v);
+    }
+}
+void ivyc_s1::ext__cpp__retst__encode(const cpp__retst& s, pretty& b, int prio){
+    {
+        {
+            annot_i self__COLON__annot_i;
+            if (((s.ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(s.ann);
+            if(((s.ann).tag == 0)){
+                ext__annot_i__encode(self__COLON__annot_i, b);
+            }
+            else {
+                ext__annot__encode(s.ann, b);
+            }
+        }
+        if((1 < prio)){
+            {
+                ext__pretty__nest(b);
+                ext__pretty__extend(b, __lit<str>("{"));
+                ext__pretty__newline(b);
+            }
+        }
+        ext__cpp__retst__encode_int(s, b, prio);
+        if((1 < prio)){
+            {
+                ext__pretty__unnest(b);
+                ext__pretty__newline(b);
+                ext__pretty__extend(b, __lit<str>("}"));
+            }
+        }
     }
 }
 void ivyc_s1::ext__ivy__file__read(const str& fname, str& b, bool& ok){
@@ -14905,7 +14367,7 @@ void ivyc_s1::ext__ivy__app__encode(const ivy__app& s, pretty& b, int prio){
         }
         {
             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15806);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",15793);
             {
                 {
                     ivy__symbol self__COLON__ivy__symbol;
@@ -14919,13 +14381,13 @@ void ivyc_s1::ext__ivy__app__encode(const ivy__app& s, pretty& b, int prio){
                 }
                 {
                     ivy__verb loc__vrb;
-    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",15805);
+    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",15792);
                     {
                         loc__vrb = loc__0;
                         if(!(loc__vrb == ivy__verb__none)){
                             {
                                 int loc__opprio;
-    loc__opprio = (int)___ivy_choose(0,"loc:opprio",15804);
+    loc__opprio = (int)___ivy_choose(0,"loc:opprio",15791);
                                 {
                                     loc__opprio = ivy__verb_to_prio[loc__vrb];
                                     if((loc__opprio < prio)){
@@ -15122,20 +14584,6 @@ void ivyc_s1::ext__ivy__app__encode(const ivy__app& s, pretty& b, int prio){
             }
         }
     }
-}
-ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__ifst__typeinfer(const ivy__ifst& s, ivy__typeinferst& st){
-    ivyc_s1::ivy__stmt res;
-    {
-        {
-            ivy__ifst loc__t;
-            {
-                loc__t = ext__ivy__ifst__typeinfer_int(s, st);
-                loc__t.ann = s.ann;
-                res = ivyc_s1::ivy__stmt(3, new ivyc_s1::ivy__stmt::twrap<ivyc_s1::ivy__ifst>(loc__t));
-            }
-        }
-    }
-    return res;
 }
 void ivyc_s1::ext__ivy__typespec__defd(ivyc_s1::ivy__typespec s, ivy__flatst& st, ivyc_s1::ivy__ident id){
     {
@@ -15352,9 +14800,9 @@ void ivyc_s1::ext__pretty__newline(pretty& self){
     {
         {
             pretty__token loc__tok;
-    loc__tok.pair = (bool)___ivy_choose(0,"loc:tok",15810);
-    loc__tok.tdepth = (unsigned long long)___ivy_choose(0,"loc:tok",15810);
-    loc__tok.second = (unsigned long long)___ivy_choose(0,"loc:tok",15810);
+    loc__tok.pair = (bool)___ivy_choose(0,"loc:tok",15798);
+    loc__tok.tdepth = (unsigned long long)___ivy_choose(0,"loc:tok",15798);
+    loc__tok.second = (unsigned long long)___ivy_choose(0,"loc:tok",15798);
             {
                 loc__tok.pair = true;
                 loc__tok.tdepth = self.depth;
@@ -15367,7 +14815,7 @@ void ivyc_s1::ext__pretty__newline(pretty& self){
 void ivyc_s1::ext__ivy__subst_vector(vector__ivy__expr__& v, const ivy__symeval& smap){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15812);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15800);
         {
             loc__idx = vector__ivy__expr____begin(v);
             while((loc__idx < vector__ivy__expr____end(v))){
@@ -15407,16 +14855,16 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__dec(const str& s){
     ivyc_s1::ivy__expr e;
     {
         pstate loc__0;
-    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",15814);
-    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",15814);
-    loc__0.ok = (bool)___ivy_choose(0,"loc:0",15814);
+    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",15802);
+    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",15802);
+    loc__0.ok = (bool)___ivy_choose(0,"loc:0",15802);
         {
             loc__0 = ext__pstate__make(s);
             {
                 pstate loc__st;
-    loc__st.p = (unsigned long long)___ivy_choose(0,"loc:st",15813);
-    loc__st.ann.line = (unsigned long long)___ivy_choose(0,"loc:st",15813);
-    loc__st.ok = (bool)___ivy_choose(0,"loc:st",15813);
+    loc__st.p = (unsigned long long)___ivy_choose(0,"loc:st",15801);
+    loc__st.ann.line = (unsigned long long)___ivy_choose(0,"loc:st",15801);
+    loc__st.ok = (bool)___ivy_choose(0,"loc:st",15801);
                 {
                     loc__st = loc__0;
                     ext__ivy__expr__parse(loc__st, 0, e);
@@ -15438,16 +14886,16 @@ void ivyc_s1::ext__ivy__prog__parse_to(pstate& st, int prio, ivy__prog& res){
                 if((0 < vector__str____end(st.ann.comments))){
                     {
                         pstate loc__0;
-    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",15816);
-    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",15816);
-    loc__0.ok = (bool)___ivy_choose(0,"loc:0",15816);
+    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",15804);
+    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",15804);
+    loc__0.ok = (bool)___ivy_choose(0,"loc:0",15804);
                         {
                             loc__0 = ext__pstate__make(vector__str____value(st.ann.comments,0));
                             {
                                 pstate loc__vst;
-    loc__vst.p = (unsigned long long)___ivy_choose(0,"loc:vst",15815);
-    loc__vst.ann.line = (unsigned long long)___ivy_choose(0,"loc:vst",15815);
-    loc__vst.ok = (bool)___ivy_choose(0,"loc:vst",15815);
+    loc__vst.p = (unsigned long long)___ivy_choose(0,"loc:vst",15803);
+    loc__vst.ann.line = (unsigned long long)___ivy_choose(0,"loc:vst",15803);
+    loc__vst.ok = (bool)___ivy_choose(0,"loc:vst",15803);
                                 {
                                     loc__vst = loc__0;
                                     ext__ivy__version__parse(loc__vst, 0, res.vers);
@@ -15482,7 +14930,7 @@ ivyc_s1::ivy__ifst ivyc_s1::ext__ivy__ifst__typeinfer_int(const ivy__ifst& s, iv
         res = s;
         {
             bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15821);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15809);
             {
                 loc__ok = true;
                 ext__ivy__bottom_up_type(res.cond, st, loc__ok);
@@ -15618,8 +15066,8 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__cpp__varst__make(ivyc_s1::cpp__expr _type, ivyc
     {
         {
             cpp__varst loc__s;
-    loc__s.vtype.is_const = (bool)___ivy_choose(0,"loc:s",15823);
-    loc__s.vtype.is_ref = (bool)___ivy_choose(0,"loc:s",15823);
+    loc__s.vtype.is_const = (bool)___ivy_choose(0,"loc:s",15811);
+    loc__s.vtype.is_ref = (bool)___ivy_choose(0,"loc:s",15811);
             {
                 loc__s.vtype._type = _type;
                 loc__s.vtype.name = name;
@@ -15634,13 +15082,13 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
     ivyc_s1::cpp__decl resd;
     {
         cpp__funcdecl loc__res;
-    loc__res.ftype.base.is_const = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.ftype.is_const = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.ftype.has_initializer = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.has_body = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.is_static = (bool)___ivy_choose(0,"loc:res",15851);
-    loc__res.is_virtual = (bool)___ivy_choose(0,"loc:res",15851);
+    loc__res.ftype.base.is_const = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.ftype.is_const = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.ftype.has_initializer = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.has_body = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.is_static = (bool)___ivy_choose(0,"loc:res",15838);
+    loc__res.is_virtual = (bool)___ivy_choose(0,"loc:res",15838);
         {
             loc__res.ann = s.ann;
             {
@@ -15658,18 +15106,18 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                     }
                     {
                         ivy__prototype loc__proto;
-    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",15849);
-    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",15849);
+    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",15836);
+    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",15836);
                         {
                             loc__proto = ivy__ident_to_prototype__value(st.protos,loc__0);
                             {
                                 bool loc__has_output;
-    loc__has_output = (bool)___ivy_choose(0,"loc:has_output",15848);
+    loc__has_output = (bool)___ivy_choose(0,"loc:has_output",15835);
                                 {
                                     loc__has_output = loc__proto.has_ret;
                                     if(loc__has_output){
@@ -15699,17 +15147,17 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                     }
                                     {
                                         bool loc__cprot;
-    loc__cprot = (bool)___ivy_choose(0,"loc:cprot",15847);
+    loc__cprot = (bool)___ivy_choose(0,"loc:cprot",15834);
                                         {
                                             loc__cprot = st.proto_only;
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15846);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15833);
                                                 {
                                                     loc__0 = ext__ivy__actdc__is_member(s);
                                                     {
                                                         bool loc__is_member;
-    loc__is_member = (bool)___ivy_choose(0,"loc:is_member",15845);
+    loc__is_member = (bool)___ivy_choose(0,"loc:is_member",15832);
                                                         {
                                                             loc__is_member = loc__0;
                                                             {
@@ -15727,7 +15175,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                                                     }
                                                                     {
                                                                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15843);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15830);
                                                                         {
                                                                             loc__idx = vector__ivy__prototype_argument____begin(loc__proto.args);
                                                                             st.is_member = loc__is_member;
@@ -15763,7 +15211,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                                                                     {
                                                                                         ivyc_s1::ivy__expr loc__0;
                                                                                         bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",15828);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",15815);
                                                                                         {
                                                                                             {
                                                                                                 ivy__app self__COLON__ivy__app;
@@ -15787,12 +15235,12 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                                                             while((loc__idx < vector__ivy__prototype_argument____end(loc__proto.args))){
                                                                                 {
                                                                                     ivy__prototype_argument loc__parg;
-    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15833);
-    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15833);
-    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15833);
-    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15833);
-    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15833);
-    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15833);
+    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15820);
+    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15820);
+    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15820);
+    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15820);
+    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15820);
+    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15820);
                                                                                     {
                                                                                         loc__parg = vector__ivy__prototype_argument____value(loc__proto.args,loc__idx);
                                                                                         {
@@ -15801,8 +15249,8 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                                                                                 loc__arg = loc__parg.name;
                                                                                                 {
                                                                                                     cpp__simpletype loc__argt;
-    loc__argt.is_const = (bool)___ivy_choose(0,"loc:argt",15831);
-    loc__argt.is_ref = (bool)___ivy_choose(0,"loc:argt",15831);
+    loc__argt.is_const = (bool)___ivy_choose(0,"loc:argt",15818);
+    loc__argt.is_ref = (bool)___ivy_choose(0,"loc:argt",15818);
                                                                                                     {
                                                                                                         loc__argt.is_const = loc__parg.is_const;
                                                                                                         loc__argt.is_ref = loc__parg.is_ref;
@@ -15988,7 +15436,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
                                                                                                                 loc__res.body = ext__cpp__sequence__make(loc__res.body, loc__ret, s.ann);
                                                                                                                 {
                                                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15838);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15825);
                                                                                                                     {
                                                                                                                         loc__0 = ext__ivy__is_input_param(s, vector__ivy__expr____value(s.outputs,0));
                                                                                                                         if(!loc__0){
@@ -16065,7 +15513,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__actdc__to_cpp(const ivy__actdc& s, ivy__to
 void ivyc_s1::ext__ivy__vardc__build_global_types(const ivy__vardc& s, ivy__global_types& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15859);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15846);
         {
             loc__0 = ext__ivy__is_typing_complete(s.typing);
             if(loc__0){
@@ -16161,7 +15609,7 @@ bool ivyc_s1::ext__ivy__is_variant_type(ivyc_s1::ivy__expr t, const ivy__tocppst
         {
             ivyc_s1::ivy__ident loc__0;
             bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",15860);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",15847);
             {
                 {
                     ivy__symbol self__COLON__ivy__symbol;
@@ -16184,27 +15632,30 @@ bool ivyc_s1::ext__ivy__is_variant_type(ivyc_s1::ivy__expr t, const ivy__tocppst
     }
     return res;
 }
-void ivyc_s1::ext__pretty__extend(pretty& self, const str& string){
+void ivyc_s1::ext__cpp__version__encode(const cpp__version& s, pretty& b){
     {
-        pretty__token loc__tok;
-    loc__tok.pair = (bool)___ivy_choose(0,"loc:tok",15861);
-    loc__tok.tdepth = (unsigned long long)___ivy_choose(0,"loc:tok",15861);
-    loc__tok.second = (unsigned long long)___ivy_choose(0,"loc:tok",15861);
+        ext__pretty__extend(b, __lit<str>("#lang ivy"));
         {
-            loc__tok.pair = false;
-            loc__tok.tdepth = self.depth;
-            loc__tok.first = string;
-            if(((string == self.whitespace))){
-                {
-                    loc__tok.pair = true;
-                    loc__tok.second = str__end(string);
+            unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15849);
+            {
+                loc__idx = vector__pos____begin(s.nums);
+                while((loc__idx < vector__pos____end(s.nums))){
+                    {
+                        if((vector__pos____begin(s.nums) < loc__idx)){
+                            ext__pretty__extend(b, __lit<str>("."));
+                        }
+                        {
+                            str loc__0;
+                            {
+                                loc__0 = ext__pos__to_str(vector__pos____value(s.nums,loc__idx));
+                                ext__pretty__extend(b, loc__0);
+                            }
+                        }
+                        loc__idx = ext__vector__pos____domain__next(loc__idx);
+                    }
                 }
             }
-            else {
-                ext__pretty__add_length(self, str__end(string), vector__pretty__token____end(self.tokens));
-            }
-            ext__vector__pretty__token____append(self.tokens, loc__tok);
-            self.st.total = (self.st.total + str__end(string));
         }
     }
 }
@@ -16217,6 +15668,157 @@ ivyc_s1::annot ivyc_s1::ext__ivy__asgn__get_ann(const ivy__asgn& s){
     ivyc_s1::annot res;
     res = s.ann;
     return res;
+}
+void ivyc_s1::ext__ivy__auto_flat_rec(ivyc_s1::ivy__expr s, ivy__flatst& st){
+    {
+        {
+            bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15733);
+            {
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
+                    if(((s).tag == 1)){
+                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__dot);
+                    }
+                    else {
+                        loc__0 = ext__ivy__expr__is(s, ivy__verb__dot);
+                    }
+                }
+                if(loc__0){
+                    {
+                        {
+                            ivyc_s1::ivy__expr loc__0;
+                            {
+                                {
+                                    ivy__app self__COLON__ivy__app;
+                                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
+                                    if(((s).tag == 1)){
+                                        loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
+                                    }
+                                    else {
+                                        loc__0 = ext__ivy__expr__get_arg(s, 0);
+                                    }
+                                }
+                                ext__ivy__auto_flat_rec(loc__0, st);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        {
+            bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15742);
+            {
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
+                    if(((s).tag == 1)){
+                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__dot);
+                    }
+                    else {
+                        loc__0 = ext__ivy__expr__is(s, ivy__verb__dot);
+                    }
+                }
+                if((loc__0 || ((s).tag == 0))){
+                    {
+                        ivyc_s1::ivy__expr loc__e;
+                        {
+                            st.no_undefined = true;
+                            {
+                                ivy__app self__COLON__ivy__app;
+                                if (((s).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s);
+                                if(((s).tag == 1)){
+                                    loc__e = ext__ivy__app__flat(self__COLON__ivy__app, st);
+                                }
+                                else {
+                                    {
+                                        ivy__symbol self__COLON__ivy__symbol;
+                                        if (((s).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s);
+                                        if(((s).tag == 0)){
+                                            loc__e = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
+                                        }
+                                        else {
+                                            loc__e = ext__ivy__expr__flat(s, st);
+                                        }
+                                    }
+                                }
+                            }
+                            st.no_undefined = false;
+                            {
+                                ivyc_s1::ivy__ident loc__0;
+                                {
+                                    {
+                                        ivy__symbol self__COLON__ivy__symbol;
+                                        if (((loc__e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__e);
+                                        if(((loc__e).tag == 0)){
+                                            loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                                        }
+                                        else {
+                                            loc__0 = ext__ivy__expr__get_name(loc__e);
+                                        }
+                                    }
+                                    {
+                                        ivyc_s1::ivy__ident loc__id;
+                                        {
+                                            loc__id = loc__0;
+                                            {
+                                                bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15738);
+                                                {
+                                                    loc__0 = ext__ivy__ident_set__mem(st.autos_pending, loc__id);
+                                                    if(loc__0){
+                                                        {
+                                                            ext__ivy__ident_set__remove(st.autos_pending, loc__id);
+                                                            {
+                                                                bool loc__ok;
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15737);
+                                                                {
+                                                                    {
+                                                                        ivy__instantiatedc loc__idc;
+                                                                        {
+                                                                            loc__idc = ext__ivy__find_auto_inst(loc__id, st, loc__ok);
+                                                                            if(loc__ok){
+                                                                                {
+                                                                                    {
+                                                                                        bool loc__old_has_root;
+    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",15735);
+                                                                                        {
+                                                                                            loc__old_has_root = st.has_root;
+                                                                                            {
+                                                                                                ivyc_s1::ivy__ident loc__old_root;
+                                                                                                {
+                                                                                                    loc__old_root = st.root;
+                                                                                                    st.has_root = true;
+                                                                                                    st.root = loc__id;
+                                                                                                    ext__ivy__instantiatedc__flat(loc__idc, st);
+                                                                                                    st.has_root = loc__old_has_root;
+                                                                                                    st.root = loc__old_root;
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 void ivyc_s1::ext__ivy__make_temp(ivy__tocppst& s, ivyc_s1::ivy__expr ty, ivyc_s1::annot ann, ivyc_s1::cpp__expr& res){
     {
@@ -16235,8 +15837,8 @@ void ivyc_s1::ext__ivy__make_temp(ivy__tocppst& s, ivyc_s1::ivy__expr ty, ivyc_s
                 res = ext__cpp__symbol__makestr(loc__name, ann);
                 {
                     cpp__varst loc__vst;
-    loc__vst.vtype.is_const = (bool)___ivy_choose(0,"loc:vst",15864);
-    loc__vst.vtype.is_ref = (bool)___ivy_choose(0,"loc:vst",15864);
+    loc__vst.vtype.is_const = (bool)___ivy_choose(0,"loc:vst",15852);
+    loc__vst.vtype.is_ref = (bool)___ivy_choose(0,"loc:vst",15852);
                     {
                         loc__vst.vtype._type = ext__ivy__fix_variant_type(ty, s);
                         loc__vst.vtype.name = res;
@@ -16254,20 +15856,39 @@ void ivyc_s1::ext__ivy__make_temp(ivy__tocppst& s, ivyc_s1::ivy__expr ty, ivyc_s
         }
     }
 }
-void ivyc_s1::ext__ivy__enumspec__defd(const ivy__enumspec& s, ivy__flatst& st, ivyc_s1::ivy__ident id){
-    {
-        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15999);
+ivyc_s1::cpp__expr ivyc_s1::ext__cpp__plus__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann){
+    ivyc_s1::cpp__expr res;
+    if((0 < vector__cpp__expr____end(args))){
         {
-            loc__idx = vector__ivy__expr____begin(s.constructors);
-            while((loc__idx < vector__ivy__expr____end(s.constructors))){
+            res = vector__cpp__expr____value(args,0);
+            {
+                unsigned long long loc__0;
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15987);
                 {
-                    ext__ivy__add_def(vector__ivy__expr____value(s.constructors,loc__idx), st, false);
-                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                    loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(args));
+                    {
+                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15986);
+                        {
+                            loc__idx = loc__0;
+                            while((loc__idx < vector__cpp__expr____end(args))){
+                                {
+                                    res = ext__cpp__plus__make(res, vector__cpp__expr____value(args,loc__idx), ann);
+                                    loc__idx = ext__vector__cpp__expr____domain__next(loc__idx);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+    else {
+        {
+            res = ext__cpp__empty__make(ann);
+        }
+    }
+    return res;
 }
 unsigned long long ivyc_s1::ext__pos__prev(unsigned long long x){
     unsigned long long y;
@@ -16281,74 +15902,21 @@ unsigned long long ivyc_s1::ext__pos__prev(unsigned long long x){
     }
     return y;
 }
-void ivyc_s1::ext__ivy__member_name(ivyc_s1::cpp__expr& s){
+void ivyc_s1::ext__ivy__push_pop_ident_set__set(ivy__push_pop_ident_set& s, ivyc_s1::ivy__ident id, bool v){
     {
-        ivyc_s1::cpp__ident loc__0;
         {
+            bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15858);
             {
-                cpp__symbol self__COLON__cpp__symbol;
-                if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
-                if(((s).tag == 0)){
-                    loc__0 = ext__cpp__symbol__get_name(self__COLON__cpp__symbol);
-                }
-                else {
-                    loc__0 = ext__cpp__expr__get_name(s);
-                }
-            }
-            if(((loc__0).tag == 2)){
-                {
-                    ivyc_s1::cpp__ident loc__0;
-                    ivyc_s1::cpp__ident loc__1;
-                    ivyc_s1::annot loc__2;
+                loc__0 = ext__ivy__push_pop_ident_set__map_t__mem(s.map, id);
+                if(!loc__0){
                     {
-                        {
-                            cpp__symbol self__COLON__cpp__symbol;
-                            if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
-                            if(((s).tag == 0)){
-                                loc__0 = ext__cpp__symbol__get_name(self__COLON__cpp__symbol);
-                            }
-                            else {
-                                loc__0 = ext__cpp__expr__get_name(s);
-                            }
-                        }
-                        {
-                            cpp__dotident self__COLON__cpp__dotident;
-                            if (((loc__0).tag == 2)) self__COLON__cpp__dotident = ivyc_s1::cpp__ident::unwrap< ivyc_s1::cpp__dotident >(loc__0);
-                            if(((loc__0).tag == 2)){
-                                loc__1 = ext__cpp__dotident__get_member(self__COLON__cpp__dotident);
-                            }
-                            else {
-                                loc__1 = ext__cpp__ident__get_member(loc__0);
-                            }
-                        }
-                        {
-                            cpp__app self__COLON__cpp__app;
-                            if (((s).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(s);
-                            if(((s).tag == 1)){
-                                loc__2 = ext__cpp__app__get_ann(self__COLON__cpp__app);
-                            }
-                            else {
-                                {
-                                    cpp__symbol self__COLON__cpp__symbol;
-                                    if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
-                                    if(((s).tag == 0)){
-                                        loc__2 = ext__cpp__symbol__get_ann(self__COLON__cpp__symbol);
-                                    }
-                                    else {
-                                        loc__2 = ext__cpp__expr__get_ann(s);
-                                    }
-                                }
-                            }
-                        }
-                        s = ext__cpp__symbol__make(loc__1, loc__2);
+                        ext__ivy__push_pop_ident_set__vec_t__append(s.del, id);
                     }
                 }
             }
         }
-    }
-}
-void ivyc_s1::ext__ivy__decl__flat(ivyc_s1::ivy__decl s, ivy__flatst& st){
-    {
+        ext__ivy__push_pop_ident_set__map_t__set(s.map, id, v);
     }
 }
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__uncurry(ivyc_s1::ivy__expr ty){
@@ -16392,7 +15960,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__uncurry(ivyc_s1::ivy__expr ty){
                                         loc__rng = loc__0;
                                         {
                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15872);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15861);
                                             {
                                                 {
                                                     ivy__app self__COLON__ivy__app;
@@ -16683,7 +16251,7 @@ bool ivyc_s1::ext__ivy__func_is_member(ivyc_s1::ivy__expr func){
                     loc__ty = loc__0;
                     {
                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15889);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15878);
                         {
                             {
                                 ivy__app self__COLON__ivy__app;
@@ -16804,7 +16372,7 @@ ivyc_s1::str ivyc_s1::ext__pos__to_str(unsigned long long num){
     ivyc_s1::str res;
     {
         unsigned long long loc__x;
-    loc__x = (unsigned long long)___ivy_choose(0,"loc:x",15897);
+    loc__x = (unsigned long long)___ivy_choose(0,"loc:x",15886);
         {
             loc__x = num;
             if((loc__x < 0)){
@@ -16830,7 +16398,7 @@ ivyc_s1::str ivyc_s1::ext__pos__to_str(unsigned long long num){
                             {
                                 {
                                     unsigned long long loc__y;
-    loc__y = (unsigned long long)___ivy_choose(0,"loc:y",15894);
+    loc__y = (unsigned long long)___ivy_choose(0,"loc:y",15883);
                                     {
                                         unsigned long long __tmp25;
                                         __tmp25 = loc__x;
@@ -16839,7 +16407,7 @@ ivyc_s1::str ivyc_s1::ext__pos__to_str(unsigned long long num){
                                         loc__y = ( __tmp25 < __tmp26 ? 0 : __tmp25 - __tmp26);
                                         {
                                             int loc__digit;
-    loc__digit = (int)___ivy_choose(0,"loc:digit",15893);
+    loc__digit = (int)___ivy_choose(0,"loc:digit",15882);
                                             {
                                                 loc__digit = 48;
                                                 while((0 < loc__y)){
@@ -16862,7 +16430,7 @@ ivyc_s1::str ivyc_s1::ext__pos__to_str(unsigned long long num){
                         }
                         {
                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15895);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15884);
                             {
                                 loc__idx = str__end(loc__tmp);
                                 while((str__begin(loc__tmp) < loc__idx)){
@@ -16971,26 +16539,26 @@ void ivyc_s1::ext__ivy__kill_lvalue(ivyc_s1::ivy__expr e, ivy__tocppst& st, cons
         {
             {
                 bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",15905);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",15894);
                 {
                     ext__ivy__lvalue_path(e, loc__path, loc__ok);
                     if(loc__ok){
                         {
                             {
                                 unsigned long long loc__alias_count;
-    loc__alias_count = (unsigned long long)___ivy_choose(0,"loc:alias_count",15904);
+    loc__alias_count = (unsigned long long)___ivy_choose(0,"loc:alias_count",15893);
                                 {
                                     loc__alias_count = 0;
                                     {
                                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15903);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15892);
                                         {
                                             loc__idx = vector__ivy__access_path____begin(paths);
                                             while((loc__idx < vector__ivy__access_path____end(paths))){
                                                 {
                                                     {
                                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15901);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15890);
                                                         {
                                                             loc__0 = ext__ivy__path_may_alias(loc__path, vector__ivy__access_path____value(paths,loc__idx));
                                                             if(loc__0){
@@ -17005,7 +16573,7 @@ void ivyc_s1::ext__ivy__kill_lvalue(ivyc_s1::ivy__expr e, ivy__tocppst& st, cons
                                             }
                                             {
                                                 ivy__lvalue_count loc__lc;
-    loc__lc.cnt = (unsigned long long)___ivy_choose(0,"loc:lc",15902);
+    loc__lc.cnt = (unsigned long long)___ivy_choose(0,"loc:lc",15891);
                                                 {
                                                     {
                                                         ivy__app self__COLON__ivy__app;
@@ -17056,7 +16624,7 @@ void ivyc_s1::ext__ivy__actdc__defd(const ivy__actdc& s, ivy__flatst& st){
 void ivyc_s1::ext__ivy__canon_typing(ivyc_s1::ivy__expr& typing){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15920);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15909);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -17109,7 +16677,7 @@ void ivyc_s1::ext__ivy__canon_typing(ivyc_s1::ivy__expr& typing){
                                                         {
                                                             {
                                                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15913);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15902);
                                                                 {
                                                                     loc__idx = vector__ivy__expr____begin(loc__args);
                                                                     while((loc__idx < vector__ivy__expr____end(loc__args))){
@@ -17312,14 +16880,14 @@ bool ivyc_s1::ext__ivy__app__has_numident(const ivy__app& s){
         }
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15922);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15911);
             {
                 loc__idx = vector__ivy__expr____begin(s.args);
                 while((loc__idx < vector__ivy__expr____end(s.args))){
                     {
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15921);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15910);
                             {
                                 {
                                     ivy__app self__COLON__ivy__app;
@@ -17351,6 +16919,139 @@ bool ivyc_s1::ext__ivy__app__has_numident(const ivy__app& s){
     }
     return res;
 }
+void ivyc_s1::ext__ivy__report_error(ivyc_s1::ivy__error e, ivyc_s1::annot ann){
+    {
+        {
+            pretty loc__0;
+    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",15990);
+    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",15990);
+            {
+                loc__0 = ext__pretty__make(100, 4);
+                {
+                    pretty loc__b;
+    loc__b.st.begin = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.st.total = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.maxline = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.indent = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.space = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.depth = (unsigned long long)___ivy_choose(0,"loc:b",15989);
+    loc__b.cppstyle = (bool)___ivy_choose(0,"loc:b",15989);
+                    {
+                        loc__b = loc__0;
+                        {
+                            str loc__0;
+                            {
+                                {
+                                    annot_i self__COLON__annot_i;
+                                    if (((ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(ann);
+                                    if(((ann).tag == 0)){
+                                        loc__0 = ext__annot_i__to_str(self__COLON__annot_i);
+                                    }
+                                    else {
+                                        loc__0 = ext__annot__to_str(ann);
+                                    }
+                                }
+                                ext__pretty__extend(loc__b, loc__0);
+                            }
+                        }
+                        ext__pretty__extend(loc__b, __lit<str>(":"));
+                        ext__pretty__extend(loc__b, __lit<str>(" "));
+                        {
+                            ivy__syntax_error self__COLON__ivy__syntax_error;
+                            if (((e).tag == 8)) self__COLON__ivy__syntax_error = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__syntax_error >(e);
+                            if(((e).tag == 8)){
+                                ext__ivy__syntax_error__encode(self__COLON__ivy__syntax_error, loc__b);
+                            }
+                            else {
+                                {
+                                    ivy__wrong_number_params self__COLON__ivy__wrong_number_params;
+                                    if (((e).tag == 7)) self__COLON__ivy__wrong_number_params = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__wrong_number_params >(e);
+                                    if(((e).tag == 7)){
+                                        ext__ivy__wrong_number_params__encode(self__COLON__ivy__wrong_number_params, loc__b);
+                                    }
+                                    else {
+                                        {
+                                            ivy__undefined self__COLON__ivy__undefined;
+                                            if (((e).tag == 6)) self__COLON__ivy__undefined = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__undefined >(e);
+                                            if(((e).tag == 6)){
+                                                ext__ivy__undefined__encode(self__COLON__ivy__undefined, loc__b);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__cannot_write self__COLON__ivy__cannot_write;
+                                                    if (((e).tag == 5)) self__COLON__ivy__cannot_write = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__cannot_write >(e);
+                                                    if(((e).tag == 5)){
+                                                        ext__ivy__cannot_write__encode(self__COLON__ivy__cannot_write, loc__b);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__file_not_found self__COLON__ivy__file_not_found;
+                                                            if (((e).tag == 4)) self__COLON__ivy__file_not_found = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__file_not_found >(e);
+                                                            if(((e).tag == 4)){
+                                                                ext__ivy__file_not_found__encode(self__COLON__ivy__file_not_found, loc__b);
+                                                            }
+                                                            else {
+                                                                {
+                                                                    ivy__not_first_order self__COLON__ivy__not_first_order;
+                                                                    if (((e).tag == 3)) self__COLON__ivy__not_first_order = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__not_first_order >(e);
+                                                                    if(((e).tag == 3)){
+                                                                        ext__ivy__not_first_order__encode(self__COLON__ivy__not_first_order, loc__b);
+                                                                    }
+                                                                    else {
+                                                                        {
+                                                                            ivy__untyped self__COLON__ivy__untyped;
+                                                                            if (((e).tag == 2)) self__COLON__ivy__untyped = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__untyped >(e);
+                                                                            if(((e).tag == 2)){
+                                                                                ext__ivy__untyped__encode(self__COLON__ivy__untyped, loc__b);
+                                                                            }
+                                                                            else {
+                                                                                {
+                                                                                    ivy__type_conversion self__COLON__ivy__type_conversion;
+                                                                                    if (((e).tag == 1)) self__COLON__ivy__type_conversion = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__type_conversion >(e);
+                                                                                    if(((e).tag == 1)){
+                                                                                        ext__ivy__type_conversion__encode(self__COLON__ivy__type_conversion, loc__b);
+                                                                                    }
+                                                                                    else {
+                                                                                        {
+                                                                                            ivy__type_clash self__COLON__ivy__type_clash;
+                                                                                            if (((e).tag == 0)) self__COLON__ivy__type_clash = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__type_clash >(e);
+                                                                                            if(((e).tag == 0)){
+                                                                                                ext__ivy__type_clash__encode(self__COLON__ivy__type_clash, loc__b);
+                                                                                            }
+                                                                                            else {
+                                                                                                ext__ivy__error__encode(e, loc__b);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        ext__pretty__flush(loc__b);
+                        ext__stdio__write(loc__b.output);
+                        ext__vector__ivy__error____append(ivy__errors, e);
+                    }
+                }
+            }
+        }
+    }
+}
 void ivyc_s1::ext__ivy__find_ident(ivyc_s1::ivy__ident root, ivyc_s1::ivy__ident& s, const ivy__flatst& st){
     {
         ivyc_s1::ivy__ident loc__0;
@@ -17380,7 +17081,7 @@ void ivyc_s1::ext__ivy__find_ident(ivyc_s1::ivy__ident root, ivyc_s1::ivy__ident
                     loc__cand = loc__0;
                     {
                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16418);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16396);
                         {
                             loc__0 = ext__ivy__ident_set__mem(st.defs, loc__cand);
                             if(loc__0){
@@ -17433,18 +17134,18 @@ void ivyc_s1::ext__ivy__prog__typeinfer(ivy__prog& p){
                 loc__st.subtype_rel = ext__ivy__prog__get_subtypes(p);
                 {
                     ivy__global_types loc__0;
-    loc__0.curried = (bool)___ivy_choose(0,"loc:0",15938);
+    loc__0.curried = (bool)___ivy_choose(0,"loc:0",15927);
                     {
                         loc__0 = ext__ivy__prog__get_global_types(p, false);
                         {
                             ivy__global_types loc__gt;
-    loc__gt.curried = (bool)___ivy_choose(0,"loc:gt",15937);
+    loc__gt.curried = (bool)___ivy_choose(0,"loc:gt",15926);
                             {
                                 loc__gt = loc__0;
                                 loc__st.tc.m = loc__gt.type_of;
                                 {
                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15936);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15925);
                                     {
                                         loc__idx = vector__ivy__decl____begin(p.decls);
                                         while((loc__idx < vector__ivy__decl____end(p.decls))){
@@ -17494,10 +17195,6 @@ void ivyc_s1::ext__ivy__prog__typeinfer(ivy__prog& p){
                 }
             }
         }
-    }
-}
-void ivyc_s1::ext__ivy__decl__reg_member(ivyc_s1::ivy__decl s, ivy__tocppst& st){
-    {
     }
 }
 void ivyc_s1::ext__ivy__not_first_order__encode(const ivy__not_first_order& e, pretty& b){
@@ -17565,133 +17262,13 @@ void ivyc_s1::ext__ivy__not_first_order__encode(const ivy__not_first_order& e, p
         }
     }
 }
-ivyc_s1::cpp__decl ivyc_s1::ext__ivy__vardc__to_cpp(const ivy__vardc& s, ivy__tocppst& st){
-    ivyc_s1::cpp__decl resd;
+bool ivyc_s1::ext__ivy__expr__is_typed(ivyc_s1::ivy__expr s, ivy__verb vrb){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
     {
-        cpp__vardecl loc__res;
-    loc__res.vtype.is_const = (bool)___ivy_choose(0,"loc:res",15946);
-    loc__res.vtype.is_ref = (bool)___ivy_choose(0,"loc:res",15946);
-        {
-            loc__res.ann = s.ann;
-            {
-                ivyc_s1::ivy__expr loc__0;
-                {
-                    {
-                        ivy__app self__COLON__ivy__app;
-                        if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
-                        if(((s.typing).tag == 1)){
-                            loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
-                        }
-                        else {
-                            loc__0 = ext__ivy__expr__get_arg(s.typing, 1);
-                        }
-                    }
-                    {
-                        ivyc_s1::ivy__expr loc__ty;
-                        {
-                            loc__ty = loc__0;
-                            if(s.is_destructor){
-                                {
-                                    {
-                                        ivyc_s1::ivy__expr loc__0;
-                                        {
-                                            loc__0 = ext__ivy__expr__curry(loc__ty);
-                                            {
-                                                ivy__app self__COLON__ivy__app;
-                                                if (((loc__0).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__0);
-                                                if(((loc__0).tag == 1)){
-                                                    loc__ty = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
-                                                }
-                                                else {
-                                                    loc__ty = ext__ivy__expr__get_arg(loc__0, 1);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            loc__res.vtype._type = ext__ivy__fix_variant_type(loc__ty, st);
-                            {
-                                ivyc_s1::cpp__expr loc__name;
-                                {
-                                    {
-                                        ivyc_s1::ivy__expr loc__0;
-                                        {
-                                            {
-                                                ivy__app self__COLON__ivy__app;
-                                                if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
-                                                if(((s.typing).tag == 1)){
-                                                    loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
-                                                }
-                                                else {
-                                                    loc__0 = ext__ivy__expr__get_arg(s.typing, 0);
-                                                }
-                                            }
-                                            {
-                                                ivy__app self__COLON__ivy__app;
-                                                if (((loc__0).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__0);
-                                                if(((loc__0).tag == 1)){
-                                                    loc__name = ext__ivy__app__to_cpp(self__COLON__ivy__app, st);
-                                                }
-                                                else {
-                                                    {
-                                                        ivy__symbol self__COLON__ivy__symbol;
-                                                        if (((loc__0).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__0);
-                                                        if(((loc__0).tag == 0)){
-                                                            loc__name = ext__ivy__symbol__to_cpp(self__COLON__ivy__symbol, st);
-                                                        }
-                                                        else {
-                                                            loc__name = ext__ivy__expr__to_cpp(loc__0, st);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    ivyc_s1::cpp__expr __tmp30;
-                                    __tmp30 = loc__name; ext__ivy__member_name(__tmp30);
-                                    loc__res.vtype.name = __tmp30;
-                                    resd = ivyc_s1::cpp__decl(3, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__vardecl>(loc__res));
-                                    if(!st.in_class){
-                                        {
-                                            {
-                                                ivyc_s1::ivy__expr loc__0;
-                                                ivyc_s1::ivy__ident loc__1;
-                                                {
-                                                    {
-                                                        ivy__app self__COLON__ivy__app;
-                                                        if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
-                                                        if(((s.typing).tag == 1)){
-                                                            loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
-                                                        }
-                                                        else {
-                                                            loc__0 = ext__ivy__expr__get_arg(s.typing, 0);
-                                                        }
-                                                    }
-                                                    {
-                                                        ivy__symbol self__COLON__ivy__symbol;
-                                                        if (((loc__0).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__0);
-                                                        if(((loc__0).tag == 0)){
-                                                            loc__1 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                                                        }
-                                                        else {
-                                                            loc__1 = ext__ivy__expr__get_name(loc__0);
-                                                        }
-                                                    }
-                                                    ext__ivy__add_namespaces(resd, loc__1);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        res = false;
     }
-    return resd;
+    return res;
 }
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__varst__get_expr(const ivy__varst& s){
     ivyc_s1::ivy__expr res;
@@ -17728,13 +17305,13 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
             }
             {
                 ivy__prototype loc__proto;
-    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",15969);
-    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",15969);
+    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",15958);
+    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",15958);
                 {
                     loc__proto = ivy__ident_to_prototype__value(st.protos,loc__1);
                     {
@@ -17742,7 +17319,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                         {
                             {
                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15967);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15956);
                                 {
                                     loc__idx = vector__ivy__prototype_argument____begin(loc__proto.args);
                                     while((loc__idx < vector__ivy__prototype_argument____end(loc__proto.args))){
@@ -17751,12 +17328,12 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                             {
                                                 {
                                                     ivy__prototype_argument loc__parg;
-    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15948);
-    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15948);
-    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15948);
-    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15948);
-    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15948);
-    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15948);
+    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15937);
+    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15937);
+    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15937);
+    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15937);
+    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15937);
+    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15937);
                                                     {
                                                         loc__parg = vector__ivy__prototype_argument____value(loc__proto.args,loc__idx);
                                                         if(loc__parg.is_input){
@@ -17809,18 +17386,18 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                                         {
                                                             {
                                                                 unsigned long long loc__kdx;
-    loc__kdx = (unsigned long long)___ivy_choose(0,"loc:kdx",15963);
+    loc__kdx = (unsigned long long)___ivy_choose(0,"loc:kdx",15952);
                                                                 {
                                                                     loc__kdx = vector__cpp__expr____begin(loc__inpvals);
                                                                     while((loc__idx < vector__ivy__prototype_argument____end(loc__proto.args))){
                                                                         {
                                                                             ivy__prototype_argument loc__parg;
-    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15960);
-    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15960);
-    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15960);
-    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15960);
-    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15960);
-    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15960);
+    loc__parg.is_input = (bool)___ivy_choose(0,"loc:parg",15949);
+    loc__parg.inpos = (unsigned long long)___ivy_choose(0,"loc:parg",15949);
+    loc__parg.is_output = (bool)___ivy_choose(0,"loc:parg",15949);
+    loc__parg.outpos = (unsigned long long)___ivy_choose(0,"loc:parg",15949);
+    loc__parg.is_ref = (bool)___ivy_choose(0,"loc:parg",15949);
+    loc__parg.is_const = (bool)___ivy_choose(0,"loc:parg",15949);
                                                                             {
                                                                                 loc__parg = vector__ivy__prototype_argument____value(loc__proto.args,loc__idx);
                                                                                 {
@@ -17853,7 +17430,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                                                                                         }
                                                                                                         {
                                                                                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15953);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15942);
                                                                                                             {
                                                                                                                 loc__0 = ext__ivy__is_dead(loc__out, st, (loc__parg.is_input ? 1 : 0));
                                                                                                                 if(!loc__0){
@@ -17898,7 +17475,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                                                                                         {
                                                                                                             {
                                                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15955);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15944);
                                                                                                                 {
                                                                                                                     loc__0 = ext__ivy__is_dead(loc__inp, st, 1);
                                                                                                                     if(loc__0){
@@ -17934,7 +17511,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                                                                                 }
                                                                                                 {
                                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15957);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15946);
                                                                                                     {
                                                                                                         loc__0 = ext__cpp__expr__eq(loc__inp, loc__out);
                                                                                                         if((loc__parg.is_input && loc__parg.is_ref && !loc__parg.is_const && !loc__0)){
@@ -17981,7 +17558,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
                                                                             }
                                                                             {
                                                                                 unsigned long long loc__jdx;
-    loc__jdx = (unsigned long long)___ivy_choose(0,"loc:jdx",15962);
+    loc__jdx = (unsigned long long)___ivy_choose(0,"loc:jdx",15951);
                                                                                 {
                                                                                     loc__jdx = vector__cpp__stmt____begin(loc__rets);
                                                                                     while((loc__jdx < vector__cpp__stmt____end(loc__rets))){
@@ -18013,440 +17590,13 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__call_to_cpp(ivyc_s1::ivy__expr func, const
     }
     return res;
 }
-void ivyc_s1::ext__cpp__curly_tup__encode(const vector__cpp__expr__& s, pretty& b, int prio){
-    if((0 < vector__cpp__expr____end(s))){
-        {
-            ext__pretty__extend(b, __lit<str>(" "));
-            ext__pretty__extend(b, __lit<str>("{"));
-            {
-                cpp__pi self__COLON__cpp__pi;
-                if (((vector__cpp__expr____value(s,0)).tag == 3)) self__COLON__cpp__pi = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__pi >(vector__cpp__expr____value(s,0));
-                if(((vector__cpp__expr____value(s,0)).tag == 3)){
-                    ext__cpp__pi__encode(self__COLON__cpp__pi, b, 0);
-                }
-                else {
-                    {
-                        cpp__app self__COLON__cpp__app;
-                        if (((vector__cpp__expr____value(s,0)).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(vector__cpp__expr____value(s,0));
-                        if(((vector__cpp__expr____value(s,0)).tag == 1)){
-                            ext__cpp__app__encode(self__COLON__cpp__app, b, 0);
-                        }
-                        else {
-                            {
-                                cpp__symbol self__COLON__cpp__symbol;
-                                if (((vector__cpp__expr____value(s,0)).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(vector__cpp__expr____value(s,0));
-                                if(((vector__cpp__expr____value(s,0)).tag == 0)){
-                                    ext__cpp__symbol__encode(self__COLON__cpp__symbol, b, 0);
-                                }
-                                else {
-                                    ext__cpp__expr__encode(vector__cpp__expr____value(s,0), b, 0);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            {
-                unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16005);
-                {
-                    loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(s));
-                    {
-                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16004);
-                        {
-                            loc__idx = loc__0;
-                            while((loc__idx < vector__cpp__expr____end(s))){
-                                {
-                                    ext__pretty__extend(b, __lit<str>(","));
-                                    {
-                                        cpp__pi self__COLON__cpp__pi;
-                                        if (((vector__cpp__expr____value(s,loc__idx)).tag == 3)) self__COLON__cpp__pi = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__pi >(vector__cpp__expr____value(s,loc__idx));
-                                        if(((vector__cpp__expr____value(s,loc__idx)).tag == 3)){
-                                            ext__cpp__pi__encode(self__COLON__cpp__pi, b, 0);
-                                        }
-                                        else {
-                                            {
-                                                cpp__app self__COLON__cpp__app;
-                                                if (((vector__cpp__expr____value(s,loc__idx)).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(vector__cpp__expr____value(s,loc__idx));
-                                                if(((vector__cpp__expr____value(s,loc__idx)).tag == 1)){
-                                                    ext__cpp__app__encode(self__COLON__cpp__app, b, 0);
-                                                }
-                                                else {
-                                                    {
-                                                        cpp__symbol self__COLON__cpp__symbol;
-                                                        if (((vector__cpp__expr____value(s,loc__idx)).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(vector__cpp__expr____value(s,loc__idx));
-                                                        if(((vector__cpp__expr____value(s,loc__idx)).tag == 0)){
-                                                            ext__cpp__symbol__encode(self__COLON__cpp__symbol, b, 0);
-                                                        }
-                                                        else {
-                                                            ext__cpp__expr__encode(vector__cpp__expr____value(s,loc__idx), b, 0);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    loc__idx = ext__vector__cpp__expr____domain__next(loc__idx);
-                                }
-                            }
-                            ext__pretty__extend(b, __lit<str>("}"));
-                        }
-                    }
-                }
-            }
-        }
+unsigned long long ivyc_s1::ext__vector__ivy__stmt____domain__next(unsigned long long x){
+    unsigned long long y;
+    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
+    {
+        y = (x + 1);
     }
-}
-void ivyc_s1::ext__ivy__decl__parse(pstate& st, int prio, ivyc_s1::ivy__decl& res){
-    if((st.tok == __lit<str>("{"))){
-        {
-            ext__pstate__consume(st);
-            {
-                ivy__groupdc loc__s;
-                {
-                    ext__pstate__get_ann(st, loc__s.ann);
-                    if((st.tok == __lit<str>("..."))){
-                        ext__pstate__consume(st);
-                    }
-                    ext__ivy__decl__parse_list(st, 0, loc__s.decls);
-                    if((st.tok == __lit<str>("}"))){
-                        {
-                            ext__pstate__consume(st);
-                        }
-                    }
-                    else {
-                        st.ok = false;
-                    }
-                    res = ivyc_s1::ivy__decl(1, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__groupdc>(loc__s));
-                }
-            }
-        }
-    }
-    else {
-        if((st.tok == __lit<str>("action"))){
-            ext__ivy__parse_action(st, prio, ivy__action_kind__internal, res);
-        }
-        else {
-            if((st.tok == __lit<str>("type"))){
-                {
-                    ext__pstate__consume(st);
-                    {
-                        ivy__typedc loc__s;
-    loc__s.has_super = (bool)___ivy_choose(0,"loc:s",15974);
-    loc__s.has_spec = (bool)___ivy_choose(0,"loc:s",15974);
-                        {
-                            ext__pstate__get_ann(st, loc__s.ann);
-                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.sort);
-                            if((st.ok && (st.tok == __lit<str>("=")))){
-                                {
-                                    ext__pstate__consume(st);
-                                    loc__s.has_spec = true;
-                                    ext__ivy__typespec__parse(st, 0, loc__s.spec);
-                                }
-                            }
-                            res = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(loc__s));
-                        }
-                    }
-                }
-            }
-            else {
-                if(((st.tok == __lit<str>("var")) || (st.tok == __lit<str>("destructor")) || (st.tok == __lit<str>("function")))){
-                    {
-                        ivy__vardc loc__s;
-    loc__s.is_destructor = (bool)___ivy_choose(0,"loc:s",15975);
-    loc__s.has_def = (bool)___ivy_choose(0,"loc:s",15975);
-                        {
-                            loc__s.is_destructor = (st.tok == __lit<str>("destructor"));
-                            ext__pstate__consume(st);
-                            ext__pstate__get_ann(st, loc__s.ann);
-                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.typing);
-                            if((st.ok && (st.tok == __lit<str>("=")))){
-                                {
-                                    ext__pstate__consume(st);
-                                    loc__s.has_def = true;
-                                    ext__ivy__expr__parse(st, 0, loc__s.def);
-                                }
-                            }
-                            res = ivyc_s1::ivy__decl(3, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__vardc>(loc__s));
-                        }
-                    }
-                }
-                else {
-                    if((st.tok == __lit<str>("header"))){
-                        {
-                            ivy__header loc__s;
-                            {
-                                ext__pstate__get_ann(st, loc__s.ann);
-                                ext__pstate__consume(st);
-                                if((st.ok && (0 < str__end(st.tok)) && (str__value(st.tok,0) == 34))){
-                                    {
-                                        loc__s.filename = st.tok;
-                                        ext__pstate__consume(st);
-                                    }
-                                }
-                                else {
-                                    st.ok = false;
-                                }
-                                res = ivyc_s1::ivy__decl(4, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__header>(loc__s));
-                            }
-                        }
-                    }
-                    else {
-                        if((st.tok == __lit<str>("interpret"))){
-                            {
-                                ivy__interpdc loc__s;
-                                {
-                                    ext__pstate__get_ann(st, loc__s.ann);
-                                    ext__pstate__consume(st);
-                                    if((st.ok && (0 < str__end(st.tok)))){
-                                        {
-                                            ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__arrow], loc__s.itype);
-                                            if((st.ok && (st.tok == __lit<str>("->")))){
-                                                {
-                                                    ext__pstate__consume(st);
-                                                    ext__ivy__expr__parse(st, 0, loc__s.ctype);
-                                                }
-                                            }
-                                            else {
-                                                st.ok = false;
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        st.ok = false;
-                                    }
-                                    res = ivyc_s1::ivy__decl(5, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__interpdc>(loc__s));
-                                }
-                            }
-                        }
-                        else {
-                            if((st.tok == __lit<str>("include"))){
-                                {
-                                    ivy__includedc loc__s;
-                                    {
-                                        ext__pstate__get_ann(st, loc__s.ann);
-                                        ext__pstate__consume(st);
-                                        ext__ivy__expr__parse(st, 0, loc__s.file);
-                                        res = ivyc_s1::ivy__decl(6, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__includedc>(loc__s));
-                                    }
-                                }
-                            }
-                            else {
-                                if((st.tok == __lit<str>("module"))){
-                                    {
-                                        {
-                                            ivy__moduledc loc__s;
-                                            {
-                                                ext__pstate__get_ann(st, loc__s.ann);
-                                                ext__pstate__consume(st);
-                                                ext__ivy__expr__parse(st, 99, loc__s.name);
-                                                if((st.ok && (st.tok == __lit<str>("(")))){
-                                                    {
-                                                        ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
-                                                    }
-                                                }
-                                                if((st.ok && (st.tok == __lit<str>("=")))){
-                                                    {
-                                                        ext__pstate__consume(st);
-                                                        ext__ivy__decl__parse(st, 0, loc__s.body);
-                                                    }
-                                                }
-                                                else {
-                                                    st.ok = false;
-                                                }
-                                                res = ivyc_s1::ivy__decl(7, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__moduledc>(loc__s));
-                                            }
-                                        }
-                                    }
-                                }
-                                else {
-                                    if((st.tok == __lit<str>("instantiate"))){
-                                        {
-                                            ivy__instantiatedc loc__s;
-                                            {
-                                                ext__pstate__get_ann(st, loc__s.ann);
-                                                ext__pstate__consume(st);
-                                                ext__ivy__expr__parse(st, 99, loc__s.name);
-                                                if((st.ok && (st.tok == __lit<str>("(")))){
-                                                    {
-                                                        ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
-                                                    }
-                                                }
-                                                res = ivyc_s1::ivy__decl(8, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__instantiatedc>(loc__s));
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        if((st.tok == __lit<str>("object"))){
-                                            {
-                                                ivy__objectdc loc__s;
-                                                {
-                                                    ext__pstate__get_ann(st, loc__s.ann);
-                                                    ext__pstate__consume(st);
-                                                    ext__ivy__expr__parse(st, 99, loc__s.name);
-                                                    if((st.ok && (st.tok == __lit<str>("=")))){
-                                                        {
-                                                            ext__pstate__consume(st);
-                                                        }
-                                                    }
-                                                    if((st.ok && (st.tok == __lit<str>("{")))){
-                                                        {
-                                                            ext__ivy__decl__parse(st, 0, loc__s.body);
-                                                        }
-                                                    }
-                                                    res = ivyc_s1::ivy__decl(9, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__objectdc>(loc__s));
-                                                }
-                                            }
-                                        }
-                                        else {
-                                            if(((st.tok == __lit<str>("instance")) || (st.tok == __lit<str>("autoinstance")))){
-                                                {
-                                                    ivy__instancedc loc__s;
-    loc__s.is_auto = (bool)___ivy_choose(0,"loc:s",15982);
-                                                    {
-                                                        loc__s.is_auto = (st.tok == __lit<str>("autoinstance"));
-                                                        ext__pstate__get_ann(st, loc__s.ann);
-                                                        ext__pstate__consume(st);
-                                                        ext__ivy__expr__parse(st, 99, loc__s.objname);
-                                                        if((st.ok && (st.tok == __lit<str>(":")))){
-                                                            {
-                                                                ext__pstate__consume(st);
-                                                            }
-                                                        }
-                                                        if(st.ok){
-                                                            ext__ivy__expr__parse(st, 99, loc__s.modname);
-                                                        }
-                                                        if((st.ok && (st.tok == __lit<str>("(")))){
-                                                            {
-                                                                ext__ivy__expr__tup__parse(st, 1, loc__s.prms);
-                                                            }
-                                                        }
-                                                        res = ivyc_s1::ivy__decl(10, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__instancedc>(loc__s));
-                                                    }
-                                                }
-                                            }
-                                            else {
-                                                if((st.tok == __lit<str>("variant"))){
-                                                    {
-                                                        ext__pstate__consume(st);
-                                                        {
-                                                            ivy__typedc loc__s;
-    loc__s.has_super = (bool)___ivy_choose(0,"loc:s",15983);
-    loc__s.has_spec = (bool)___ivy_choose(0,"loc:s",15983);
-                                                            {
-                                                                loc__s.has_super = true;
-                                                                ext__pstate__get_ann(st, loc__s.ann);
-                                                                ext__ivy__expr__parse(st, 0, loc__s.sort);
-                                                                if((st.ok && (st.tok == __lit<str>("of")))){
-                                                                    ext__pstate__consume(st);
-                                                                }
-                                                                else {
-                                                                    st.ok = false;
-                                                                }
-                                                                ext__ivy__expr__parse(st, ivy__verb_to_prio[ivy__verb__equals], loc__s.super);
-                                                                if((st.ok && (st.tok == __lit<str>("=")))){
-                                                                    {
-                                                                        ext__pstate__consume(st);
-                                                                        loc__s.has_spec = true;
-                                                                        ext__ivy__typespec__parse(st, 0, loc__s.spec);
-                                                                    }
-                                                                }
-                                                                res = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(loc__s));
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                else {
-                                                    if((st.tok == __lit<str>("extern"))){
-                                                        {
-                                                            ext__pstate__consume(st);
-                                                            ext__ivy__parse_action(st, prio, ivy__action_kind__external, res);
-                                                        }
-                                                    }
-                                                    else {
-                                                        if((st.tok == __lit<str>("import"))){
-                                                            {
-                                                                ext__pstate__consume(st);
-                                                                ext__ivy__parse_action(st, prio, ivy__action_kind__imported, res);
-                                                            }
-                                                        }
-                                                        else {
-                                                            if((st.tok == __lit<str>("export"))){
-                                                                {
-                                                                    ext__pstate__consume(st);
-                                                                    ext__ivy__parse_action(st, prio, ivy__action_kind__exported, res);
-                                                                }
-                                                            }
-                                                            else {
-                                                                if((st.tok == __lit<str>("init"))){
-                                                                    {
-                                                                        {
-                                                                            ivy__initdc loc__s;
-                                                                            {
-                                                                                ext__pstate__get_ann(st, loc__s.ann);
-                                                                                ext__pstate__consume(st);
-                                                                                if((st.tok == __lit<str>("{"))){
-                                                                                    {
-                                                                                        ext__ivy__stmt__parse(st, 1, loc__s.body);
-                                                                                    }
-                                                                                }
-                                                                                else {
-                                                                                    st.ok = false;
-                                                                                }
-                                                                                res = ivyc_s1::ivy__decl(11, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__initdc>(loc__s));
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                                else {
-                                                                    if((st.tok == __lit<str>("after"))){
-                                                                        {
-                                                                            {
-                                                                                ivy__initdc loc__s;
-                                                                                {
-                                                                                    ext__pstate__get_ann(st, loc__s.ann);
-                                                                                    ext__pstate__consume(st);
-                                                                                    if((st.tok == __lit<str>("init"))){
-                                                                                        {
-                                                                                            ext__pstate__consume(st);
-                                                                                        }
-                                                                                    }
-                                                                                    else {
-                                                                                        st.ok = false;
-                                                                                    }
-                                                                                    if((st.ok && (st.tok == __lit<str>("{")))){
-                                                                                        {
-                                                                                            ext__ivy__stmt__parse(st, 1, loc__s.body);
-                                                                                        }
-                                                                                    }
-                                                                                    else {
-                                                                                        st.ok = false;
-                                                                                    }
-                                                                                    res = ivyc_s1::ivy__decl(11, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__initdc>(loc__s));
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    else {
-                                                                        st.ok = false;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    return y;
 }
 void ivyc_s1::ext__ivy__cannot_infer(ivyc_s1::ivy__expr e, ivyc_s1::ivy__expr t){
     {
@@ -18781,556 +17931,6 @@ ivyc_s1::str ivyc_s1::ext__ivy__dotident__to_str(const ivy__dotident& s){
     }
     return res;
 }
-ivyc_s1::ivy__ident ivyc_s1::ext__ivy__ident__prefix(ivyc_s1::ivy__ident s, ivyc_s1::ivy__ident pref){
-    ivyc_s1::ivy__ident res;
-    res = s;
-    return res;
-}
-ivyc_s1::cpp__expr ivyc_s1::ext__ivy__function_type(ivyc_s1::ivy__expr ty, ivy__tocppst& st){
-    ivyc_s1::cpp__expr res;
-    if(((ty).tag == 1)){
-        {
-            ivyc_s1::ivy__expr loc__0;
-            vector__ivy__expr__ loc__1;
-            ivyc_s1::ivy__expr loc__2;
-            {
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
-                    if(((ty).tag == 1)){
-                        loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
-                    }
-                    else {
-                        loc__0 = ext__ivy__expr__get_arg(ty, 0);
-                    }
-                }
-                loc__1 = ext__ivy__times__unfold_left(loc__0);
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
-                    if(((ty).tag == 1)){
-                        loc__2 = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
-                    }
-                    else {
-                        loc__2 = ext__ivy__expr__get_arg(ty, 1);
-                    }
-                }
-                res = ext__ivy__make_md_vector_type(loc__1, loc__2, st);
-            }
-        }
-    }
-    else {
-        {
-            ivy__app self__COLON__ivy__app;
-            if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
-            if(((ty).tag == 1)){
-                res = ext__ivy__app__to_cpp(self__COLON__ivy__app, st);
-            }
-            else {
-                {
-                    ivy__symbol self__COLON__ivy__symbol;
-                    if (((ty).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(ty);
-                    if(((ty).tag == 0)){
-                        res = ext__ivy__symbol__to_cpp(self__COLON__ivy__symbol, st);
-                    }
-                    else {
-                        res = ext__ivy__expr__to_cpp(ty, st);
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-bool ivyc_s1::ext__ivy__is_dead(ivyc_s1::cpp__expr e, const ivy__tocppst& st, unsigned long long cnt){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    {
-        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15992);
-        {
-            loc__idx = vector__ivy__lvalue_count____begin(st.dead);
-            while((!res && (loc__idx < vector__ivy__lvalue_count____end(st.dead)))){
-                {
-                    ivy__lvalue_count loc__d;
-    loc__d.cnt = (unsigned long long)___ivy_choose(0,"loc:d",15991);
-                    {
-                        loc__d = vector__ivy__lvalue_count____value(st.dead,loc__idx);
-                        {
-                            bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",15990);
-                            {
-                                loc__0 = ext__cpp__expr__eq(e, loc__d.lvalue);
-                                res = (loc__0 && ((loc__d.cnt < cnt) || (loc__d.cnt == cnt)));
-                            }
-                        }
-                        loc__idx = ext__vector__ivy__lvalue_count____domain__next(loc__idx);
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-ivyc_s1::ivy__ident ivyc_s1::ext__ivy__strident__flat(const ivy__strident& s, bool rhs, const ivy__flatst& st){
-    ivyc_s1::ivy__ident res;
-    {
-        ivy__strident loc__s2;
-        {
-            loc__s2 = s;
-            {
-                unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15994);
-                {
-                    loc__idx = vector__ivy__ident____begin(loc__s2.subscrs);
-                    while((loc__idx < vector__ivy__ident____end(loc__s2.subscrs))){
-                        {
-                            ivyc_s1::ivy__ident loc__t;
-                            {
-                                loc__t = vector__ivy__ident____value(loc__s2.subscrs,loc__idx);
-                                {
-                                    ivy__dotident self__COLON__ivy__dotident;
-                                    if (((loc__t).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(loc__t);
-                                    if(((loc__t).tag == 2)){
-                                        loc__t = ext__ivy__dotident__flat(self__COLON__ivy__dotident, false, st);
-                                    }
-                                    else {
-                                        {
-                                            ivy__strident self__COLON__ivy__strident;
-                                            if (((loc__t).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(loc__t);
-                                            if(((loc__t).tag == 0)){
-                                                loc__t = ext__ivy__strident__flat(self__COLON__ivy__strident, false, st);
-                                            }
-                                            else {
-                                                loc__t = ext__ivy__ident__flat(loc__t, false, st);
-                                            }
-                                        }
-                                    }
-                                }
-                                ext__vector__ivy__ident____set(loc__s2.subscrs, loc__idx, loc__t);
-                                loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
-                            }
-                        }
-                    }
-                    if((st.has_root && (loc__s2.val == __lit<str>("this")) && (vector__ivy__ident____end(loc__s2.subscrs) == 0))){
-                        res = st.root;
-                    }
-                    else {
-                        {
-                            res = ivyc_s1::ivy__ident(0, new ivyc_s1::ivy__ident::twrap<ivyc_s1::ivy__strident>(loc__s2));
-                            if(!rhs){
-                                {
-                                    ivyc_s1::ivy__ident __tmp31;
-                                    __tmp31 = res; ext__ivy__ident_to_ident__get(st.prmvals, res, __tmp31);
-                                    res = __tmp31;
-                                    if(st.has_root){
-                                        if(st.defining){
-                                            {
-                                                ivy__dotident self__COLON__ivy__dotident;
-                                                if (((res).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(res);
-                                                if(((res).tag == 2)){
-                                                    res = ext__ivy__dotident__prefix(self__COLON__ivy__dotident, st.root);
-                                                }
-                                                else {
-                                                    {
-                                                        ivy__strident self__COLON__ivy__strident;
-                                                        if (((res).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(res);
-                                                        if(((res).tag == 0)){
-                                                            res = ext__ivy__strident__prefix(self__COLON__ivy__strident, st.root);
-                                                        }
-                                                        else {
-                                                            res = ext__ivy__ident__prefix(res, st.root);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else {
-                                            {
-                                                ext__ivy__find_ident(st.root, res, st);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-ivyc_s1::ivy__typespec ivyc_s1::ext__ivy__enumspec__flat(const ivy__enumspec& s, ivy__flatst& st){
-    ivyc_s1::ivy__typespec res;
-    {
-        {
-            ivy__enumspec loc__t;
-            {
-                loc__t = s;
-                {
-                    unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15997);
-                    {
-                        loc__idx = vector__ivy__expr____begin(loc__t.constructors);
-                        while((loc__idx < vector__ivy__expr____end(loc__t.constructors))){
-                            {
-                                {
-                                    ivyc_s1::ivy__expr loc__e;
-                                    {
-                                        loc__e = vector__ivy__expr____value(loc__t.constructors,loc__idx);
-                                        {
-                                            ivy__app self__COLON__ivy__app;
-                                            if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
-                                            if(((loc__e).tag == 1)){
-                                                loc__e = ext__ivy__app__flat(self__COLON__ivy__app, st);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__symbol self__COLON__ivy__symbol;
-                                                    if (((loc__e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__e);
-                                                    if(((loc__e).tag == 0)){
-                                                        loc__e = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
-                                                    }
-                                                    else {
-                                                        loc__e = ext__ivy__expr__flat(loc__e, st);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        ext__vector__ivy__expr____set(loc__t.constructors, loc__idx, loc__e);
-                                        loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                                    }
-                                }
-                            }
-                        }
-                        res = ivyc_s1::ivy__typespec(0, new ivyc_s1::ivy__typespec::twrap<ivyc_s1::ivy__enumspec>(loc__t));
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-ivyc_s1::cpp__expr ivyc_s1::ext__cpp__plus__fold_left(const vector__cpp__expr__& args, ivyc_s1::annot ann){
-    ivyc_s1::cpp__expr res;
-    if((0 < vector__cpp__expr____end(args))){
-        {
-            res = vector__cpp__expr____value(args,0);
-            {
-                unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15867);
-                {
-                    loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(args));
-                    {
-                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15866);
-                        {
-                            loc__idx = loc__0;
-                            while((loc__idx < vector__cpp__expr____end(args))){
-                                {
-                                    res = ext__cpp__plus__make(res, vector__cpp__expr____value(args,loc__idx), ann);
-                                    loc__idx = ext__vector__cpp__expr____domain__next(loc__idx);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else {
-        {
-            res = ext__cpp__empty__make(ann);
-        }
-    }
-    return res;
-}
-void ivyc_s1::ext__ivy__tocppst__get_code(ivy__tocppst& s, ivyc_s1::annot ann, ivyc_s1::cpp__stmt& res){
-    {
-        res = ext__cpp__sequence__fold_right(s.code, ann);
-        s.code = ext__vector__cpp__stmt____empty();
-    }
-}
-void ivyc_s1::ext__ivy__report_error(ivyc_s1::ivy__error e, ivyc_s1::annot ann){
-    {
-        {
-            pretty loc__0;
-    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",16002);
-    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",16002);
-            {
-                loc__0 = ext__pretty__make(100, 4);
-                {
-                    pretty loc__b;
-    loc__b.st.begin = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.st.total = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.maxline = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.indent = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.space = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.depth = (unsigned long long)___ivy_choose(0,"loc:b",16001);
-    loc__b.cppstyle = (bool)___ivy_choose(0,"loc:b",16001);
-                    {
-                        loc__b = loc__0;
-                        {
-                            str loc__0;
-                            {
-                                {
-                                    annot_i self__COLON__annot_i;
-                                    if (((ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(ann);
-                                    if(((ann).tag == 0)){
-                                        loc__0 = ext__annot_i__to_str(self__COLON__annot_i);
-                                    }
-                                    else {
-                                        loc__0 = ext__annot__to_str(ann);
-                                    }
-                                }
-                                ext__pretty__extend(loc__b, loc__0);
-                            }
-                        }
-                        ext__pretty__extend(loc__b, __lit<str>(":"));
-                        ext__pretty__extend(loc__b, __lit<str>(" "));
-                        {
-                            ivy__syntax_error self__COLON__ivy__syntax_error;
-                            if (((e).tag == 8)) self__COLON__ivy__syntax_error = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__syntax_error >(e);
-                            if(((e).tag == 8)){
-                                ext__ivy__syntax_error__encode(self__COLON__ivy__syntax_error, loc__b);
-                            }
-                            else {
-                                {
-                                    ivy__wrong_number_params self__COLON__ivy__wrong_number_params;
-                                    if (((e).tag == 7)) self__COLON__ivy__wrong_number_params = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__wrong_number_params >(e);
-                                    if(((e).tag == 7)){
-                                        ext__ivy__wrong_number_params__encode(self__COLON__ivy__wrong_number_params, loc__b);
-                                    }
-                                    else {
-                                        {
-                                            ivy__undefined self__COLON__ivy__undefined;
-                                            if (((e).tag == 6)) self__COLON__ivy__undefined = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__undefined >(e);
-                                            if(((e).tag == 6)){
-                                                ext__ivy__undefined__encode(self__COLON__ivy__undefined, loc__b);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__cannot_write self__COLON__ivy__cannot_write;
-                                                    if (((e).tag == 5)) self__COLON__ivy__cannot_write = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__cannot_write >(e);
-                                                    if(((e).tag == 5)){
-                                                        ext__ivy__cannot_write__encode(self__COLON__ivy__cannot_write, loc__b);
-                                                    }
-                                                    else {
-                                                        {
-                                                            ivy__file_not_found self__COLON__ivy__file_not_found;
-                                                            if (((e).tag == 4)) self__COLON__ivy__file_not_found = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__file_not_found >(e);
-                                                            if(((e).tag == 4)){
-                                                                ext__ivy__file_not_found__encode(self__COLON__ivy__file_not_found, loc__b);
-                                                            }
-                                                            else {
-                                                                {
-                                                                    ivy__not_first_order self__COLON__ivy__not_first_order;
-                                                                    if (((e).tag == 3)) self__COLON__ivy__not_first_order = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__not_first_order >(e);
-                                                                    if(((e).tag == 3)){
-                                                                        ext__ivy__not_first_order__encode(self__COLON__ivy__not_first_order, loc__b);
-                                                                    }
-                                                                    else {
-                                                                        {
-                                                                            ivy__untyped self__COLON__ivy__untyped;
-                                                                            if (((e).tag == 2)) self__COLON__ivy__untyped = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__untyped >(e);
-                                                                            if(((e).tag == 2)){
-                                                                                ext__ivy__untyped__encode(self__COLON__ivy__untyped, loc__b);
-                                                                            }
-                                                                            else {
-                                                                                {
-                                                                                    ivy__type_conversion self__COLON__ivy__type_conversion;
-                                                                                    if (((e).tag == 1)) self__COLON__ivy__type_conversion = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__type_conversion >(e);
-                                                                                    if(((e).tag == 1)){
-                                                                                        ext__ivy__type_conversion__encode(self__COLON__ivy__type_conversion, loc__b);
-                                                                                    }
-                                                                                    else {
-                                                                                        {
-                                                                                            ivy__type_clash self__COLON__ivy__type_clash;
-                                                                                            if (((e).tag == 0)) self__COLON__ivy__type_clash = ivyc_s1::ivy__error::unwrap< ivyc_s1::ivy__type_clash >(e);
-                                                                                            if(((e).tag == 0)){
-                                                                                                ext__ivy__type_clash__encode(self__COLON__ivy__type_clash, loc__b);
-                                                                                            }
-                                                                                            else {
-                                                                                                ext__ivy__error__encode(e, loc__b);
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        ext__pretty__flush(loc__b);
-                        ext__stdio__write(loc__b.output);
-                        ext__vector__ivy__error____append(ivy__errors, e);
-                    }
-                }
-            }
-        }
-    }
-}
-unsigned long long ivyc_s1::ext__vector__ivy__decl____domain__next(unsigned long long x){
-    unsigned long long y;
-    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
-    {
-        y = (x + 1);
-    }
-    return y;
-}
-ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__skipst__make(ivyc_s1::annot ann){
-    ivyc_s1::ivy__stmt res;
-    {
-        {
-            ivy__skipst loc__s;
-            {
-                loc__s.ann = ann;
-                res = ivyc_s1::ivy__stmt(2, new ivyc_s1::ivy__stmt::twrap<ivyc_s1::ivy__skipst>(loc__s));
-            }
-        }
-    }
-    return res;
-}
-unsigned long long ivyc_s1::ext__vector__ivy__stmt____domain__next(unsigned long long x){
-    unsigned long long y;
-    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
-    {
-        y = (x + 1);
-    }
-    return y;
-}
-void ivyc_s1::ext__ivy__typedc__reg_member(const ivy__typedc& s, ivy__tocppst& st){
-    if(s.has_spec){
-        if(((s.spec).tag == 0)){
-            {
-                vector__ivy__expr__ loc__0;
-                {
-                    {
-                        ivy__structspec self__COLON__ivy__structspec;
-                        if (((s.spec).tag == 1)) self__COLON__ivy__structspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__structspec >(s.spec);
-                        if(((s.spec).tag == 1)){
-                            loc__0 = ext__ivy__structspec__get_elems(self__COLON__ivy__structspec);
-                        }
-                        else {
-                            {
-                                ivy__enumspec self__COLON__ivy__enumspec;
-                                if (((s.spec).tag == 0)) self__COLON__ivy__enumspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__enumspec >(s.spec);
-                                if(((s.spec).tag == 0)){
-                                    loc__0 = ext__ivy__enumspec__get_elems(self__COLON__ivy__enumspec);
-                                }
-                                else {
-                                    loc__0 = ext__ivy__typespec__get_elems(s.spec);
-                                }
-                            }
-                        }
-                    }
-                    {
-                        vector__ivy__expr__ loc__conss;
-                        {
-                            loc__conss = loc__0;
-                            {
-                                unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16008);
-                                {
-                                    loc__idx = vector__ivy__expr____begin(loc__conss);
-                                    while((loc__idx < vector__ivy__expr____end(loc__conss))){
-                                        {
-                                            ivyc_s1::ivy__expr loc__cons;
-                                            {
-                                                loc__cons = vector__ivy__expr____value(loc__conss,loc__idx);
-                                                {
-                                                    ivyc_s1::ivy__ident loc__0;
-                                                    {
-                                                        {
-                                                            ivy__symbol self__COLON__ivy__symbol;
-                                                            if (((loc__cons).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__cons);
-                                                            if(((loc__cons).tag == 0)){
-                                                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                                                            }
-                                                            else {
-                                                                loc__0 = ext__ivy__expr__get_name(loc__cons);
-                                                            }
-                                                        }
-                                                        ext__ivy__ident_set__set(st.constructors, loc__0, true);
-                                                    }
-                                                }
-                                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-ivyc_s1::ivy__initdc ivyc_s1::ext__ivy__initdc__typeinfer_int(const ivy__initdc& s, ivy__typeinferst& st){
-    ivyc_s1::ivy__initdc res;
-    {
-        {
-            ivy__whilest self__COLON__ivy__whilest;
-            if (((s.body).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(s.body);
-            if(((s.body).tag == 4)){
-                res.body = ext__ivy__whilest__typeinfer(self__COLON__ivy__whilest, st);
-            }
-            else {
-                {
-                    ivy__ifst self__COLON__ivy__ifst;
-                    if (((s.body).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(s.body);
-                    if(((s.body).tag == 3)){
-                        res.body = ext__ivy__ifst__typeinfer(self__COLON__ivy__ifst, st);
-                    }
-                    else {
-                        {
-                            ivy__sequence self__COLON__ivy__sequence;
-                            if (((s.body).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(s.body);
-                            if(((s.body).tag == 1)){
-                                res.body = ext__ivy__sequence__typeinfer(self__COLON__ivy__sequence, st);
-                            }
-                            else {
-                                {
-                                    ivy__asgn self__COLON__ivy__asgn;
-                                    if (((s.body).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(s.body);
-                                    if(((s.body).tag == 0)){
-                                        res.body = ext__ivy__asgn__typeinfer(self__COLON__ivy__asgn, st);
-                                    }
-                                    else {
-                                        res.body = ext__ivy__stmt__typeinfer(s.body, st);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-void ivyc_s1::ext__ivy__elidest__map__set(ivy__elidest__map& a, ivyc_s1::ivy__ident x, bool y){
-    {
-
-        a[x] = y;
-    }
-}
 void ivyc_s1::ext__ivy__type_clash__encode(const ivy__type_clash& e, pretty& b){
     {
         ext__pretty__extend(b, __lit<str>("Cannot unify types"));
@@ -19426,6 +18026,481 @@ void ivyc_s1::ext__ivy__type_clash__encode(const ivy__type_clash& e, pretty& b){
                 }
             }
         }
+    }
+}
+ivyc_s1::ivy__ident ivyc_s1::ext__ivy__ident__prefix(ivyc_s1::ivy__ident s, ivyc_s1::ivy__ident pref){
+    ivyc_s1::ivy__ident res;
+    res = s;
+    return res;
+}
+ivyc_s1::cpp__expr ivyc_s1::ext__ivy__function_type(ivyc_s1::ivy__expr ty, ivy__tocppst& st){
+    ivyc_s1::cpp__expr res;
+    if(((ty).tag == 1)){
+        {
+            ivyc_s1::ivy__expr loc__0;
+            vector__ivy__expr__ loc__1;
+            ivyc_s1::ivy__expr loc__2;
+            {
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
+                    if(((ty).tag == 1)){
+                        loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
+                    }
+                    else {
+                        loc__0 = ext__ivy__expr__get_arg(ty, 0);
+                    }
+                }
+                loc__1 = ext__ivy__times__unfold_left(loc__0);
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
+                    if(((ty).tag == 1)){
+                        loc__2 = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
+                    }
+                    else {
+                        loc__2 = ext__ivy__expr__get_arg(ty, 1);
+                    }
+                }
+                res = ext__ivy__make_md_vector_type(loc__1, loc__2, st);
+            }
+        }
+    }
+    else {
+        {
+            ivy__app self__COLON__ivy__app;
+            if (((ty).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(ty);
+            if(((ty).tag == 1)){
+                res = ext__ivy__app__to_cpp(self__COLON__ivy__app, st);
+            }
+            else {
+                {
+                    ivy__symbol self__COLON__ivy__symbol;
+                    if (((ty).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(ty);
+                    if(((ty).tag == 0)){
+                        res = ext__ivy__symbol__to_cpp(self__COLON__ivy__symbol, st);
+                    }
+                    else {
+                        res = ext__ivy__expr__to_cpp(ty, st);
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+bool ivyc_s1::ext__ivy__is_dead(ivyc_s1::cpp__expr e, const ivy__tocppst& st, unsigned long long cnt){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
+    {
+        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15979);
+        {
+            loc__idx = vector__ivy__lvalue_count____begin(st.dead);
+            while((!res && (loc__idx < vector__ivy__lvalue_count____end(st.dead)))){
+                {
+                    ivy__lvalue_count loc__d;
+    loc__d.cnt = (unsigned long long)___ivy_choose(0,"loc:d",15978);
+                    {
+                        loc__d = vector__ivy__lvalue_count____value(st.dead,loc__idx);
+                        {
+                            bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",15977);
+                            {
+                                loc__0 = ext__cpp__expr__eq(e, loc__d.lvalue);
+                                res = (loc__0 && ((loc__d.cnt < cnt) || (loc__d.cnt == cnt)));
+                            }
+                        }
+                        loc__idx = ext__vector__ivy__lvalue_count____domain__next(loc__idx);
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+ivyc_s1::ivy__ident ivyc_s1::ext__ivy__strident__flat(const ivy__strident& s, bool rhs, const ivy__flatst& st){
+    ivyc_s1::ivy__ident res;
+    {
+        ivy__strident loc__s2;
+        {
+            loc__s2 = s;
+            {
+                unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15981);
+                {
+                    loc__idx = vector__ivy__ident____begin(loc__s2.subscrs);
+                    while((loc__idx < vector__ivy__ident____end(loc__s2.subscrs))){
+                        {
+                            ivyc_s1::ivy__ident loc__t;
+                            {
+                                loc__t = vector__ivy__ident____value(loc__s2.subscrs,loc__idx);
+                                {
+                                    ivy__dotident self__COLON__ivy__dotident;
+                                    if (((loc__t).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(loc__t);
+                                    if(((loc__t).tag == 2)){
+                                        loc__t = ext__ivy__dotident__flat(self__COLON__ivy__dotident, false, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__strident self__COLON__ivy__strident;
+                                            if (((loc__t).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(loc__t);
+                                            if(((loc__t).tag == 0)){
+                                                loc__t = ext__ivy__strident__flat(self__COLON__ivy__strident, false, st);
+                                            }
+                                            else {
+                                                loc__t = ext__ivy__ident__flat(loc__t, false, st);
+                                            }
+                                        }
+                                    }
+                                }
+                                ext__vector__ivy__ident____set(loc__s2.subscrs, loc__idx, loc__t);
+                                loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
+                            }
+                        }
+                    }
+                    if((st.has_root && (loc__s2.val == __lit<str>("this")) && (vector__ivy__ident____end(loc__s2.subscrs) == 0))){
+                        res = st.root;
+                    }
+                    else {
+                        {
+                            res = ivyc_s1::ivy__ident(0, new ivyc_s1::ivy__ident::twrap<ivyc_s1::ivy__strident>(loc__s2));
+                            if(!rhs){
+                                {
+                                    ivyc_s1::ivy__ident __tmp30;
+                                    __tmp30 = res; ext__ivy__ident_to_ident__get(st.prmvals, res, __tmp30);
+                                    res = __tmp30;
+                                    if(st.has_root){
+                                        if(st.defining){
+                                            {
+                                                ivy__dotident self__COLON__ivy__dotident;
+                                                if (((res).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(res);
+                                                if(((res).tag == 2)){
+                                                    res = ext__ivy__dotident__prefix(self__COLON__ivy__dotident, st.root);
+                                                }
+                                                else {
+                                                    {
+                                                        ivy__strident self__COLON__ivy__strident;
+                                                        if (((res).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(res);
+                                                        if(((res).tag == 0)){
+                                                            res = ext__ivy__strident__prefix(self__COLON__ivy__strident, st.root);
+                                                        }
+                                                        else {
+                                                            res = ext__ivy__ident__prefix(res, st.root);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            {
+                                                ext__ivy__find_ident(st.root, res, st);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+ivyc_s1::ivy__typespec ivyc_s1::ext__ivy__enumspec__flat(const ivy__enumspec& s, ivy__flatst& st){
+    ivyc_s1::ivy__typespec res;
+    {
+        {
+            ivy__enumspec loc__t;
+            {
+                loc__t = s;
+                {
+                    unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15984);
+                    {
+                        loc__idx = vector__ivy__expr____begin(loc__t.constructors);
+                        while((loc__idx < vector__ivy__expr____end(loc__t.constructors))){
+                            {
+                                {
+                                    ivyc_s1::ivy__expr loc__e;
+                                    {
+                                        loc__e = vector__ivy__expr____value(loc__t.constructors,loc__idx);
+                                        {
+                                            ivy__app self__COLON__ivy__app;
+                                            if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
+                                            if(((loc__e).tag == 1)){
+                                                loc__e = ext__ivy__app__flat(self__COLON__ivy__app, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__symbol self__COLON__ivy__symbol;
+                                                    if (((loc__e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__e);
+                                                    if(((loc__e).tag == 0)){
+                                                        loc__e = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
+                                                    }
+                                                    else {
+                                                        loc__e = ext__ivy__expr__flat(loc__e, st);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        ext__vector__ivy__expr____set(loc__t.constructors, loc__idx, loc__e);
+                                        loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                                    }
+                                }
+                            }
+                        }
+                        res = ivyc_s1::ivy__typespec(0, new ivyc_s1::ivy__typespec::twrap<ivyc_s1::ivy__enumspec>(loc__t));
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+void ivyc_s1::ext__ivy__enumspec__defd(const ivy__enumspec& s, ivy__flatst& st, ivyc_s1::ivy__ident id){
+    {
+        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15854);
+        {
+            loc__idx = vector__ivy__expr____begin(s.constructors);
+            while((loc__idx < vector__ivy__expr____end(s.constructors))){
+                {
+                    ext__ivy__add_def(vector__ivy__expr____value(s.constructors,loc__idx), st, false);
+                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                }
+            }
+        }
+    }
+}
+void ivyc_s1::ext__ivy__tocppst__get_code(ivy__tocppst& s, ivyc_s1::annot ann, ivyc_s1::cpp__stmt& res){
+    {
+        res = ext__cpp__sequence__fold_right(s.code, ann);
+        s.code = ext__vector__cpp__stmt____empty();
+    }
+}
+unsigned long long ivyc_s1::ext__vector__ivy__decl____domain__next(unsigned long long x){
+    unsigned long long y;
+    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
+    {
+        y = (x + 1);
+    }
+    return y;
+}
+ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__skipst__make(ivyc_s1::annot ann){
+    ivyc_s1::ivy__stmt res;
+    {
+        {
+            ivy__skipst loc__s;
+            {
+                loc__s.ann = ann;
+                res = ivyc_s1::ivy__stmt(2, new ivyc_s1::ivy__stmt::twrap<ivyc_s1::ivy__skipst>(loc__s));
+            }
+        }
+    }
+    return res;
+}
+void ivyc_s1::ext__cpp__curly_tup__encode(const vector__cpp__expr__& s, pretty& b, int prio){
+    if((0 < vector__cpp__expr____end(s))){
+        {
+            ext__pretty__extend(b, __lit<str>(" "));
+            ext__pretty__extend(b, __lit<str>("{"));
+            {
+                cpp__pi self__COLON__cpp__pi;
+                if (((vector__cpp__expr____value(s,0)).tag == 3)) self__COLON__cpp__pi = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__pi >(vector__cpp__expr____value(s,0));
+                if(((vector__cpp__expr____value(s,0)).tag == 3)){
+                    ext__cpp__pi__encode(self__COLON__cpp__pi, b, 0);
+                }
+                else {
+                    {
+                        cpp__app self__COLON__cpp__app;
+                        if (((vector__cpp__expr____value(s,0)).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(vector__cpp__expr____value(s,0));
+                        if(((vector__cpp__expr____value(s,0)).tag == 1)){
+                            ext__cpp__app__encode(self__COLON__cpp__app, b, 0);
+                        }
+                        else {
+                            {
+                                cpp__symbol self__COLON__cpp__symbol;
+                                if (((vector__cpp__expr____value(s,0)).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(vector__cpp__expr____value(s,0));
+                                if(((vector__cpp__expr____value(s,0)).tag == 0)){
+                                    ext__cpp__symbol__encode(self__COLON__cpp__symbol, b, 0);
+                                }
+                                else {
+                                    ext__cpp__expr__encode(vector__cpp__expr____value(s,0), b, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            {
+                unsigned long long loc__0;
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",15993);
+                {
+                    loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(s));
+                    {
+                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15992);
+                        {
+                            loc__idx = loc__0;
+                            while((loc__idx < vector__cpp__expr____end(s))){
+                                {
+                                    ext__pretty__extend(b, __lit<str>(","));
+                                    {
+                                        cpp__pi self__COLON__cpp__pi;
+                                        if (((vector__cpp__expr____value(s,loc__idx)).tag == 3)) self__COLON__cpp__pi = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__pi >(vector__cpp__expr____value(s,loc__idx));
+                                        if(((vector__cpp__expr____value(s,loc__idx)).tag == 3)){
+                                            ext__cpp__pi__encode(self__COLON__cpp__pi, b, 0);
+                                        }
+                                        else {
+                                            {
+                                                cpp__app self__COLON__cpp__app;
+                                                if (((vector__cpp__expr____value(s,loc__idx)).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(vector__cpp__expr____value(s,loc__idx));
+                                                if(((vector__cpp__expr____value(s,loc__idx)).tag == 1)){
+                                                    ext__cpp__app__encode(self__COLON__cpp__app, b, 0);
+                                                }
+                                                else {
+                                                    {
+                                                        cpp__symbol self__COLON__cpp__symbol;
+                                                        if (((vector__cpp__expr____value(s,loc__idx)).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(vector__cpp__expr____value(s,loc__idx));
+                                                        if(((vector__cpp__expr____value(s,loc__idx)).tag == 0)){
+                                                            ext__cpp__symbol__encode(self__COLON__cpp__symbol, b, 0);
+                                                        }
+                                                        else {
+                                                            ext__cpp__expr__encode(vector__cpp__expr____value(s,loc__idx), b, 0);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    loc__idx = ext__vector__cpp__expr____domain__next(loc__idx);
+                                }
+                            }
+                            ext__pretty__extend(b, __lit<str>("}"));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+void ivyc_s1::ext__ivy__typedc__reg_member(const ivy__typedc& s, ivy__tocppst& st){
+    if(s.has_spec){
+        if(((s.spec).tag == 0)){
+            {
+                vector__ivy__expr__ loc__0;
+                {
+                    {
+                        ivy__structspec self__COLON__ivy__structspec;
+                        if (((s.spec).tag == 1)) self__COLON__ivy__structspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__structspec >(s.spec);
+                        if(((s.spec).tag == 1)){
+                            loc__0 = ext__ivy__structspec__get_elems(self__COLON__ivy__structspec);
+                        }
+                        else {
+                            {
+                                ivy__enumspec self__COLON__ivy__enumspec;
+                                if (((s.spec).tag == 0)) self__COLON__ivy__enumspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__enumspec >(s.spec);
+                                if(((s.spec).tag == 0)){
+                                    loc__0 = ext__ivy__enumspec__get_elems(self__COLON__ivy__enumspec);
+                                }
+                                else {
+                                    loc__0 = ext__ivy__typespec__get_elems(s.spec);
+                                }
+                            }
+                        }
+                    }
+                    {
+                        vector__ivy__expr__ loc__conss;
+                        {
+                            loc__conss = loc__0;
+                            {
+                                unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15996);
+                                {
+                                    loc__idx = vector__ivy__expr____begin(loc__conss);
+                                    while((loc__idx < vector__ivy__expr____end(loc__conss))){
+                                        {
+                                            ivyc_s1::ivy__expr loc__cons;
+                                            {
+                                                loc__cons = vector__ivy__expr____value(loc__conss,loc__idx);
+                                                {
+                                                    ivyc_s1::ivy__ident loc__0;
+                                                    {
+                                                        {
+                                                            ivy__symbol self__COLON__ivy__symbol;
+                                                            if (((loc__cons).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__cons);
+                                                            if(((loc__cons).tag == 0)){
+                                                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                                                            }
+                                                            else {
+                                                                loc__0 = ext__ivy__expr__get_name(loc__cons);
+                                                            }
+                                                        }
+                                                        ext__ivy__ident_set__set(st.constructors, loc__0, true);
+                                                    }
+                                                }
+                                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+ivyc_s1::ivy__initdc ivyc_s1::ext__ivy__initdc__typeinfer_int(const ivy__initdc& s, ivy__typeinferst& st){
+    ivyc_s1::ivy__initdc res;
+    {
+        {
+            ivy__whilest self__COLON__ivy__whilest;
+            if (((s.body).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(s.body);
+            if(((s.body).tag == 4)){
+                res.body = ext__ivy__whilest__typeinfer(self__COLON__ivy__whilest, st);
+            }
+            else {
+                {
+                    ivy__ifst self__COLON__ivy__ifst;
+                    if (((s.body).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(s.body);
+                    if(((s.body).tag == 3)){
+                        res.body = ext__ivy__ifst__typeinfer(self__COLON__ivy__ifst, st);
+                    }
+                    else {
+                        {
+                            ivy__sequence self__COLON__ivy__sequence;
+                            if (((s.body).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(s.body);
+                            if(((s.body).tag == 1)){
+                                res.body = ext__ivy__sequence__typeinfer(self__COLON__ivy__sequence, st);
+                            }
+                            else {
+                                {
+                                    ivy__asgn self__COLON__ivy__asgn;
+                                    if (((s.body).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(s.body);
+                                    if(((s.body).tag == 0)){
+                                        res.body = ext__ivy__asgn__typeinfer(self__COLON__ivy__asgn, st);
+                                    }
+                                    else {
+                                        res.body = ext__ivy__stmt__typeinfer(s.body, st);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+void ivyc_s1::ext__ivy__elidest__map__set(ivy__elidest__map& a, ivyc_s1::ivy__ident x, bool y){
+    {
+
+        a[x] = y;
     }
 }
 void ivyc_s1::ext__ivy__set_root(ivy__flatst& st, ivyc_s1::ivy__expr s){
@@ -19559,23 +18634,97 @@ void ivyc_s1::ext__cpp__varst__encode(const cpp__varst& s, pretty& b, int prio){
         }
     }
 }
-void ivyc_s1::ext__ivy__add_namespaces(ivyc_s1::cpp__decl& d, ivyc_s1::ivy__ident id){
-    if(((id).tag == 2)){
+void ivyc_s1::ext__ivy__instancedc__defd(const ivy__instancedc& s, ivy__flatst& st){
+    if(s.is_auto){
+        {
+            ext__ivy__auto_instance_defd(s, st);
+        }
+    }
+    else {
         {
             {
-                ivyc_s1::ivy__ident loc__0;
+                ivyc_s1::ivy__decl loc__0;
                 {
+                    loc__0 = ext__ivy__instancedc__desugar(s);
                     {
-                        ivy__dotident self__COLON__ivy__dotident;
-                        if (((id).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(id);
-                        if(((id).tag == 2)){
-                            loc__0 = ext__ivy__dotident__get_namesp(self__COLON__ivy__dotident);
-                        }
-                        else {
-                            loc__0 = ext__ivy__ident__get_namesp(id);
+                        ivyc_s1::ivy__decl loc__ds;
+                        {
+                            loc__ds = loc__0;
+                            {
+                                ivy__instancedc self__COLON__ivy__instancedc;
+                                if (((loc__ds).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(loc__ds);
+                                if(((loc__ds).tag == 10)){
+                                    ext__ivy__instancedc__defd(self__COLON__ivy__instancedc, st);
+                                }
+                                else {
+                                    {
+                                        ivy__objectdc self__COLON__ivy__objectdc;
+                                        if (((loc__ds).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(loc__ds);
+                                        if(((loc__ds).tag == 9)){
+                                            ext__ivy__objectdc__defd(self__COLON__ivy__objectdc, st);
+                                        }
+                                        else {
+                                            {
+                                                ivy__instantiatedc self__COLON__ivy__instantiatedc;
+                                                if (((loc__ds).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(loc__ds);
+                                                if(((loc__ds).tag == 8)){
+                                                    ext__ivy__instantiatedc__defd(self__COLON__ivy__instantiatedc, st);
+                                                }
+                                                else {
+                                                    {
+                                                        ivy__moduledc self__COLON__ivy__moduledc;
+                                                        if (((loc__ds).tag == 7)) self__COLON__ivy__moduledc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__moduledc >(loc__ds);
+                                                        if(((loc__ds).tag == 7)){
+                                                            ext__ivy__moduledc__defd(self__COLON__ivy__moduledc, st);
+                                                        }
+                                                        else {
+                                                            {
+                                                                ivy__vardc self__COLON__ivy__vardc;
+                                                                if (((loc__ds).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(loc__ds);
+                                                                if(((loc__ds).tag == 3)){
+                                                                    ext__ivy__vardc__defd(self__COLON__ivy__vardc, st);
+                                                                }
+                                                                else {
+                                                                    {
+                                                                        ivy__typedc self__COLON__ivy__typedc;
+                                                                        if (((loc__ds).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(loc__ds);
+                                                                        if(((loc__ds).tag == 2)){
+                                                                            ext__ivy__typedc__defd(self__COLON__ivy__typedc, st);
+                                                                        }
+                                                                        else {
+                                                                            {
+                                                                                ivy__groupdc self__COLON__ivy__groupdc;
+                                                                                if (((loc__ds).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(loc__ds);
+                                                                                if(((loc__ds).tag == 1)){
+                                                                                    ext__ivy__groupdc__defd(self__COLON__ivy__groupdc, st);
+                                                                                }
+                                                                                else {
+                                                                                    {
+                                                                                        ivy__actdc self__COLON__ivy__actdc;
+                                                                                        if (((loc__ds).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(loc__ds);
+                                                                                        if(((loc__ds).tag == 0)){
+                                                                                            ext__ivy__actdc__defd(self__COLON__ivy__actdc, st);
+                                                                                        }
+                                                                                        else {
+                                                                                            ext__ivy__decl__defd(loc__ds, st);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    ext__ivy__add_namespaces_rec(d, loc__0);
                 }
             }
         }
@@ -19667,7 +18816,7 @@ void ivyc_s1::ext__cpp__structdecl__encode(const cpp__structdecl& s, pretty& b, 
                 ext__pretty__nest(b);
                 {
                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16017);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16005);
                     {
                         loc__idx = vector__cpp__decl____begin(s.members);
                         while((loc__idx < vector__cpp__decl____end(s.members))){
@@ -19766,117 +18915,28 @@ void ivyc_s1::ext__cpp__structdecl__encode(const cpp__structdecl& s, pretty& b, 
         ext__pretty__newline(b);
     }
 }
-ivyc_s1::vector__ivy__ident__ ivyc_s1::ext__ivy__setup_local_vars(ivyc_s1::ivy__stmt s, ivy__flatst& st){
-    ivyc_s1::vector__ivy__ident__ del;
+void ivyc_s1::ext__pretty__flush(pretty& self){
     {
-        ivyc_s1::ivy__expr loc__0;
         {
+            unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16024);
             {
-                ivy__asgn self__COLON__ivy__asgn;
-                if (((s).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(s);
-                if(((s).tag == 0)){
-                    loc__0 = ext__ivy__asgn__get_lhs(self__COLON__ivy__asgn);
-                }
-                else {
-                    loc__0 = ext__ivy__stmt__get_lhs(s);
-                }
-            }
-            {
-                ivyc_s1::ivy__expr loc__alhs;
-                {
-                    loc__alhs = loc__0;
+                loc__idx = vector__pretty__token____begin(self.tokens);
+                while((loc__idx < vector__pretty__token____end(self.tokens))){
                     {
-                        vector__ivy__expr__ loc__0;
-                        {
-                            loc__0 = ext__ivy__comma__unfold_left(loc__alhs);
-                            {
-                                vector__ivy__expr__ loc__lhs;
-                                {
-                                    loc__lhs = loc__0;
-                                    {
-                                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16023);
-                                        {
-                                            loc__idx = vector__ivy__expr____begin(loc__lhs);
-                                            while((loc__idx < vector__ivy__expr____end(loc__lhs))){
-                                                {
-                                                    ivyc_s1::ivy__expr loc__e;
-                                                    {
-                                                        loc__e = vector__ivy__expr____value(loc__lhs,loc__idx);
-                                                        {
-                                                            bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16021);
-                                                            {
-                                                                {
-                                                                    ivy__app self__COLON__ivy__app;
-                                                                    if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
-                                                                    if(((loc__e).tag == 1)){
-                                                                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__varv);
-                                                                    }
-                                                                    else {
-                                                                        loc__0 = ext__ivy__expr__is(loc__e, ivy__verb__varv);
-                                                                    }
-                                                                }
-                                                                if(loc__0){
-                                                                    {
-                                                                        ivyc_s1::ivy__expr loc__0;
-                                                                        ivyc_s1::ivy__ident loc__1;
-                                                                        {
-                                                                            {
-                                                                                ivy__app self__COLON__ivy__app;
-                                                                                if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
-                                                                                if(((loc__e).tag == 1)){
-                                                                                    loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
-                                                                                }
-                                                                                else {
-                                                                                    loc__0 = ext__ivy__expr__get_arg(loc__e, 0);
-                                                                                }
-                                                                            }
-                                                                            loc__1 = ext__ivy__formal_ident(loc__0);
-                                                                            {
-                                                                                ivyc_s1::ivy__ident loc__id;
-                                                                                {
-                                                                                    loc__id = loc__1;
-                                                                                    {
-                                                                                        bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16018);
-                                                                                        {
-                                                                                            loc__0 = ext__ivy__ident_set__mem(st.locals, loc__id);
-                                                                                            if(!loc__0){
-                                                                                                {
-                                                                                                    ext__vector__ivy__ident____append(del, loc__id);
-                                                                                                    ext__ivy__ident_set__set(st.locals, loc__id, true);
-                                                                                                }
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                        loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        ext__pretty__print(self, vector__pretty__token____value(self.tokens,loc__idx));
+                        loc__idx = ext__vector__pretty__token____domain__next(loc__idx);
                     }
                 }
+                self.tokens = ext__vector__pretty__token____empty();
             }
         }
     }
-    return del;
 }
 void ivyc_s1::ext__ivy__flat_exprvec(vector__ivy__expr__& es, ivy__flatst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16029);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16007);
         {
             loc__idx = vector__ivy__expr____begin(es);
             while((loc__idx < vector__ivy__expr____end(es))){
@@ -19916,8 +18976,8 @@ void ivyc_s1::ext__ivy__flat_exprvec(vector__ivy__expr__& es, ivy__flatst& st){
 void ivyc_s1::ext__ivy__typedc__flat(const ivy__typedc& s, ivy__flatst& st){
     {
         ivy__typedc loc__res;
-    loc__res.has_super = (bool)___ivy_choose(0,"loc:res",16559);
-    loc__res.has_spec = (bool)___ivy_choose(0,"loc:res",16559);
+    loc__res.has_super = (bool)___ivy_choose(0,"loc:res",16550);
+    loc__res.has_spec = (bool)___ivy_choose(0,"loc:res",16550);
         {
             loc__res = s;
             {
@@ -20134,7 +19194,7 @@ void ivyc_s1::ext__ivy__auto_instance_defd(const ivy__instancedc& s, ivy__flatst
                                             {
                                                 {
                                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16036);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16010);
                                                     {
                                                         loc__idx = vector__ivy__expr____begin(s.prms);
                                                         while((loc__idx < vector__ivy__expr____end(s.prms))){
@@ -20153,9 +19213,9 @@ void ivyc_s1::ext__ivy__auto_instance_defd(const ivy__instancedc& s, ivy__flatst
                                                                                 loc__0 = ext__ivy__expr__get_name(vector__ivy__expr____value(s.prms,loc__idx));
                                                                             }
                                                                         }
-                                                                        ivyc_s1::ivy__expr __tmp32;
-                                                                        __tmp32 = vector__ivy__expr____value(s.prms,loc__idx); ext__ivy__symeval__get(loc__pmap, loc__0, __tmp32);
-                                                                        loc__1 = __tmp32;
+                                                                        ivyc_s1::ivy__expr __tmp31;
+                                                                        __tmp31 = vector__ivy__expr____value(s.prms,loc__idx); ext__ivy__symeval__get(loc__pmap, loc__0, __tmp31);
+                                                                        loc__1 = __tmp31;
                                                                         ext__vector__ivy__expr____append(loc__prms, loc__1);
                                                                     }
                                                                 }
@@ -20188,7 +19248,7 @@ void ivyc_s1::ext__ivy__auto_instance_defd(const ivy__instancedc& s, ivy__flatst
 void ivyc_s1::ext__ivy__range_type(ivyc_s1::ivy__expr& s){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16043);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16017);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -20237,7 +19297,7 @@ ivyc_s1::ivy__whilest ivyc_s1::ext__ivy__whilest__typeinfer_int(const ivy__while
         res = s;
         {
             bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",16047);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",16021);
             {
                 loc__ok = true;
                 ext__ivy__bottom_up_type(res.cond, st, loc__ok);
@@ -20315,12 +19375,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__comma__fold_left(const vector__ivy__expr__
             res = vector__ivy__expr____value(args,0);
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16049);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16023);
                 {
                     loc__0 = ext__vector__ivy__expr____domain__next(vector__ivy__expr____begin(args));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16048);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16022);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__ivy__expr____end(args))){
@@ -20379,16 +19439,16 @@ ivyc_s1::ivy__decl ivyc_s1::ext__ivy__vardc__func_to_action(const ivy__vardc& s)
         {
             {
                 ivy__actdc loc__res;
-    loc__res.kind = (ivy__action_kind)___ivy_choose(0,"loc:res",16059);
-    loc__res.has_body = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.has_proto = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.has_ret = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.is_input = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.is_output = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:res",16059);
-    loc__res.proto.ret.is_const = (bool)___ivy_choose(0,"loc:res",16059);
+    loc__res.kind = (ivy__action_kind)___ivy_choose(0,"loc:res",16034);
+    loc__res.has_body = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.has_proto = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.has_ret = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.is_input = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.is_output = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:res",16034);
+    loc__res.proto.ret.is_const = (bool)___ivy_choose(0,"loc:res",16034);
                 {
                     loc__res.ann = s.ann;
                     {
@@ -20549,7 +19609,7 @@ ivyc_s1::str ivyc_s1::ext__annot_i__to_str(const annot_i& s){
         ext__str__extend(res, __lit<str>(": line "));
         {
             unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16060);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16035);
             str loc__1;
             {
                 loc__0 = ext__pos__next(s.line);
@@ -20574,7 +19634,7 @@ void ivyc_s1::ext__cpp__app__encode(const cpp__app& s, pretty& b, int prio){
         }
         {
             cpp__verb loc__0;
-    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16063);
+    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16038);
             {
                 {
                     cpp__symbol self__COLON__cpp__symbol;
@@ -20588,13 +19648,13 @@ void ivyc_s1::ext__cpp__app__encode(const cpp__app& s, pretty& b, int prio){
                 }
                 {
                     cpp__verb loc__vrb;
-    loc__vrb = (cpp__verb)___ivy_choose(0,"loc:vrb",16062);
+    loc__vrb = (cpp__verb)___ivy_choose(0,"loc:vrb",16037);
                     {
                         loc__vrb = loc__0;
                         if(!(loc__vrb == cpp__verb__none)){
                             {
                                 int loc__opprio;
-    loc__opprio = (int)___ivy_choose(0,"loc:opprio",16061);
+    loc__opprio = (int)___ivy_choose(0,"loc:opprio",16036);
                                 {
                                     loc__opprio = cpp__verb_to_prio[loc__vrb];
                                     if((loc__opprio < prio)){
@@ -20792,6 +19852,22 @@ void ivyc_s1::ext__cpp__app__encode(const cpp__app& s, pretty& b, int prio){
         }
     }
 }
+ivyc_s1::ivy__varst ivyc_s1::ext__ivy__varst__flat_int(const ivy__varst& s, ivy__flatst& st){
+    ivyc_s1::ivy__varst res;
+    {
+        res = s;
+        res.name = ext__ivy__flat_formal(res.name, st);
+    }
+    return res;
+}
+bool ivyc_s1::ext__ivy__symbol__has_numident(const ivy__symbol& e){
+    bool res;
+    res = (bool)___ivy_choose(0,"fml:res",0);
+    {
+        res = ((e.name).tag == 1);
+    }
+    return res;
+}
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__arrow__make(ivyc_s1::ivy__expr lhs, ivyc_s1::ivy__expr rhs, ivyc_s1::annot ann){
     ivyc_s1::ivy__expr res;
     {
@@ -20810,13 +19886,13 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__flat(const ivy__symbol& s, ivy__fl
     ivyc_s1::ivy__expr res;
     {
         ivy__symbol loc__f;
-    loc__f.vrb = (ivy__verb)___ivy_choose(0,"loc:f",16066);
+    loc__f.vrb = (ivy__verb)___ivy_choose(0,"loc:f",16041);
         {
             loc__f = s;
             if((s.vrb == ivy__verb__none)){
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16065);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16040);
                     {
                         loc__0 = ext__ivy__ident_set__mem(st.locals, loc__f.name);
                         if(!loc__0){
@@ -20927,15 +20003,16 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__structspec__get_elems(const ivy_
     res = s.destructors;
     return res;
 }
-ivyc_s1::cpp__expr ivyc_s1::ext__cpp__app__make(ivyc_s1::cpp__expr func, const vector__cpp__expr__& args, ivyc_s1::annot ann){
+ivyc_s1::cpp__expr ivyc_s1::ext__cpp__symbol__makestr(const str& name, ivyc_s1::annot ann){
     ivyc_s1::cpp__expr res;
     {
-        cpp__app loc__s;
+        cpp__symbol loc__s;
+    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16044);
         {
-            loc__s.func = func;
-            loc__s.args = args;
+            loc__s.name = ext__cpp__strident__make(name);
+            loc__s.vrb = ext__cpp__verb_from_name(name);
             loc__s.ann = ann;
-            res = ivyc_s1::cpp__expr(1, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__app>(loc__s));
+            res = ivyc_s1::cpp__expr(0, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__symbol>(loc__s));
         }
     }
     return res;
@@ -20982,9 +20059,9 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__asgn__to_cpp(const ivy__asgn& s, ivy__tocp
                             }
                         }
                         st.outputs = ext__ivy__comma__unfold_left(s.lhs);
-                        ivy__tocppst __tmp33;
-                        __tmp33 = st; ext__ivy__kill_lvalues(st.outputs, __tmp33, loc__paths);
-                        st = __tmp33;
+                        ivy__tocppst __tmp32;
+                        __tmp32 = st; ext__ivy__kill_lvalues(st.outputs, __tmp32, loc__paths);
+                        st = __tmp32;
                         {
                             ivy__app self__COLON__ivy__app;
                             if (((s.rhs).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.rhs);
@@ -21006,7 +20083,7 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__asgn__to_cpp(const ivy__asgn& s, ivy__tocp
                         }
                         {
                             cpp__verb loc__0;
-    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16070);
+    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16045);
                             {
                                 {
                                     cpp__symbol self__COLON__cpp__symbol;
@@ -21234,6 +20311,23 @@ void ivyc_s1::ext__cpp__ifst__encode_int(const cpp__ifst& s, pretty& b, int prio
         }
     }
 }
+ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__makestr(const str& name, ivyc_s1::annot ann){
+    ivyc_s1::ivy__expr res;
+    {
+        ivy__symbol loc__s;
+    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",16048);
+        {
+            loc__s.name = ext__ivy__strident__make(name);
+            loc__s.vrb = ext__ivy__verb_from_name(name);
+            loc__s.ann = ann;
+            res = ivyc_s1::ivy__expr(0, new ivyc_s1::ivy__expr::twrap<ivyc_s1::ivy__symbol>(loc__s));
+        }
+    }
+    return res;
+}
+void ivyc_s1::ext__ivy__local_tracker__pop(ivy__local_tracker& s){
+    ext__ivy__push_pop_ident_set__push(s.map);
+}
 void ivyc_s1::ext__ivy__vardc__reg_member(const ivy__vardc& s, ivy__tocppst& st){
     if(s.is_destructor){
         {
@@ -21302,16 +20396,223 @@ void ivyc_s1::ext__ivy__ident_set__remove(ivy__ident_set& a, ivyc_s1::ivy__ident
         a.erase(x);
     }
 }
+ivyc_s1::pretty__state ivyc_s1::ext__vector__pretty__state____back(const vector__pretty__state__& a){
+    ivyc_s1::pretty__state res;
+    res.begin = (unsigned long long)___ivy_choose(0,"fml:res",0);
+    res.total = (unsigned long long)___ivy_choose(0,"fml:res",0);
+    {
+
+        if ((unsigned long long)a.size() > 0)
+            res = a.back();
+    }
+    return res;
+}
 ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__reduce(ivyc_s1::ivy__expr e, const ivy__symeval& smap){
     ivyc_s1::ivy__expr res;
     {
     }
     return res;
 }
+ivyc_s1::cpp__decl ivyc_s1::ext__ivy__vardc__to_cpp(const ivy__vardc& s, ivy__tocppst& st){
+    ivyc_s1::cpp__decl resd;
+    {
+        cpp__vardecl loc__res;
+    loc__res.vtype.is_const = (bool)___ivy_choose(0,"loc:res",15935);
+    loc__res.vtype.is_ref = (bool)___ivy_choose(0,"loc:res",15935);
+        {
+            loc__res.ann = s.ann;
+            {
+                ivyc_s1::ivy__expr loc__0;
+                {
+                    {
+                        ivy__app self__COLON__ivy__app;
+                        if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
+                        if(((s.typing).tag == 1)){
+                            loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
+                        }
+                        else {
+                            loc__0 = ext__ivy__expr__get_arg(s.typing, 1);
+                        }
+                    }
+                    {
+                        ivyc_s1::ivy__expr loc__ty;
+                        {
+                            loc__ty = loc__0;
+                            if(s.is_destructor){
+                                {
+                                    {
+                                        ivyc_s1::ivy__expr loc__0;
+                                        {
+                                            loc__0 = ext__ivy__expr__curry(loc__ty);
+                                            {
+                                                ivy__app self__COLON__ivy__app;
+                                                if (((loc__0).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__0);
+                                                if(((loc__0).tag == 1)){
+                                                    loc__ty = ext__ivy__app__get_arg(self__COLON__ivy__app, 1);
+                                                }
+                                                else {
+                                                    loc__ty = ext__ivy__expr__get_arg(loc__0, 1);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            loc__res.vtype._type = ext__ivy__fix_variant_type(loc__ty, st);
+                            {
+                                ivyc_s1::cpp__expr loc__name;
+                                {
+                                    {
+                                        ivyc_s1::ivy__expr loc__0;
+                                        {
+                                            {
+                                                ivy__app self__COLON__ivy__app;
+                                                if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
+                                                if(((s.typing).tag == 1)){
+                                                    loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
+                                                }
+                                                else {
+                                                    loc__0 = ext__ivy__expr__get_arg(s.typing, 0);
+                                                }
+                                            }
+                                            {
+                                                ivy__app self__COLON__ivy__app;
+                                                if (((loc__0).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__0);
+                                                if(((loc__0).tag == 1)){
+                                                    loc__name = ext__ivy__app__to_cpp(self__COLON__ivy__app, st);
+                                                }
+                                                else {
+                                                    {
+                                                        ivy__symbol self__COLON__ivy__symbol;
+                                                        if (((loc__0).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__0);
+                                                        if(((loc__0).tag == 0)){
+                                                            loc__name = ext__ivy__symbol__to_cpp(self__COLON__ivy__symbol, st);
+                                                        }
+                                                        else {
+                                                            loc__name = ext__ivy__expr__to_cpp(loc__0, st);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ivyc_s1::cpp__expr __tmp33;
+                                    __tmp33 = loc__name; ext__ivy__member_name(__tmp33);
+                                    loc__res.vtype.name = __tmp33;
+                                    resd = ivyc_s1::cpp__decl(3, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__vardecl>(loc__res));
+                                    if(!st.in_class){
+                                        {
+                                            {
+                                                ivyc_s1::ivy__expr loc__0;
+                                                ivyc_s1::ivy__ident loc__1;
+                                                {
+                                                    {
+                                                        ivy__app self__COLON__ivy__app;
+                                                        if (((s.typing).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.typing);
+                                                        if(((s.typing).tag == 1)){
+                                                            loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
+                                                        }
+                                                        else {
+                                                            loc__0 = ext__ivy__expr__get_arg(s.typing, 0);
+                                                        }
+                                                    }
+                                                    {
+                                                        ivy__symbol self__COLON__ivy__symbol;
+                                                        if (((loc__0).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__0);
+                                                        if(((loc__0).tag == 0)){
+                                                            loc__1 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                                                        }
+                                                        else {
+                                                            loc__1 = ext__ivy__expr__get_name(loc__0);
+                                                        }
+                                                    }
+                                                    ext__ivy__add_namespaces(resd, loc__1);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return resd;
+}
+ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__reduce(const ivy__app& s, const ivy__symeval& smap){
+    ivyc_s1::ivy__expr res;
+    {
+        {
+            ivy__app loc__resa;
+            {
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((s.func).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.func);
+                    if(((s.func).tag == 1)){
+                        loc__resa.func = ext__ivy__app__reduce(self__COLON__ivy__app, smap);
+                    }
+                    else {
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((s.func).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s.func);
+                            if(((s.func).tag == 0)){
+                                loc__resa.func = ext__ivy__symbol__reduce(self__COLON__ivy__symbol, smap);
+                            }
+                            else {
+                                loc__resa.func = ext__ivy__expr__reduce(s.func, smap);
+                            }
+                        }
+                    }
+                }
+                {
+                    unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16059);
+                    {
+                        loc__idx = vector__ivy__expr____begin(s.args);
+                        while((loc__idx < vector__ivy__expr____end(s.args))){
+                            {
+                                {
+                                    ivyc_s1::ivy__expr loc__0;
+                                    {
+                                        {
+                                            ivy__app self__COLON__ivy__app;
+                                            if (((vector__ivy__expr____value(s.args,loc__idx)).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(vector__ivy__expr____value(s.args,loc__idx));
+                                            if(((vector__ivy__expr____value(s.args,loc__idx)).tag == 1)){
+                                                loc__0 = ext__ivy__app__reduce(self__COLON__ivy__app, smap);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__symbol self__COLON__ivy__symbol;
+                                                    if (((vector__ivy__expr____value(s.args,loc__idx)).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(vector__ivy__expr____value(s.args,loc__idx));
+                                                    if(((vector__ivy__expr____value(s.args,loc__idx)).tag == 0)){
+                                                        loc__0 = ext__ivy__symbol__reduce(self__COLON__ivy__symbol, smap);
+                                                    }
+                                                    else {
+                                                        loc__0 = ext__ivy__expr__reduce(vector__ivy__expr____value(s.args,loc__idx), smap);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        ext__vector__ivy__expr____append(loc__resa.args, loc__0);
+                                    }
+                                }
+                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                            }
+                        }
+                        res = ivyc_s1::ivy__expr(1, new ivyc_s1::ivy__expr::twrap<ivyc_s1::ivy__app>(loc__resa));
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
 void ivyc_s1::ext__ivy__flat_formalvec(vector__ivy__expr__& es, ivy__flatst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16080);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16062);
         {
             loc__idx = vector__ivy__expr____begin(es);
             while((loc__idx < vector__ivy__expr____end(es))){
@@ -21391,7 +20692,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__upcast(ivyc_s1::ivy__expr lhsty, ivyc_s1::
         }
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16089);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16071);
             {
                 {
                     ivy__app self__COLON__ivy__app;
@@ -21423,7 +20724,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__upcast(ivyc_s1::ivy__expr lhsty, ivyc_s1::
                                     loc__rhsty = loc__0;
                                     {
                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16086);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16068);
                                         {
                                             loc__0 = ext__ivy__subtypes__is_subtype(st.subtype_rel, loc__rhsty, lhsty);
                                             if(loc__0){
@@ -21569,16 +20870,16 @@ void ivyc_s1::ext__ivy__actdc__flat(const ivy__actdc& s, ivy__flatst& st){
     {
         {
             ivy__actdc loc__t;
-    loc__t.kind = (ivy__action_kind)___ivy_choose(0,"loc:t",16090);
-    loc__t.has_body = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.has_proto = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.has_ret = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.is_input = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.is_output = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:t",16090);
-    loc__t.proto.ret.is_const = (bool)___ivy_choose(0,"loc:t",16090);
+    loc__t.kind = (ivy__action_kind)___ivy_choose(0,"loc:t",16072);
+    loc__t.has_body = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.has_proto = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.has_ret = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.is_input = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.is_output = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:t",16072);
+    loc__t.proto.ret.is_const = (bool)___ivy_choose(0,"loc:t",16072);
             {
                 loc__t = ext__ivy__actdc__flat_int(s, st);
                 loc__t.ann = s.ann;
@@ -21608,6 +20909,96 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__asgn__flat(const ivy__asgn& s, ivy__flatst
     }
     return res;
 }
+void ivyc_s1::ext__cpp__groupdc__encode(const cpp__groupdc& s, pretty& b, int prio){
+    {
+        {
+            unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16073);
+            {
+                loc__idx = vector__cpp__decl____begin(s.decls);
+                while((loc__idx < vector__cpp__decl____end(s.decls))){
+                    {
+                        ext__pretty__newline(b);
+                        {
+                            cpp__groupdc self__COLON__cpp__groupdc;
+                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 7)) self__COLON__cpp__groupdc = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__groupdc >(vector__cpp__decl____value(s.decls,loc__idx));
+                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 7)){
+                                ext__cpp__groupdc__encode(self__COLON__cpp__groupdc, b, 0);
+                            }
+                            else {
+                                {
+                                    cpp__namespacedecl self__COLON__cpp__namespacedecl;
+                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 6)) self__COLON__cpp__namespacedecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__namespacedecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 6)){
+                                        ext__cpp__namespacedecl__encode(self__COLON__cpp__namespacedecl, b, 0);
+                                    }
+                                    else {
+                                        {
+                                            cpp__structdecl self__COLON__cpp__structdecl;
+                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 5)) self__COLON__cpp__structdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__structdecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 5)){
+                                                ext__cpp__structdecl__encode(self__COLON__cpp__structdecl, b, 0);
+                                            }
+                                            else {
+                                                {
+                                                    cpp__funcdecl self__COLON__cpp__funcdecl;
+                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 4)) self__COLON__cpp__funcdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__funcdecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 4)){
+                                                        ext__cpp__funcdecl__encode(self__COLON__cpp__funcdecl, b, 0);
+                                                    }
+                                                    else {
+                                                        {
+                                                            cpp__vardecl self__COLON__cpp__vardecl;
+                                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 3)) self__COLON__cpp__vardecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__vardecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 3)){
+                                                                ext__cpp__vardecl__encode(self__COLON__cpp__vardecl, b, 0);
+                                                            }
+                                                            else {
+                                                                {
+                                                                    cpp__enumdecl self__COLON__cpp__enumdecl;
+                                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 2)) self__COLON__cpp__enumdecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__enumdecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 2)){
+                                                                        ext__cpp__enumdecl__encode(self__COLON__cpp__enumdecl, b, 0);
+                                                                    }
+                                                                    else {
+                                                                        {
+                                                                            cpp__typedecl self__COLON__cpp__typedecl;
+                                                                            if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 1)) self__COLON__cpp__typedecl = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__typedecl >(vector__cpp__decl____value(s.decls,loc__idx));
+                                                                            if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 1)){
+                                                                                ext__cpp__typedecl__encode(self__COLON__cpp__typedecl, b, 0);
+                                                                            }
+                                                                            else {
+                                                                                {
+                                                                                    cpp__header self__COLON__cpp__header;
+                                                                                    if (((vector__cpp__decl____value(s.decls,loc__idx)).tag == 0)) self__COLON__cpp__header = ivyc_s1::cpp__decl::unwrap< ivyc_s1::cpp__header >(vector__cpp__decl____value(s.decls,loc__idx));
+                                                                                    if(((vector__cpp__decl____value(s.decls,loc__idx)).tag == 0)){
+                                                                                        ext__cpp__header__encode(self__COLON__cpp__header, b, 0);
+                                                                                    }
+                                                                                    else {
+                                                                                        ext__cpp__decl__encode(vector__cpp__decl____value(s.decls,loc__idx), b, 0);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        loc__idx = ext__vector__cpp__decl____domain__next(loc__idx);
+                    }
+                }
+            }
+        }
+    }
+}
 ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__times__unfold_left(ivyc_s1::ivy__expr s){
     ivyc_s1::vector__ivy__expr__ args;
     {
@@ -21617,7 +21008,7 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__times__unfold_left(ivyc_s1::ivy_
                 loc__e = s;
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16094);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16076);
                     {
                         {
                             ivy__app self__COLON__ivy__app;
@@ -21631,7 +21022,7 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__times__unfold_left(ivyc_s1::ivy_
                         }
                         {
                             bool loc__b;
-    loc__b = (bool)___ivy_choose(0,"loc:b",16093);
+    loc__b = (bool)___ivy_choose(0,"loc:b",16075);
                             {
                                 loc__b = loc__0;
                                 while(loc__b){
@@ -21710,7 +21101,7 @@ ivyc_s1::ivy__ident ivyc_s1::ext__ivy__formal_ident(ivyc_s1::ivy__expr s){
     ivyc_s1::ivy__ident res;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16098);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16080);
         ivyc_s1::ivy__expr loc__1;
         ivyc_s1::ivy__ident loc__2;
         ivyc_s1::ivy__ident loc__3;
@@ -21770,13 +21161,13 @@ void ivyc_s1::ext__ivy__add_is_zero_pred(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__iszero;
-    loc__iszero.ftype.base.is_const = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.ftype.is_const = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.ftype.has_initializer = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.has_body = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.is_static = (bool)___ivy_choose(0,"loc:iszero",16111);
-    loc__iszero.is_virtual = (bool)___ivy_choose(0,"loc:iszero",16111);
+    loc__iszero.ftype.base.is_const = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.ftype.is_const = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.ftype.has_initializer = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.has_body = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.is_static = (bool)___ivy_choose(0,"loc:iszero",16093);
+    loc__iszero.is_virtual = (bool)___ivy_choose(0,"loc:iszero",16093);
             {
                 loc__iszero.ftype.base._type = ext__cpp__symbol__makestr(__lit<str>("bool"), s.ann);
                 loc__iszero.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("__is_zero"), s.ann);
@@ -21787,7 +21178,7 @@ void ivyc_s1::ext__ivy__add_is_zero_pred(cpp__structdecl& s){
                     {
                         {
                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16109);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16091);
                             {
                                 loc__idx = vector__cpp__decl____begin(s.members);
                                 while((loc__idx < vector__cpp__decl____end(s.members))){
@@ -21892,9 +21283,16 @@ void ivyc_s1::ext__ivy__add_is_zero_pred(cpp__structdecl& s){
         }
     }
 }
-ivyc_s1::annot ivyc_s1::ext__cpp__decl__get_ann(ivyc_s1::cpp__decl d){
-    ivyc_s1::annot res;
+ivyc_s1::cpp__expr ivyc_s1::ext__cpp__voidtype(ivyc_s1::annot ann){
+    ivyc_s1::cpp__expr res;
     {
+        {
+            ivyc_s1::cpp__ident loc__0;
+            {
+                loc__0 = ext__cpp__strident__make(__lit<str>("void"));
+                res = ext__cpp__namedtype(loc__0, ann);
+            }
+        }
     }
     return res;
 }
@@ -22016,9 +21414,9 @@ unsigned long long ivyc_s1::ext__vector__cpp__stmt____domain__prev(unsigned long
 void ivyc_s1::ext__ivy__fix_variant_arg(ivyc_s1::ivy__expr s, ivyc_s1::cpp__expr& rhs, const ivy__tocppst& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16118);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16105);
         bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16118);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16105);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -22051,7 +21449,7 @@ void ivyc_s1::ext__ivy__fix_variant_arg(ivyc_s1::ivy__expr s, ivyc_s1::cpp__expr
                                 loc__ty = loc__0;
                                 {
                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16115);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16102);
                                     {
                                         loc__0 = ext__ivy__is_variant_type(loc__ty, st);
                                         if(loc__0){
@@ -22193,7 +21591,7 @@ ivyc_s1::vector__ivy__stmt__ ivyc_s1::ext__ivy__desugar_asgn(ivyc_s1::ivy__stmt&
                                     loc__lhs = loc__0;
                                     {
                                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16131);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16118);
                                         {
                                             loc__idx = vector__ivy__expr____begin(loc__lhs);
                                             {
@@ -22224,10 +21622,10 @@ ivyc_s1::vector__ivy__stmt__ ivyc_s1::ext__ivy__desugar_asgn(ivyc_s1::ivy__stmt&
                                                                                     loc__f = loc__0;
                                                                                     {
                                                                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16123);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16110);
                                                                                         ivyc_s1::ivy__expr loc__1;
                                                                                         ivy__verb loc__2;
-    loc__2 = (ivy__verb)___ivy_choose(0,"loc:2",16123);
+    loc__2 = (ivy__verb)___ivy_choose(0,"loc:2",16110);
                                                                                         {
                                                                                             {
                                                                                                 ivy__app self__COLON__ivy__app;
@@ -22555,8 +21953,8 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__varst__to_cpp(const ivy__varst& s, ivy__to
     ivyc_s1::cpp__stmt res;
     {
         cpp__varst loc__t;
-    loc__t.vtype.is_const = (bool)___ivy_choose(0,"loc:t",16138);
-    loc__t.vtype.is_ref = (bool)___ivy_choose(0,"loc:t",16138);
+    loc__t.vtype.is_const = (bool)___ivy_choose(0,"loc:t",16125);
+    loc__t.vtype.is_ref = (bool)___ivy_choose(0,"loc:t",16125);
         {
             loc__t = ext__ivy__varst__to_cpp_int(s, st);
             loc__t.ann = s.ann;
@@ -22570,12 +21968,12 @@ unsigned long long ivyc_s1::ext__pos__from_str(const str& x){
     res = (unsigned long long)___ivy_choose(0,"fml:res",0);
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16141);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16128);
         {
             loc__idx = str__begin(x);
             {
                 bool loc__neg;
-    loc__neg = (bool)___ivy_choose(0,"loc:neg",16140);
+    loc__neg = (bool)___ivy_choose(0,"loc:neg",16127);
                 {
                     loc__neg = false;
                     if(((loc__idx < str__end(x)) && (str__value(x,loc__idx) == 45))){
@@ -22589,7 +21987,7 @@ unsigned long long ivyc_s1::ext__pos__from_str(const str& x){
                             res = (res * 10);
                             {
                                 int loc__digit;
-    loc__digit = (int)___ivy_choose(0,"loc:digit",16139);
+    loc__digit = (int)___ivy_choose(0,"loc:digit",16126);
                                 {
                                     loc__digit = str__value(x,loc__idx);
                                     while((48 < loc__digit)){
@@ -22645,7 +22043,7 @@ void ivyc_s1::ext__lex(pstate& st){
         ext__get_annot(st);
         {
             unsigned long long loc__start;
-    loc__start = (unsigned long long)___ivy_choose(0,"loc:start",16144);
+    loc__start = (unsigned long long)___ivy_choose(0,"loc:start",16131);
             {
                 loc__start = st.p;
                 if(((st.p < str__end(st.b)) && (str__value(st.b,st.p) == 34))){
@@ -22657,7 +22055,7 @@ void ivyc_s1::ext__lex(pstate& st){
                     {
                         {
                             int loc__last;
-    loc__last = (int)___ivy_choose(0,"loc:last",16143);
+    loc__last = (int)___ivy_choose(0,"loc:last",16130);
                             {
                                 loc__last = 32;
                                 while(((st.p < str__end(st.b)) && !char__is_white(str__value(st.b,st.p)) && ((loc__last == 32) || (char__kind(str__value(st.b,st.p)) == char__kind(loc__last))) && !(char__kind(loc__last) == char__bracket))){
@@ -22692,7 +22090,7 @@ ivyc_s1::ivy__param_map ivyc_s1::ext__ivy__param_set(const vector__ivy__expr__& 
     ivyc_s1::ivy__param_map res;
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16146);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16133);
         {
             loc__idx = vector__ivy__expr____begin(ps);
             while((loc__idx < vector__ivy__expr____end(ps))){
@@ -22773,14 +22171,6 @@ void ivyc_s1::ext__cpp__symbol__encode(const cpp__symbol& s, pretty& b, int prio
         }
     }
 }
-void ivyc_s1::ext__ivy__ident_to_moduledc__get(const ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, ivy__moduledc& y){
-    {
-
-        ivy__ident_to_moduledc::const_iterator it = a.find(x);
-        if (it != a.end())
-            y = it->second;
-    }
-}
 ivyc_s1::str ivyc_s1::ext__ivy__testelide(const str& inp){
     ivyc_s1::str res;
     {
@@ -22842,6 +22232,54 @@ ivyc_s1::str ivyc_s1::ext__ivy__testelide(const str& inp){
         }
     }
     return res;
+}
+ivyc_s1::ivy__global_types ivyc_s1::ext__ivy__prog__get_global_types(const ivy__prog& p, bool curried){
+    ivyc_s1::ivy__global_types s;
+    s.curried = (bool)___ivy_choose(0,"fml:s",0);
+    {
+        s.curried = curried;
+        {
+            unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16140);
+            {
+                loc__idx = vector__ivy__decl____begin(p.decls);
+                while((loc__idx < vector__ivy__decl____end(p.decls))){
+                    {
+                        {
+                            ivy__vardc self__COLON__ivy__vardc;
+                            if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(vector__ivy__decl____value(p.decls,loc__idx));
+                            if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 3)){
+                                ext__ivy__vardc__build_global_types(self__COLON__ivy__vardc, s);
+                            }
+                            else {
+                                {
+                                    ivy__typedc self__COLON__ivy__typedc;
+                                    if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(vector__ivy__decl____value(p.decls,loc__idx));
+                                    if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 2)){
+                                        ext__ivy__typedc__build_global_types(self__COLON__ivy__typedc, s);
+                                    }
+                                    else {
+                                        {
+                                            ivy__actdc self__COLON__ivy__actdc;
+                                            if (((vector__ivy__decl____value(p.decls,loc__idx)).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(vector__ivy__decl____value(p.decls,loc__idx));
+                                            if(((vector__ivy__decl____value(p.decls,loc__idx)).tag == 0)){
+                                                ext__ivy__actdc__build_global_types(self__COLON__ivy__actdc, s);
+                                            }
+                                            else {
+                                                ext__ivy__decl__build_global_types(vector__ivy__decl____value(p.decls,loc__idx), s);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        loc__idx = ext__vector__ivy__decl____domain__next(loc__idx);
+                    }
+                }
+            }
+        }
+    }
+    return s;
 }
 void ivyc_s1::ext__ivy__push_pop_ident_set__map_t__set(ivy__push_pop_ident_set__map_t& a, ivyc_s1::ivy__ident x, bool y){
     {
@@ -22934,7 +22372,7 @@ bool ivyc_s1::ext__ivy__actdc__emitted(const ivy__actdc& s, const ivy__tocppst& 
     {
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16157);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16145);
             {
                 loc__0 = ext__ivy__actdc__is_member(s);
                 res = ((!loc__0 || !st.proto_only) && !(s.kind == ivy__action_kind__external));
@@ -22947,18 +22385,18 @@ void ivyc_s1::ext__ivy__type_infer_known(ivyc_s1::ivy__expr& e, ivyc_s1::ivy__ex
     {
         {
             ivy__decost loc__0;
-    loc__0.counter = (unsigned long long)___ivy_choose(0,"loc:0",16160);
-    loc__0.member = (bool)___ivy_choose(0,"loc:0",16160);
-    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16160);
-    loc__0.error_reported = (bool)___ivy_choose(0,"loc:0",16160);
+    loc__0.counter = (unsigned long long)___ivy_choose(0,"loc:0",16148);
+    loc__0.member = (bool)___ivy_choose(0,"loc:0",16148);
+    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16148);
+    loc__0.error_reported = (bool)___ivy_choose(0,"loc:0",16148);
             {
                 loc__0 = ext__ivy__decost__make();
                 {
                     ivy__decost loc__st;
-    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16159);
-    loc__st.member = (bool)___ivy_choose(0,"loc:st",16159);
-    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16159);
-    loc__st.error_reported = (bool)___ivy_choose(0,"loc:st",16159);
+    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16147);
+    loc__st.member = (bool)___ivy_choose(0,"loc:st",16147);
+    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16147);
+    loc__st.error_reported = (bool)___ivy_choose(0,"loc:st",16147);
                     {
                         loc__st = loc__0;
                         {
@@ -23037,7 +22475,7 @@ ivyc_s1::ivy__subtypes ivyc_s1::ext__ivy__prog__get_subtypes(const ivy__prog& p)
     ivyc_s1::ivy__subtypes s;
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16162);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16150);
         {
             loc__idx = vector__ivy__decl____begin(p.decls);
             while((loc__idx < vector__ivy__decl____end(p.decls))){
@@ -23059,10 +22497,112 @@ ivyc_s1::ivy__subtypes ivyc_s1::ext__ivy__prog__get_subtypes(const ivy__prog& p)
     }
     return s;
 }
-ivyc_s1::ivy__ident ivyc_s1::ext__ivy__symbol__get_name(const ivy__symbol& s){
-    ivyc_s1::ivy__ident res;
-    res = s.name;
-    return res;
+void ivyc_s1::ext__ivy__groupdc__flat(const ivy__groupdc& s, ivy__flatst& st){
+    {
+        {
+            unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16151);
+            {
+                loc__idx = vector__ivy__decl____begin(s.decls);
+                while((loc__idx < vector__ivy__decl____end(s.decls))){
+                    {
+                        {
+                            ivy__initdc self__COLON__ivy__initdc;
+                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 11)) self__COLON__ivy__initdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__initdc >(vector__ivy__decl____value(s.decls,loc__idx));
+                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 11)){
+                                ext__ivy__initdc__flat(self__COLON__ivy__initdc, st);
+                            }
+                            else {
+                                {
+                                    ivy__instancedc self__COLON__ivy__instancedc;
+                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 10)){
+                                        ext__ivy__instancedc__flat(self__COLON__ivy__instancedc, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__objectdc self__COLON__ivy__objectdc;
+                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 9)){
+                                                ext__ivy__objectdc__flat(self__COLON__ivy__objectdc, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__instantiatedc self__COLON__ivy__instantiatedc;
+                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 8)){
+                                                        ext__ivy__instantiatedc__flat(self__COLON__ivy__instantiatedc, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__interpdc self__COLON__ivy__interpdc;
+                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 5)) self__COLON__ivy__interpdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__interpdc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 5)){
+                                                                ext__ivy__interpdc__flat(self__COLON__ivy__interpdc, st);
+                                                            }
+                                                            else {
+                                                                {
+                                                                    ivy__header self__COLON__ivy__header;
+                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 4)) self__COLON__ivy__header = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__header >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 4)){
+                                                                        ext__ivy__header__flat(self__COLON__ivy__header, st);
+                                                                    }
+                                                                    else {
+                                                                        {
+                                                                            ivy__vardc self__COLON__ivy__vardc;
+                                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 3)){
+                                                                                ext__ivy__vardc__flat(self__COLON__ivy__vardc, st);
+                                                                            }
+                                                                            else {
+                                                                                {
+                                                                                    ivy__typedc self__COLON__ivy__typedc;
+                                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 2)){
+                                                                                        ext__ivy__typedc__flat(self__COLON__ivy__typedc, st);
+                                                                                    }
+                                                                                    else {
+                                                                                        {
+                                                                                            ivy__groupdc self__COLON__ivy__groupdc;
+                                                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 1)){
+                                                                                                ext__ivy__groupdc__flat(self__COLON__ivy__groupdc, st);
+                                                                                            }
+                                                                                            else {
+                                                                                                {
+                                                                                                    ivy__actdc self__COLON__ivy__actdc;
+                                                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(vector__ivy__decl____value(s.decls,loc__idx));
+                                                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 0)){
+                                                                                                        ext__ivy__actdc__flat(self__COLON__ivy__actdc, st);
+                                                                                                    }
+                                                                                                    else {
+                                                                                                        ext__ivy__decl__flat(vector__ivy__decl____value(s.decls,loc__idx), st);
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        loc__idx = ext__vector__ivy__decl____domain__next(loc__idx);
+                    }
+                }
+            }
+        }
+    }
 }
 void ivyc_s1::ext__str__append(str& a, int v){
     {
@@ -23337,18 +22877,18 @@ void ivyc_s1::ext__ivy__type_unify_exprs(ivyc_s1::ivy__expr& e1, ivyc_s1::ivy__e
     {
         {
             ivy__decost loc__0;
-    loc__0.counter = (unsigned long long)___ivy_choose(0,"loc:0",16173);
-    loc__0.member = (bool)___ivy_choose(0,"loc:0",16173);
-    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16173);
-    loc__0.error_reported = (bool)___ivy_choose(0,"loc:0",16173);
+    loc__0.counter = (unsigned long long)___ivy_choose(0,"loc:0",16162);
+    loc__0.member = (bool)___ivy_choose(0,"loc:0",16162);
+    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16162);
+    loc__0.error_reported = (bool)___ivy_choose(0,"loc:0",16162);
             {
                 loc__0 = ext__ivy__decost__make();
                 {
                     ivy__decost loc__st;
-    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16172);
-    loc__st.member = (bool)___ivy_choose(0,"loc:st",16172);
-    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16172);
-    loc__st.error_reported = (bool)___ivy_choose(0,"loc:st",16172);
+    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16161);
+    loc__st.member = (bool)___ivy_choose(0,"loc:st",16161);
+    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16161);
+    loc__st.error_reported = (bool)___ivy_choose(0,"loc:st",16161);
                     {
                         loc__st = loc__0;
                         {
@@ -23504,11 +23044,6 @@ bool ivyc_s1::ext__ivy__ident_to_exprs__mem(const ivy__ident_to_exprs& a, ivyc_s
     }
     return res;
 }
-ivyc_s1::annot ivyc_s1::ext__cpp__header__get_ann(const cpp__header& d){
-    ivyc_s1::annot res;
-    res = d.ann;
-    return res;
-}
 void ivyc_s1::ext__ivy__type_error(ivyc_s1::ivy__expr e, ivy__decost& st){
     if(!st.error_reported){
         {
@@ -23543,30 +23078,17 @@ void ivyc_s1::ext__ivy__type_error(ivyc_s1::ivy__expr e, ivy__decost& st){
         }
     }
 }
-bool ivyc_s1::ext__ivy__file__exist(const str& fname){
-    bool ok;
-    ok = (bool)___ivy_choose(0,"fml:ok",0);
-
-
-    std::string fn;
-    for (size_t i = 0; i < fname.size(); i++)
-    fn.push_back(fname[i]);
-    ok = ::access(fn.c_str(),F_OK) != -1;
-    return ok;
+ivyc_s1::annot ivyc_s1::ext__ivy__expr__get_ann(ivyc_s1::ivy__expr s){
+    ivyc_s1::annot res;
+    {
+    }
+    return res;
 }
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__decl__get_name(ivyc_s1::cpp__decl d){
     ivyc_s1::cpp__expr res;
     {
     }
     return res;
-}
-void ivyc_s1::ext__ivy__cannot_write__encode(const ivy__cannot_write& e, pretty& b){
-    {
-        ext__pretty__extend(b, __lit<str>("Failed to write file:"));
-        ext__pretty__extend(b, __lit<str>(" "));
-        ext__pretty__extend(b, e.n);
-        ext__pretty__newline(b);
-    }
 }
 ivyc_s1::ivy__asgn ivyc_s1::ext__ivy__asgn__flat_int(const ivy__asgn& s, ivy__flatst& st){
     ivyc_s1::ivy__asgn res;
@@ -23687,7 +23209,7 @@ void ivyc_s1::ext__ivy__typedc__defd(const ivy__typedc& s, ivy__flatst& st){
 void ivyc_s1::ext__ivy__fix_object_clash(ivyc_s1::ivy__ident& id, const ivy__tocppst& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16182);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16171);
         {
             loc__0 = ext__ivy__ident_set__mem(st.objects, id);
             if(loc__0){
@@ -23707,8 +23229,8 @@ void ivyc_s1::ext__ivy__fix_object_clash(ivyc_s1::ivy__ident& id, const ivy__toc
 void ivyc_s1::ext__pretty__unnest(pretty& self){
     {
         pretty__state loc__oldst;
-    loc__oldst.begin = (unsigned long long)___ivy_choose(0,"loc:oldst",16183);
-    loc__oldst.total = (unsigned long long)___ivy_choose(0,"loc:oldst",16183);
+    loc__oldst.begin = (unsigned long long)___ivy_choose(0,"loc:oldst",16172);
+    loc__oldst.total = (unsigned long long)___ivy_choose(0,"loc:oldst",16172);
         {
             loc__oldst = self.st;
             ext__vector__pos____pop_back(self.stack);
@@ -23771,60 +23293,6 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__vardecl__get_type(const cpp__vardecl& d){
     }
     return res;
 }
-void ivyc_s1::ext__pretty__flush(pretty& self){
-    {
-        {
-            unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16184);
-            {
-                loc__idx = vector__pretty__token____begin(self.tokens);
-                while((loc__idx < vector__pretty__token____end(self.tokens))){
-                    {
-                        ext__pretty__print(self, vector__pretty__token____value(self.tokens,loc__idx));
-                        loc__idx = ext__vector__pretty__token____domain__next(loc__idx);
-                    }
-                }
-                self.tokens = ext__vector__pretty__token____empty();
-            }
-        }
-    }
-}
-bool ivyc_s1::ext__ivy__is_logvar_name(const str& name){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    if(char__is_capital(str__value(name,0))){
-        {
-            res = true;
-            {
-                unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16186);
-                {
-                    loc__0 = ext__pos__next(str__begin(name));
-                    {
-                        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16185);
-                        {
-                            loc__idx = loc__0;
-                            while((res && (loc__idx < str__end(name)))){
-                                res = char__is_digit(str__value(name,loc__idx));
-                            }
-                            loc__idx = ext__pos__next(loc__idx);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return res;
-}
-ivyc_s1::ivy__varst ivyc_s1::ext__ivy__varst__flat_int(const ivy__varst& s, ivy__flatst& st){
-    ivyc_s1::ivy__varst res;
-    {
-        res = s;
-        res.name = ext__ivy__flat_formal(res.name, st);
-    }
-    return res;
-}
 void ivyc_s1::ext__ivy__ident__encode(ivyc_s1::ivy__ident s, pretty& b, int prio){
     {
     }
@@ -23835,12 +23303,11 @@ ivyc_s1::ivy__verb ivyc_s1::ext__ivy__ident__get_verb(ivyc_s1::ivy__ident s){
     vrb = ivy__verb__none;
     return vrb;
 }
-ivyc_s1::ivy__ident ivyc_s1::ext__ivy__dotident__get_namesp(const ivy__dotident& s){
-    ivyc_s1::ivy__ident res;
+void ivyc_s1::ext__ivy__symeval__set(ivy__symeval& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y){
     {
-        res = s.namesp;
+
+        a[x] = y;
     }
-    return res;
 }
 ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
     ivyc_s1::cpp__prog res;
@@ -23851,19 +23318,19 @@ ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
                 loc__s = sp;
                 {
                     ivy__tocppst loc__st;
-    loc__st.globals.curried = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.is_member = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.in_class = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.proto_only = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.native = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.forward = (bool)___ivy_choose(0,"loc:st",16209);
-    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16209);
-    loc__st.dot_rhs = (bool)___ivy_choose(0,"loc:st",16209);
+    loc__st.globals.curried = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.is_member = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.in_class = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.proto_only = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.native = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.forward = (bool)___ivy_choose(0,"loc:st",16195);
+    loc__st.counter = (unsigned long long)___ivy_choose(0,"loc:st",16195);
+    loc__st.dot_rhs = (bool)___ivy_choose(0,"loc:st",16195);
                     {
                         loc__st.subtype_rel = ext__ivy__prog__get_subtypes(loc__s);
                         {
                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16208);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16194);
                             {
                                 loc__idx = vector__ivy__decl____begin(loc__s.decls);
                                 while((loc__idx < vector__ivy__decl____end(loc__s.decls))){
@@ -24025,7 +23492,7 @@ ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
                                     {
                                         {
                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16192);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16178);
                                             {
                                                 {
                                                     ivy__initdc self__COLON__ivy__initdc;
@@ -24134,7 +23601,7 @@ ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
                                             loc__ivyd = vector__ivy__decl____value(loc__s.decls,loc__idx);
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16194);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16180);
                                                 {
                                                     {
                                                         ivy__initdc self__COLON__ivy__initdc;
@@ -24237,25 +23704,25 @@ ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
                                 }
                                 {
                                     cpp__funcdecl loc__main;
-    loc__main.ftype.base.is_const = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.ftype.is_const = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.ftype.has_initializer = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.has_body = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.is_static = (bool)___ivy_choose(0,"loc:main",16207);
-    loc__main.is_virtual = (bool)___ivy_choose(0,"loc:main",16207);
+    loc__main.ftype.base.is_const = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.ftype.is_const = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.ftype.has_initializer = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.has_body = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.is_static = (bool)___ivy_choose(0,"loc:main",16193);
+    loc__main.is_virtual = (bool)___ivy_choose(0,"loc:main",16193);
                                     {
                                         loc__main.ftype.base._type = ext__cpp__inttype(loc__main.ann);
                                         loc__main.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("main"), loc__main.ann);
                                         {
                                             cpp__simpletype loc__mainarg0;
-    loc__mainarg0.is_const = (bool)___ivy_choose(0,"loc:mainarg0",16206);
-    loc__mainarg0.is_ref = (bool)___ivy_choose(0,"loc:mainarg0",16206);
+    loc__mainarg0.is_const = (bool)___ivy_choose(0,"loc:mainarg0",16192);
+    loc__mainarg0.is_ref = (bool)___ivy_choose(0,"loc:mainarg0",16192);
                                             {
                                                 {
                                                     cpp__simpletype loc__mainarg1;
-    loc__mainarg1.is_const = (bool)___ivy_choose(0,"loc:mainarg1",16205);
-    loc__mainarg1.is_ref = (bool)___ivy_choose(0,"loc:mainarg1",16205);
+    loc__mainarg1.is_const = (bool)___ivy_choose(0,"loc:mainarg1",16191);
+    loc__mainarg1.is_ref = (bool)___ivy_choose(0,"loc:mainarg1",16191);
                                                     {
                                                         loc__mainarg0._type = ext__cpp__inttype(loc__main.ann);
                                                         loc__mainarg0.name = ext__cpp__symbol__makestr(__lit<str>("argc"), loc__main.ann);
@@ -24437,99 +23904,103 @@ ivyc_s1::cpp__prog ivyc_s1::ext__ivy__prog__to_cpp(const ivy__prog& sp){
     }
     return res;
 }
-ivyc_s1::ivy__cannot_write ivyc_s1::ext__ivy__cannot_write__make(const str& n){
-    ivyc_s1::ivy__cannot_write res;
+void ivyc_s1::ext__cpp__decl__encode(ivyc_s1::cpp__decl s, pretty& b, int prio){
     {
-        res.n = n;
+    }
+}
+ivyc_s1::annot ivyc_s1::ext__cpp__decl__get_ann(ivyc_s1::cpp__decl d){
+    ivyc_s1::annot res;
+    {
     }
     return res;
 }
-void ivyc_s1::ext__ivy__groupdc__flat(const ivy__groupdc& s, ivy__flatst& st){
+void ivyc_s1::ext__cpp__funcdecl__encode(const cpp__funcdecl& s, pretty& b, int prio){
     {
         {
-            unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16211);
+            annot_i self__COLON__annot_i;
+            if (((s.ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(s.ann);
+            if(((s.ann).tag == 0)){
+                ext__annot_i__encode(self__COLON__annot_i, b);
+            }
+            else {
+                ext__annot__encode(s.ann, b);
+            }
+        }
+        ext__pretty__nest(b);
+        if(s.is_static){
             {
-                loc__idx = vector__ivy__decl____begin(s.decls);
-                while((loc__idx < vector__ivy__decl____end(s.decls))){
-                    {
+                ext__pretty__extend(b, __lit<str>("static"));
+                ext__pretty__extend(b, __lit<str>(" "));
+            }
+        }
+        if(s.is_virtual){
+            {
+                ext__pretty__extend(b, __lit<str>("virtual"));
+                ext__pretty__extend(b, __lit<str>(" "));
+            }
+        }
+        ext__cpp__functype__encode(s.ftype, b, 0);
+        if(s.has_body){
+            {
+                ext__pretty__unnest(b);
+                ext__pretty__extend(b, __lit<str>(" "));
+                {
+                    cpp__retst self__COLON__cpp__retst;
+                    if (((s.body).tag == 7)) self__COLON__cpp__retst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__retst >(s.body);
+                    if(((s.body).tag == 7)){
+                        ext__cpp__retst__encode(self__COLON__cpp__retst, b, 2);
+                    }
+                    else {
                         {
-                            ivy__initdc self__COLON__ivy__initdc;
-                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 11)) self__COLON__ivy__initdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__initdc >(vector__ivy__decl____value(s.decls,loc__idx));
-                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 11)){
-                                ext__ivy__initdc__flat(self__COLON__ivy__initdc, st);
+                            cpp__varst self__COLON__cpp__varst;
+                            if (((s.body).tag == 6)) self__COLON__cpp__varst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__varst >(s.body);
+                            if(((s.body).tag == 6)){
+                                ext__cpp__varst__encode(self__COLON__cpp__varst, b, 2);
                             }
                             else {
                                 {
-                                    ivy__instancedc self__COLON__ivy__instancedc;
-                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 10)){
-                                        ext__ivy__instancedc__flat(self__COLON__ivy__instancedc, st);
+                                    cpp__breakst self__COLON__cpp__breakst;
+                                    if (((s.body).tag == 5)) self__COLON__cpp__breakst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__breakst >(s.body);
+                                    if(((s.body).tag == 5)){
+                                        ext__cpp__breakst__encode(self__COLON__cpp__breakst, b, 2);
                                     }
                                     else {
                                         {
-                                            ivy__objectdc self__COLON__ivy__objectdc;
-                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 9)){
-                                                ext__ivy__objectdc__flat(self__COLON__ivy__objectdc, st);
+                                            cpp__whilest self__COLON__cpp__whilest;
+                                            if (((s.body).tag == 4)) self__COLON__cpp__whilest = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__whilest >(s.body);
+                                            if(((s.body).tag == 4)){
+                                                ext__cpp__whilest__encode(self__COLON__cpp__whilest, b, 2);
                                             }
                                             else {
                                                 {
-                                                    ivy__instantiatedc self__COLON__ivy__instantiatedc;
-                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 8)){
-                                                        ext__ivy__instantiatedc__flat(self__COLON__ivy__instantiatedc, st);
+                                                    cpp__ifst self__COLON__cpp__ifst;
+                                                    if (((s.body).tag == 3)) self__COLON__cpp__ifst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__ifst >(s.body);
+                                                    if(((s.body).tag == 3)){
+                                                        ext__cpp__ifst__encode(self__COLON__cpp__ifst, b, 2);
                                                     }
                                                     else {
                                                         {
-                                                            ivy__interpdc self__COLON__ivy__interpdc;
-                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 5)) self__COLON__ivy__interpdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__interpdc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 5)){
-                                                                ext__ivy__interpdc__flat(self__COLON__ivy__interpdc, st);
+                                                            cpp__skipst self__COLON__cpp__skipst;
+                                                            if (((s.body).tag == 2)) self__COLON__cpp__skipst = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__skipst >(s.body);
+                                                            if(((s.body).tag == 2)){
+                                                                ext__cpp__skipst__encode(self__COLON__cpp__skipst, b, 2);
                                                             }
                                                             else {
                                                                 {
-                                                                    ivy__header self__COLON__ivy__header;
-                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 4)) self__COLON__ivy__header = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__header >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 4)){
-                                                                        ext__ivy__header__flat(self__COLON__ivy__header, st);
+                                                                    cpp__sequence self__COLON__cpp__sequence;
+                                                                    if (((s.body).tag == 1)) self__COLON__cpp__sequence = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__sequence >(s.body);
+                                                                    if(((s.body).tag == 1)){
+                                                                        ext__cpp__sequence__encode(self__COLON__cpp__sequence, b, 2);
                                                                     }
                                                                     else {
                                                                         {
-                                                                            ivy__vardc self__COLON__ivy__vardc;
-                                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 3)){
-                                                                                ext__ivy__vardc__flat(self__COLON__ivy__vardc, st);
+                                                                            cpp__asgn self__COLON__cpp__asgn;
+                                                                            if (((s.body).tag == 0)) self__COLON__cpp__asgn = ivyc_s1::cpp__stmt::unwrap< ivyc_s1::cpp__asgn >(s.body);
+                                                                            if(((s.body).tag == 0)){
+                                                                                ext__cpp__asgn__encode(self__COLON__cpp__asgn, b, 2);
                                                                             }
                                                                             else {
-                                                                                {
-                                                                                    ivy__typedc self__COLON__ivy__typedc;
-                                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 2)){
-                                                                                        ext__ivy__typedc__flat(self__COLON__ivy__typedc, st);
-                                                                                    }
-                                                                                    else {
-                                                                                        {
-                                                                                            ivy__groupdc self__COLON__ivy__groupdc;
-                                                                                            if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                                                            if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 1)){
-                                                                                                ext__ivy__groupdc__flat(self__COLON__ivy__groupdc, st);
-                                                                                            }
-                                                                                            else {
-                                                                                                {
-                                                                                                    ivy__actdc self__COLON__ivy__actdc;
-                                                                                                    if (((vector__ivy__decl____value(s.decls,loc__idx)).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(vector__ivy__decl____value(s.decls,loc__idx));
-                                                                                                    if(((vector__ivy__decl____value(s.decls,loc__idx)).tag == 0)){
-                                                                                                        ext__ivy__actdc__flat(self__COLON__ivy__actdc, st);
-                                                                                                    }
-                                                                                                    else {
-                                                                                                        ext__ivy__decl__flat(vector__ivy__decl____value(s.decls,loc__idx), st);
-                                                                                                    }
-                                                                                                }
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
+                                                                                ext__cpp__stmt__encode(s.body, b, 2);
                                                                             }
                                                                         }
                                                                     }
@@ -24544,19 +24015,37 @@ void ivyc_s1::ext__ivy__groupdc__flat(const ivy__groupdc& s, ivy__flatst& st){
                                 }
                             }
                         }
-                        loc__idx = ext__vector__ivy__decl____domain__next(loc__idx);
                     }
                 }
             }
         }
+        else {
+            {
+                ext__pretty__extend(b, __lit<str>(";"));
+                ext__pretty__unnest(b);
+                ext__pretty__newline(b);
+            }
+        }
     }
+}
+ivyc_s1::ivy__cannot_write ivyc_s1::ext__ivy__cannot_write__make(const str& n){
+    ivyc_s1::ivy__cannot_write res;
+    {
+        res.n = n;
+    }
+    return res;
+}
+ivyc_s1::ivy__ident ivyc_s1::ext__ivy__symbol__get_name(const ivy__symbol& s){
+    ivyc_s1::ivy__ident res;
+    res = s.name;
+    return res;
 }
 ivyc_s1::annot ivyc_s1::ext__annot_i__strip(const annot_i& s){
     ivyc_s1::annot res;
     {
         {
             annot_i loc__news;
-    loc__news.line = (unsigned long long)___ivy_choose(0,"loc:news",16212);
+    loc__news.line = (unsigned long long)___ivy_choose(0,"loc:news",16197);
             {
                 loc__news = s;
                 loc__news.comments = ext__vector__str____empty();
@@ -24616,6 +24105,11 @@ void ivyc_s1::ext__cpp__enumdecl__encode(const cpp__enumdecl& s, pretty& b, int 
         ext__pretty__newline(b);
     }
 }
+ivyc_s1::annot ivyc_s1::ext__cpp__header__get_ann(const cpp__header& d){
+    ivyc_s1::annot res;
+    res = d.ann;
+    return res;
+}
 ivyc_s1::ivy__ident ivyc_s1::ext__ivy__dotident__prefix(const ivy__dotident& s, ivyc_s1::ivy__ident pref){
     ivyc_s1::ivy__ident res;
     {
@@ -24660,6 +24154,15 @@ void ivyc_s1::ext__ivy__decost__map__get(const ivy__decost__map& a, ivyc_s1::ivy
             y = it->second;
     }
 }
+void ivyc_s1::ext__ivy__set_built_in_type(ivy__verb vrb, const str& ty, bool m, bool io, bool oi, bool fi){
+    {
+        ivy__optypes[vrb] = ext__ivy__expr__dec(ty);
+        ivy__verb_mono[vrb] = m;
+        ivy__verb_in_to_out[vrb] = io;
+        ivy__verb_out_to_in[vrb] = oi;
+        ivy__verb_first_to_in[vrb] = fi;
+    }
+}
 void ivyc_s1::ext__ivy__decost__unify(ivy__decost& st, ivyc_s1::ivy__expr x0, ivyc_s1::ivy__expr y0){
     {
         {
@@ -24691,7 +24194,7 @@ void ivyc_s1::ext__ivy__decost__unify(ivy__decost& st, ivyc_s1::ivy__expr x0, iv
                                             if(((loc__nx).tag == 1)){
                                                 {
                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16214);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16199);
                                                     {
                                                         {
                                                             ivy__app self__COLON__ivy__app;
@@ -24779,13 +24282,13 @@ void ivyc_s1::ext__ivy__decost__unify(ivy__decost& st, ivyc_s1::ivy__expr x0, iv
                             else {
                                 {
                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16221);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16206);
                                     bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16221);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16206);
                                     bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",16221);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",16206);
                                     bool loc__3;
-    loc__3 = (bool)___ivy_choose(0,"loc:3",16221);
+    loc__3 = (bool)___ivy_choose(0,"loc:3",16206);
                                     {
                                         {
                                             ivy__app self__COLON__ivy__app;
@@ -24918,7 +24421,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__namedtype(ivyc_s1::cpp__ident name, ivyc_s
     {
         {
             cpp__symbol loc__s;
-    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16224);
+    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16209);
             {
                 loc__s.name = name;
                 {
@@ -25092,12 +24595,12 @@ void ivyc_s1::ext__ivy__expr__tup__encode(const vector__ivy__expr__& s, pretty& 
             }
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16229);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16214);
                 {
                     loc__0 = ext__vector__ivy__expr____domain__next(vector__ivy__expr____begin(s));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16228);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16213);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__ivy__expr____end(s))){
@@ -25203,14 +24706,6 @@ void ivyc_s1::ext__cpp__breakst__encode_int(const cpp__breakst& s, pretty& b, in
         ext__pretty__extend(b, __lit<str>("break;"));
     }
 }
-unsigned long long ivyc_s1::ext__vector__cpp__expr____domain__next(unsigned long long x){
-    unsigned long long y;
-    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
-    {
-        y = (x + 1);
-    }
-    return y;
-}
 ivyc_s1::cpp__ident ivyc_s1::ext__ivy__ident__to_cpp(ivyc_s1::ivy__ident s, bool native){
     ivyc_s1::cpp__ident res;
     {
@@ -25257,7 +24752,7 @@ void ivyc_s1::ext__ivy__expr__parse(pstate& st, int prio, ivyc_s1::ivy__expr& re
         else {
             {
                 ivy__verb loc__vrb;
-    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16235);
+    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16219);
                 {
                     loc__vrb = ivy__str_to_verb[st.tok];
                     if((!(loc__vrb == ivy__verb__none) && (ivy__verb_to_arity[loc__vrb] == 1))){
@@ -25289,7 +24784,7 @@ void ivyc_s1::ext__ivy__expr__parse(pstate& st, int prio, ivyc_s1::ivy__expr& re
         }
         {
             ivy__verb loc__vrb;
-    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16238);
+    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16222);
             {
                 loc__vrb = ivy__str_to_verb[st.tok];
                 while((st.ok && !(loc__vrb == ivy__verb__none) && (prio < ivy__verb_to_prio[loc__vrb]))){
@@ -25524,30 +25019,30 @@ void ivyc_s1::ext__ivy__add_numeric_cons(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16248);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16248);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16232);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16232);
             {
                 loc__0 = ext__ivy__make_cpp_cons(s);
                 {
                     cpp__funcdecl loc__ncons;
-    loc__ncons.ftype.base.is_const = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.ftype.is_const = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.ftype.has_initializer = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.has_body = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.is_static = (bool)___ivy_choose(0,"loc:ncons",16247);
-    loc__ncons.is_virtual = (bool)___ivy_choose(0,"loc:ncons",16247);
+    loc__ncons.ftype.base.is_const = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.ftype.is_const = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.ftype.has_initializer = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.has_body = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.is_static = (bool)___ivy_choose(0,"loc:ncons",16231);
+    loc__ncons.is_virtual = (bool)___ivy_choose(0,"loc:ncons",16231);
                     {
                         loc__ncons = loc__0;
                         {
                             cpp__simpletype loc__nconsarg0;
-    loc__nconsarg0.is_const = (bool)___ivy_choose(0,"loc:nconsarg0",16246);
-    loc__nconsarg0.is_ref = (bool)___ivy_choose(0,"loc:nconsarg0",16246);
+    loc__nconsarg0.is_const = (bool)___ivy_choose(0,"loc:nconsarg0",16230);
+    loc__nconsarg0.is_ref = (bool)___ivy_choose(0,"loc:nconsarg0",16230);
                             {
                                 loc__nconsarg0._type = ext__cpp__symbol__makestr(__lit<str>("long long"), s.ann);
                                 loc__nconsarg0.name = ext__cpp__symbol__makestr(__lit<str>("value"), loc__ncons.ann);
@@ -25565,7 +25060,7 @@ void ivyc_s1::ext__get_line(pstate& st, str& line){
     {
         {
             unsigned long long loc__start;
-    loc__start = (unsigned long long)___ivy_choose(0,"loc:start",16249);
+    loc__start = (unsigned long long)___ivy_choose(0,"loc:start",16233);
             {
                 loc__start = st.p;
                 while(((st.p < str__end(st.b)) && !(str__value(st.b,st.p) == 10))){
@@ -25727,7 +25222,7 @@ void ivyc_s1::ext__cpp__asgn__encode_int(const cpp__asgn& s, pretty& b, int prio
         ext__pretty__nest(b);
         {
             cpp__verb loc__0;
-    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16250);
+    loc__0 = (cpp__verb)___ivy_choose(0,"loc:0",16234);
             {
                 {
                     cpp__symbol self__COLON__cpp__symbol;
@@ -25812,7 +25307,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
     ivyc_s1::cpp__expr res;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16293);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16277);
         {
             loc__0 = ext__ivy__app__is(s, ivy__verb__colon);
             if(loc__0){
@@ -25842,9 +25337,9 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                         if(((loc__arg).tag == 0)){
                             {
                                 ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16262);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16246);
                                 ivy__verb loc__1;
-    loc__1 = (ivy__verb)___ivy_choose(0,"loc:1",16262);
+    loc__1 = (ivy__verb)___ivy_choose(0,"loc:1",16246);
                                 {
                                     {
                                         ivy__symbol self__COLON__ivy__symbol;
@@ -25884,10 +25379,10 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                     else {
                                         {
                                             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16261);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16245);
                                             ivyc_s1::ivy__ident loc__1;
                                             bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",16261);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",16245);
                                             {
                                                 {
                                                     ivy__symbol self__COLON__ivy__symbol;
@@ -25948,7 +25443,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                 else {
                                                     {
                                                         ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16260);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16244);
                                                         {
                                                             {
                                                                 ivy__symbol self__COLON__ivy__symbol;
@@ -25999,7 +25494,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                 {
                                                                     ivyc_s1::ivy__ident loc__0;
                                                                     bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16259);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16243);
                                                                     {
                                                                         {
                                                                             ivy__symbol self__COLON__ivy__symbol;
@@ -26015,7 +25510,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                         if(loc__1){
                                                                             {
                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16258);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16242);
                                                                                 {
                                                                                     {
                                                                                         ivy__app self__COLON__ivy__app;
@@ -26082,7 +25577,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
             else {
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16292);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16276);
                     {
                         loc__0 = ext__ivy__app__is(s, ivy__verb__arrow);
                         if(loc__0){
@@ -26097,7 +25592,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                         else {
                             {
                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16291);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16275);
                                 {
                                     loc__0 = ext__ivy__app__is(s, ivy__verb__isav);
                                     if(loc__0){
@@ -26147,7 +25642,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                         }
                                                         {
                                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16268);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16252);
                                                             {
                                                                 loc__0 = ext__ivy__is_cpp_this(loc__arg0);
                                                                 if(loc__0){
@@ -26202,10 +25697,10 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                     else {
                                         {
                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16290);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16274);
                                             ivyc_s1::ivy__expr loc__1;
                                             ivy__verb loc__2;
-    loc__2 = (ivy__verb)___ivy_choose(0,"loc:2",16290);
+    loc__2 = (ivy__verb)___ivy_choose(0,"loc:2",16274);
                                             {
                                                 {
                                                     ivy__app self__COLON__ivy__app;
@@ -26284,7 +25779,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                         ivyc_s1::ivy__expr loc__0;
                                                                         ivyc_s1::ivy__ident loc__1;
                                                                         bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",16287);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",16271);
                                                                         {
                                                                             {
                                                                                 ivy__app self__COLON__ivy__app;
@@ -26343,7 +25838,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                     st.outputs = ext__vector__ivy__expr____empty();
                                                                                                     {
                                                                                                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16284);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16268);
                                                                                                         {
                                                                                                             loc__idx = vector__ivy__expr____begin(s.args);
                                                                                                             while((loc__idx < vector__ivy__expr____end(s.args))){
@@ -26352,7 +25847,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                                     {
                                                                                                                         {
                                                                                                                             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16273);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16257);
                                                                                                                             {
                                                                                                                                 {
                                                                                                                                     ivy__symbol self__COLON__ivy__symbol;
@@ -26399,7 +25894,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                             st.outputs = loc__save_outputs;
                                                                                                             {
                                                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16276);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16260);
                                                                                                                 {
                                                                                                                     loc__0 = ext__cpp__app__is(loc__capp, cpp__verb__ite);
                                                                                                                     if(loc__0){
@@ -26418,7 +25913,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                             }
                                                                                                             {
                                                                                                                 ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16283);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16267);
                                                                                                                 {
                                                                                                                     {
                                                                                                                         ivy__symbol self__COLON__ivy__symbol;
@@ -26437,7 +25932,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                                                 loc__lhs = vector__ivy__expr____value(s.args,0);
                                                                                                                                 {
                                                                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16281);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16265);
                                                                                                                                     {
                                                                                                                                         {
                                                                                                                                             ivy__app self__COLON__ivy__app;
@@ -26469,9 +25964,9 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
                                                                                                                                                             loc__ty = loc__0;
                                                                                                                                                             {
                                                                                                                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16278);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16262);
                                                                                                                                                                 bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16278);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16262);
                                                                                                                                                                 {
                                                                                                                                                                     loc__0 = ext__ivy__is_variant_type(loc__ty, st);
                                                                                                                                                                     loc__1 = ext__ivy__is_cpp_this(vector__cpp__expr____value(loc__capp.args,0));
@@ -26550,7 +26045,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__app__to_cpp(const ivy__app& s, ivy__tocpps
 void ivyc_s1::ext__ivy__unown_func_args(const vector__ivy__expr__& args, ivy__tocppst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16297);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16281);
         {
             loc__idx = vector__ivy__expr____begin(args);
             while((loc__idx < vector__ivy__expr____end(args))){
@@ -26563,7 +26058,7 @@ void ivyc_s1::ext__ivy__unown_func_args(const vector__ivy__expr__& args, ivy__to
                             {
                                 {
                                     bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",16294);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",16278);
                                     {
                                         ext__ivy__lvalue_path(loc__arg, loc__path, loc__ok);
                                         if(loc__ok){
@@ -26587,41 +26082,26 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__get_func(const ivy__app& s){
     res = s.func;
     return res;
 }
-ivyc_s1::cpp__expr ivyc_s1::ext__cpp__plus__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann){
+ivyc_s1::ivy__verb ivyc_s1::ext__ivy__expr__get_verb(ivyc_s1::ivy__expr s){
+    ivyc_s1::ivy__verb vrb;
+    vrb = (ivy__verb)___ivy_choose(0,"fml:vrb",0);
+    {
+        vrb = ivy__verb__none;
+    }
+    return vrb;
+}
+ivyc_s1::cpp__expr ivyc_s1::ext__cpp__app__make(ivyc_s1::cpp__expr func, const vector__cpp__expr__& args, ivyc_s1::annot ann){
     ivyc_s1::cpp__expr res;
     {
         cpp__app loc__s;
         {
-            loc__s.func = ext__cpp__symbol__makestr(__lit<str>("+"), ann);
-            ext__vector__cpp__expr____append(loc__s.args, lhs);
-            ext__vector__cpp__expr____append(loc__s.args, rhs);
+            loc__s.func = func;
+            loc__s.args = args;
             loc__s.ann = ann;
             res = ivyc_s1::cpp__expr(1, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__app>(loc__s));
         }
     }
     return res;
-}
-ivyc_s1::cpp__expr ivyc_s1::ext__cpp__symbol__makestr(const str& name, ivyc_s1::annot ann){
-    ivyc_s1::cpp__expr res;
-    {
-        cpp__symbol loc__s;
-    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16311);
-        {
-            loc__s.name = ext__cpp__strident__make(name);
-            loc__s.vrb = ext__cpp__verb_from_name(name);
-            loc__s.ann = ann;
-            res = ivyc_s1::cpp__expr(0, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__symbol>(loc__s));
-        }
-    }
-    return res;
-}
-void ivyc_s1::ext__ivy__file_not_found__encode(const ivy__file_not_found& e, pretty& b){
-    {
-        ext__pretty__extend(b, __lit<str>("File not found:"));
-        ext__pretty__extend(b, __lit<str>(" "));
-        ext__pretty__extend(b, e.n);
-        ext__pretty__newline(b);
-    }
 }
 void ivyc_s1::imp__parse_error(unsigned long long p, const str& tok){
     {
@@ -26739,7 +26219,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_formal_type(const vector__ivy__expr__&
                 {
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15925);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",15914);
                         {
                             loc__idx = vector__ivy__expr____begin(typings);
                             while((loc__idx < vector__ivy__expr____end(typings))){
@@ -26779,12 +26259,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__get_formal_type(const vector__ivy__expr__&
 void ivyc_s1::ext__ivy__type_context__pop(ivy__type_context& s){
     {
         ivy__type_context__stack_entry loc__0;
-    loc__0.any = (bool)___ivy_choose(0,"loc:0",16314);
+    loc__0.any = (bool)___ivy_choose(0,"loc:0",16285);
         {
             loc__0 = ext__vector__ivy__type_context__stack_entry____back(s.stack);
             {
                 ivy__type_context__stack_entry loc__ent;
-    loc__ent.any = (bool)___ivy_choose(0,"loc:ent",16313);
+    loc__ent.any = (bool)___ivy_choose(0,"loc:ent",16284);
                 {
                     loc__ent = loc__0;
                     ext__vector__ivy__type_context__stack_entry____pop_back(s.stack);
@@ -26832,7 +26312,7 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__get_func_params(ivyc_s1::ivy__ex
             loc__ty = typing;
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16316);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16287);
                 {
                     {
                         ivy__app self__COLON__ivy__app;
@@ -26899,14 +26379,14 @@ bool ivyc_s1::ext__ivy__app__occurs(const ivy__app& s, ivyc_s1::ivy__ident n){
         }
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16319);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16290);
             {
                 loc__idx = vector__ivy__expr____begin(s.args);
                 while((loc__idx < vector__ivy__expr____end(s.args))){
                     {
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16289);
                             {
                                 {
                                     ivy__app self__COLON__ivy__app;
@@ -26972,7 +26452,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__ivy__make_md_vector_type(const vector__ivy__exp
                     }
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16326);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16297);
                         {
                             loc__idx = vector__ivy__expr____begin(dom);
                             while((loc__idx < vector__ivy__expr____end(dom))){
@@ -27051,13 +26531,13 @@ void ivyc_s1::ext__ivy__add_is_seq_pred(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__isseq;
-    loc__isseq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.ftype.is_const = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.has_body = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.is_static = (bool)___ivy_choose(0,"loc:isseq",16330);
-    loc__isseq.is_virtual = (bool)___ivy_choose(0,"loc:isseq",16330);
+    loc__isseq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.ftype.is_const = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.has_body = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.is_static = (bool)___ivy_choose(0,"loc:isseq",16301);
+    loc__isseq.is_virtual = (bool)___ivy_choose(0,"loc:isseq",16301);
             {
                 loc__isseq.ftype.base._type = ext__cpp__symbol__makestr(__lit<str>("bool"), s.ann);
                 loc__isseq.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("__is_seq"), s.ann);
@@ -27073,6 +26553,14 @@ void ivyc_s1::ext__ivy__add_is_seq_pred(cpp__structdecl& s){
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__isseq)));
             }
         }
+    }
+}
+void ivyc_s1::ext__ivy__cannot_write__encode(const ivy__cannot_write& e, pretty& b){
+    {
+        ext__pretty__extend(b, __lit<str>("Failed to write file:"));
+        ext__pretty__extend(b, __lit<str>(" "));
+        ext__pretty__extend(b, e.n);
+        ext__pretty__newline(b);
     }
 }
 void ivyc_s1::ext__ivy__actdc__build_global_types(const ivy__actdc& s, ivy__global_types& st){
@@ -27102,7 +26590,7 @@ void ivyc_s1::ext__ivy__actdc__build_global_types(const ivy__actdc& s, ivy__glob
                         }
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16333);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16304);
                             {
                                 loc__0 = ext__ivy__actdc__is_member(s);
                                 if((loc__0 && st.curried)){
@@ -27206,7 +26694,7 @@ void ivyc_s1::ext__pretty__do_indent(pretty& self){
         ext__str__append(self.output, 10);
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16340);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16311);
             {
                 unsigned long long __tmp48;
                 __tmp48 = self.maxline;
@@ -27239,73 +26727,10 @@ void ivyc_s1::ext__annot__encode(ivyc_s1::annot s, pretty& b){
     {
     }
 }
-ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__reduce(const ivy__app& s, const ivy__symeval& smap){
-    ivyc_s1::ivy__expr res;
+void ivyc_s1::ext__ivy__local_tracker__push(ivy__local_tracker& s){
     {
-        {
-            ivy__app loc__resa;
-            {
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((s.func).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.func);
-                    if(((s.func).tag == 1)){
-                        loc__resa.func = ext__ivy__app__reduce(self__COLON__ivy__app, smap);
-                    }
-                    else {
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((s.func).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s.func);
-                            if(((s.func).tag == 0)){
-                                loc__resa.func = ext__ivy__symbol__reduce(self__COLON__ivy__symbol, smap);
-                            }
-                            else {
-                                loc__resa.func = ext__ivy__expr__reduce(s.func, smap);
-                            }
-                        }
-                    }
-                }
-                {
-                    unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16342);
-                    {
-                        loc__idx = vector__ivy__expr____begin(s.args);
-                        while((loc__idx < vector__ivy__expr____end(s.args))){
-                            {
-                                {
-                                    ivyc_s1::ivy__expr loc__0;
-                                    {
-                                        {
-                                            ivy__app self__COLON__ivy__app;
-                                            if (((vector__ivy__expr____value(s.args,loc__idx)).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(vector__ivy__expr____value(s.args,loc__idx));
-                                            if(((vector__ivy__expr____value(s.args,loc__idx)).tag == 1)){
-                                                loc__0 = ext__ivy__app__reduce(self__COLON__ivy__app, smap);
-                                            }
-                                            else {
-                                                {
-                                                    ivy__symbol self__COLON__ivy__symbol;
-                                                    if (((vector__ivy__expr____value(s.args,loc__idx)).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(vector__ivy__expr____value(s.args,loc__idx));
-                                                    if(((vector__ivy__expr____value(s.args,loc__idx)).tag == 0)){
-                                                        loc__0 = ext__ivy__symbol__reduce(self__COLON__ivy__symbol, smap);
-                                                    }
-                                                    else {
-                                                        loc__0 = ext__ivy__expr__reduce(vector__ivy__expr____value(s.args,loc__idx), smap);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        ext__vector__ivy__expr____append(loc__resa.args, loc__0);
-                                    }
-                                }
-                                loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                            }
-                        }
-                        res = ivyc_s1::ivy__expr(1, new ivyc_s1::ivy__expr::twrap<ivyc_s1::ivy__app>(loc__resa));
-                    }
-                }
-            }
-        }
+        ext__ivy__push_pop_ident_set__push(s.map);
     }
-    return res;
 }
 ivyc_s1::str ivyc_s1::ext__ivy__ident__to_str(ivyc_s1::ivy__ident s){
     ivyc_s1::str res;
@@ -27317,7 +26742,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__get_type(const ivy__app& s){
     ivyc_s1::ivy__expr res;
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16347);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16315);
         {
             loc__0 = ext__ivy__app__is(s, ivy__verb__colon);
             if(loc__0){
@@ -27328,7 +26753,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__get_type(const ivy__app& s){
             else {
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16346);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16314);
                     {
                         loc__0 = ext__ivy__app__is(s, ivy__verb__dot);
                         if(loc__0){
@@ -27414,7 +26839,7 @@ void ivyc_s1::ext__ivy__groupdc__defd(const ivy__groupdc& s, ivy__flatst& st){
     {
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16348);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16316);
             {
                 loc__idx = vector__ivy__decl____begin(s.decls);
                 while((loc__idx < vector__ivy__decl____end(s.decls))){
@@ -27508,7 +26933,7 @@ void ivyc_s1::ext__vector__ivy__decl____append(vector__ivy__decl__& a, ivyc_s1::
 void ivyc_s1::ext__ivy__kill_lvalues(const vector__ivy__expr__& es, ivy__tocppst& st, const vector__ivy__access_path__& paths){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16349);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16317);
         {
             loc__idx = vector__ivy__expr____begin(es);
             while((loc__idx < vector__ivy__expr____end(es))){
@@ -27524,13 +26949,13 @@ void ivyc_s1::ext__ivy__add_upcast_method(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16350);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16350);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16318);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16318);
             {
                 loc__0 = ext__ivy__make_upcast_method(s);
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__0)));
@@ -27543,18 +26968,18 @@ void ivyc_s1::ext__ivy__prog__find_include(str& name){
         ext__str__extend(name, __lit<str>(".ivy"));
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16356);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16324);
             {
                 loc__0 = ext__ivy__file__exist(name);
                 if(!loc__0){
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16355);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16323);
                         {
                             loc__idx = vector__str____begin(ivy__include_path);
                             {
                                 bool loc__found;
-    loc__found = (bool)___ivy_choose(0,"loc:found",16354);
+    loc__found = (bool)___ivy_choose(0,"loc:found",16322);
                                 {
                                     loc__found = false;
                                     while((!loc__found && (loc__idx < vector__str____end(ivy__include_path)))){
@@ -27571,7 +26996,7 @@ void ivyc_s1::ext__ivy__prog__find_include(str& name){
                                                             loc__pname = loc__0;
                                                             {
                                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16351);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16319);
                                                                 {
                                                                     loc__0 = ext__ivy__file__exist(loc__pname);
                                                                     if(loc__0){
@@ -27640,7 +27065,7 @@ bool ivyc_s1::ext__cpp__expr__eq(ivyc_s1::cpp__expr e1, ivyc_s1::cpp__expr e2){
                 ivyc_s1::cpp__expr loc__0;
                 ivyc_s1::cpp__expr loc__1;
                 bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",16364);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",16332);
                 {
                     {
                         cpp__app self__COLON__cpp__app;
@@ -27703,14 +27128,14 @@ bool ivyc_s1::ext__cpp__expr__eq(ivyc_s1::cpp__expr e1, ivyc_s1::cpp__expr e2){
                                                                 res = true;
                                                                 {
                                                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16359);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16327);
                                                                     {
                                                                         loc__idx = vector__cpp__expr____begin(loc__args1);
                                                                         while((res && (loc__idx < vector__cpp__expr____end(loc__args1)))){
                                                                             {
                                                                                 {
                                                                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16358);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16326);
                                                                                     {
                                                                                         loc__0 = ext__cpp__expr__eq(vector__cpp__expr____value(loc__args1,loc__idx), vector__cpp__expr____value(loc__args2,loc__idx));
                                                                                         if(!loc__0){
@@ -27742,22 +27167,99 @@ bool ivyc_s1::ext__cpp__expr__eq(ivyc_s1::cpp__expr e1, ivyc_s1::cpp__expr e2){
     }
     return res;
 }
-void ivyc_s1::ext__ivy__set_built_in_type(ivy__verb vrb, const str& ty, bool m, bool io, bool oi, bool fi){
+void ivyc_s1::ext__ivy__objectdc__defd(const ivy__objectdc& s, ivy__flatst& st){
     {
-        ivy__optypes[vrb] = ext__ivy__expr__dec(ty);
-        ivy__verb_mono[vrb] = m;
-        ivy__verb_in_to_out[vrb] = io;
-        ivy__verb_out_to_in[vrb] = oi;
-        ivy__verb_first_to_in[vrb] = fi;
+        ext__ivy__add_def(s.name, st, false);
+        {
+            bool loc__old_has_root;
+    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",16334);
+            {
+                loc__old_has_root = st.has_root;
+                {
+                    ivyc_s1::ivy__ident loc__old_root;
+                    {
+                        loc__old_root = st.root;
+                        ext__ivy__set_root(st, s.name);
+                        {
+                            ivy__instancedc self__COLON__ivy__instancedc;
+                            if (((s.body).tag == 10)) self__COLON__ivy__instancedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instancedc >(s.body);
+                            if(((s.body).tag == 10)){
+                                ext__ivy__instancedc__defd(self__COLON__ivy__instancedc, st);
+                            }
+                            else {
+                                {
+                                    ivy__objectdc self__COLON__ivy__objectdc;
+                                    if (((s.body).tag == 9)) self__COLON__ivy__objectdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__objectdc >(s.body);
+                                    if(((s.body).tag == 9)){
+                                        ext__ivy__objectdc__defd(self__COLON__ivy__objectdc, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__instantiatedc self__COLON__ivy__instantiatedc;
+                                            if (((s.body).tag == 8)) self__COLON__ivy__instantiatedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__instantiatedc >(s.body);
+                                            if(((s.body).tag == 8)){
+                                                ext__ivy__instantiatedc__defd(self__COLON__ivy__instantiatedc, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__moduledc self__COLON__ivy__moduledc;
+                                                    if (((s.body).tag == 7)) self__COLON__ivy__moduledc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__moduledc >(s.body);
+                                                    if(((s.body).tag == 7)){
+                                                        ext__ivy__moduledc__defd(self__COLON__ivy__moduledc, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__vardc self__COLON__ivy__vardc;
+                                                            if (((s.body).tag == 3)) self__COLON__ivy__vardc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__vardc >(s.body);
+                                                            if(((s.body).tag == 3)){
+                                                                ext__ivy__vardc__defd(self__COLON__ivy__vardc, st);
+                                                            }
+                                                            else {
+                                                                {
+                                                                    ivy__typedc self__COLON__ivy__typedc;
+                                                                    if (((s.body).tag == 2)) self__COLON__ivy__typedc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__typedc >(s.body);
+                                                                    if(((s.body).tag == 2)){
+                                                                        ext__ivy__typedc__defd(self__COLON__ivy__typedc, st);
+                                                                    }
+                                                                    else {
+                                                                        {
+                                                                            ivy__groupdc self__COLON__ivy__groupdc;
+                                                                            if (((s.body).tag == 1)) self__COLON__ivy__groupdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__groupdc >(s.body);
+                                                                            if(((s.body).tag == 1)){
+                                                                                ext__ivy__groupdc__defd(self__COLON__ivy__groupdc, st);
+                                                                            }
+                                                                            else {
+                                                                                {
+                                                                                    ivy__actdc self__COLON__ivy__actdc;
+                                                                                    if (((s.body).tag == 0)) self__COLON__ivy__actdc = ivyc_s1::ivy__decl::unwrap< ivyc_s1::ivy__actdc >(s.body);
+                                                                                    if(((s.body).tag == 0)){
+                                                                                        ext__ivy__actdc__defd(self__COLON__ivy__actdc, st);
+                                                                                    }
+                                                                                    else {
+                                                                                        ext__ivy__decl__defd(s.body, st);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        st.has_root = loc__old_has_root;
+                        st.root = loc__old_root;
+                    }
+                }
+            }
+        }
     }
-}
-unsigned long long ivyc_s1::ext__pos__next(unsigned long long x){
-    unsigned long long y;
-    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
-    {
-        y = (x + 1);
-    }
-    return y;
 }
 ivyc_s1::cpp__expr ivyc_s1::ext__ivy__fix_tpl_param(ivyc_s1::ivy__expr s, ivy__tocppst& st){
     ivyc_s1::cpp__expr res;
@@ -27768,12 +27270,12 @@ void ivyc_s1::ext__ivy__path__change_extension(str& path, const str& ext){
     if((0 < str__end(path))){
         {
             unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16366);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16336);
             {
                 loc__0 = ext__pos__prev(str__end(path));
                 {
                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16365);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16335);
                     {
                         loc__idx = loc__0;
                         while(((0 < loc__idx) && !(str__value(path,loc__idx) == 46))){
@@ -27801,7 +27303,7 @@ bool ivyc_s1::ext__ivy__path_may_alias(const ivy__access_path& v, const ivy__acc
         res = true;
         {
             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16367);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16337);
             {
                 loc__idx = vector__ivy__ident____begin(v.elems);
                 while((res && (loc__idx < vector__ivy__ident____end(v.elems)) && (loc__idx < vector__ivy__ident____end(w.elems)))){
@@ -27899,7 +27401,7 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__symbol__makestr1(const str& name, ivyc_s1:
     ivyc_s1::cpp__expr res;
     {
         cpp__symbol loc__s;
-    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16368);
+    loc__s.vrb = (cpp__verb)___ivy_choose(0,"loc:s",16338);
         {
             loc__s.name = ext__cpp__strident__make1(name, arg);
             loc__s.vrb = ext__cpp__verb_from_name(name);
@@ -27914,7 +27416,7 @@ bool ivyc_s1::ext__ivy__is_typing_complete(ivyc_s1::ivy__expr typing){
     res = (bool)___ivy_choose(0,"fml:res",0);
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16377);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16347);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -27954,7 +27456,7 @@ bool ivyc_s1::ext__ivy__is_typing_complete(ivyc_s1::ivy__expr typing){
                                         {
                                             ivyc_s1::ivy__expr loc__0;
                                             bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16373);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16343);
                                             {
                                                 {
                                                     ivy__app self__COLON__ivy__app;
@@ -28003,14 +27505,14 @@ bool ivyc_s1::ext__ivy__is_typing_complete(ivyc_s1::ivy__expr typing){
                                                                         loc__args = loc__0;
                                                                         {
                                                                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16370);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16340);
                                                                             {
                                                                                 loc__idx = vector__ivy__expr____begin(loc__args);
                                                                                 while((loc__idx < vector__ivy__expr____end(loc__args))){
                                                                                     {
                                                                                         {
                                                                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16369);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16339);
                                                                                             {
                                                                                                 {
                                                                                                     ivy__app self__COLON__ivy__app;
@@ -28054,7 +27556,7 @@ bool ivyc_s1::ext__ivy__is_typing_complete(ivyc_s1::ivy__expr typing){
                     {
                         ivyc_s1::ivy__expr loc__0;
                         bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16376);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16346);
                         {
                             {
                                 ivy__app self__COLON__ivy__app;
@@ -28126,7 +27628,7 @@ void ivyc_s1::ext__ivy__stmt__parse_lang_stmt(pstate& st, int prio, ivyc_s1::ivy
                             }
                             {
                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16380);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16350);
                                 {
                                     {
                                         ivy__app self__COLON__ivy__app;
@@ -28203,12 +27705,12 @@ bool ivyc_s1::ext__cpp__is_logvar_name(const str& name){
             res = true;
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16383);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16353);
                 {
                     loc__0 = ext__pos__next(str__begin(name));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16382);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16352);
                         {
                             loc__idx = loc__0;
                             while((res && (loc__idx < str__end(name)))){
@@ -28258,12 +27760,12 @@ void ivyc_s1::ext__cpp__expr__tup__encode(const vector__cpp__expr__& s, pretty& 
             }
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16385);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16355);
                 {
                     loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(s));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16384);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16354);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__cpp__expr____end(s))){
@@ -28312,13 +27814,13 @@ void ivyc_s1::ext__ivy__add_sizet_conv(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__tosizet;
-    loc__tosizet.ftype.base.is_const = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.ftype.is_const = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.ftype.has_initializer = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.has_body = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.is_static = (bool)___ivy_choose(0,"loc:tosizet",16387);
-    loc__tosizet.is_virtual = (bool)___ivy_choose(0,"loc:tosizet",16387);
+    loc__tosizet.ftype.base.is_const = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.ftype.is_const = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.ftype.has_initializer = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.has_body = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.is_static = (bool)___ivy_choose(0,"loc:tosizet",16357);
+    loc__tosizet.is_virtual = (bool)___ivy_choose(0,"loc:tosizet",16357);
             {
                 loc__tosizet.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("operator std::size_t"), s.ann);
                 loc__tosizet.ftype.is_const = true;
@@ -28398,66 +27900,11 @@ ivyc_s1::cpp__ident ivyc_s1::ext__ivy__strident__to_cpp(const ivy__strident& s, 
     }
     return res;
 }
-ivyc_s1::str ivyc_s1::ext__ivy__expr__enc(ivyc_s1::ivy__expr e){
-    ivyc_s1::str s;
+void ivyc_s1::ext__vector__ivy__ident____append(vector__ivy__ident__& a, ivyc_s1::ivy__ident v){
     {
-        pretty loc__0;
-    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",16394);
-    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",16394);
-        {
-            loc__0 = ext__pretty__make(100, 4);
-            {
-                pretty loc__p;
-    loc__p.st.begin = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.st.total = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.maxline = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.indent = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.space = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.depth = (unsigned long long)___ivy_choose(0,"loc:p",16393);
-    loc__p.cppstyle = (bool)___ivy_choose(0,"loc:p",16393);
-                {
-                    loc__p = loc__0;
-                    loc__p.cppstyle = false;
-                    {
-                        ivy__pi self__COLON__ivy__pi;
-                        if (((e).tag == 3)) self__COLON__ivy__pi = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__pi >(e);
-                        if(((e).tag == 3)){
-                            ext__ivy__pi__encode(self__COLON__ivy__pi, loc__p, 0);
-                        }
-                        else {
-                            {
-                                ivy__app self__COLON__ivy__app;
-                                if (((e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(e);
-                                if(((e).tag == 1)){
-                                    ext__ivy__app__encode(self__COLON__ivy__app, loc__p, 0);
-                                }
-                                else {
-                                    {
-                                        ivy__symbol self__COLON__ivy__symbol;
-                                        if (((e).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(e);
-                                        if(((e).tag == 0)){
-                                            ext__ivy__symbol__encode(self__COLON__ivy__symbol, loc__p, 0);
-                                        }
-                                        else {
-                                            ext__ivy__expr__encode(e, loc__p, 0);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    ext__pretty__flush(loc__p);
-                    s = loc__p.output;
-                }
-            }
-        }
+
+        a.push_back(v);
     }
-    return s;
 }
 void ivyc_s1::ext__cpp__stmt__encode(ivyc_s1::cpp__stmt s, pretty& b, int prio){
     {
@@ -28477,51 +27924,8 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__sequence__flat(const ivy__sequence& s, ivy
     }
     return res;
 }
-void ivyc_s1::ext__ivy__moduledc__defd(const ivy__moduledc& s, ivy__flatst& st){
+void ivyc_s1::ext__ivy__decl__reg_member(ivyc_s1::ivy__decl s, ivy__tocppst& st){
     {
-        {
-            ivyc_s1::ivy__expr loc__name;
-            {
-                st.defining = true;
-                {
-                    ivy__app self__COLON__ivy__app;
-                    if (((s.name).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.name);
-                    if(((s.name).tag == 1)){
-                        loc__name = ext__ivy__app__flat(self__COLON__ivy__app, st);
-                    }
-                    else {
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((s.name).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s.name);
-                            if(((s.name).tag == 0)){
-                                loc__name = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
-                            }
-                            else {
-                                loc__name = ext__ivy__expr__flat(s.name, st);
-                            }
-                        }
-                    }
-                }
-                st.defining = false;
-                {
-                    ivyc_s1::ivy__ident loc__0;
-                    {
-                        {
-                            ivy__symbol self__COLON__ivy__symbol;
-                            if (((loc__name).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__name);
-                            if(((loc__name).tag == 0)){
-                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
-                            }
-                            else {
-                                loc__0 = ext__ivy__expr__get_name(loc__name);
-                            }
-                        }
-                        ext__ivy__ident_to_moduledc__set(st.moddecls, loc__0, s);
-                    }
-                }
-                ext__ivy__add_def(s.name, st, false);
-            }
-        }
     }
 }
 ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__stmt__flat(ivyc_s1::ivy__stmt s, ivy__flatst& st){
@@ -28546,7 +27950,7 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__comma__unfold_left(ivyc_s1::ivy_
                 loc__e = s;
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16398);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16366);
                     {
                         {
                             ivy__app self__COLON__ivy__app;
@@ -28560,7 +27964,7 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__comma__unfold_left(ivyc_s1::ivy_
                         }
                         {
                             bool loc__b;
-    loc__b = (bool)___ivy_choose(0,"loc:b",16397);
+    loc__b = (bool)___ivy_choose(0,"loc:b",16365);
                             {
                                 loc__b = loc__0;
                                 while(loc__b){
@@ -28614,17 +28018,6 @@ ivyc_s1::vector__ivy__expr__ ivyc_s1::ext__ivy__comma__unfold_left(ivyc_s1::ivy_
     }
     return args;
 }
-ivyc_s1::pretty__state ivyc_s1::ext__vector__pretty__state____back(const vector__pretty__state__& a){
-    ivyc_s1::pretty__state res;
-    res.begin = (unsigned long long)___ivy_choose(0,"fml:res",0);
-    res.total = (unsigned long long)___ivy_choose(0,"fml:res",0);
-    {
-
-        if ((unsigned long long)a.size() > 0)
-            res = a.back();
-    }
-    return res;
-}
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__new__make(ivyc_s1::cpp__expr arg, ivyc_s1::annot ann){
     ivyc_s1::cpp__expr res;
     {
@@ -28635,6 +28028,13 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__new__make(ivyc_s1::cpp__expr arg, ivyc_s1:
             loc__s.ann = ann;
             res = ivyc_s1::cpp__expr(1, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__app>(loc__s));
         }
+    }
+    return res;
+}
+ivyc_s1::ivy__decl ivyc_s1::ext__ivy__decl__func_to_action(ivyc_s1::ivy__decl s){
+    ivyc_s1::ivy__decl res;
+    {
+        res = s;
     }
     return res;
 }
@@ -28659,7 +28059,7 @@ void ivyc_s1::ext__cpp__strident__encode(const cpp__strident& s, pretty& b, int 
                     ext__pretty__extend(b, __lit<str>("< "));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16401);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16369);
                         {
                             loc__idx = vector__cpp__ident____begin(s.subscrs);
                             while((loc__idx < vector__cpp__ident____end(s.subscrs))){
@@ -28709,7 +28109,7 @@ void ivyc_s1::ext__cpp__strident__encode(const cpp__strident& s, pretty& b, int 
         else {
             {
                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16402);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16370);
                 {
                     loc__idx = vector__cpp__ident____begin(s.subscrs);
                     while((loc__idx < vector__cpp__ident____end(s.subscrs))){
@@ -28854,13 +28254,6 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__expr__type_decorate(ivyc_s1::ivy__expr e, 
     }
     return res;
 }
-void ivyc_s1::ext__vector__pretty__token____set(vector__pretty__token__& a, unsigned long long x, const pretty__token& y){
-    {
-
-        if (0 <= x && x < (unsigned long long)a.size())
-            a[x] = y;
-    }
-}
 bool ivyc_s1::ext__ivy__subtypes__is_subtype(const ivy__subtypes& s, ivyc_s1::ivy__expr sub, ivyc_s1::ivy__expr super){
     bool res;
     res = (bool)___ivy_choose(0,"fml:res",0);
@@ -28884,7 +28277,7 @@ bool ivyc_s1::ext__ivy__subtypes__is_subtype(const ivy__subtypes& s, ivyc_s1::iv
                         loc__name = loc__0;
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16406);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16374);
                             {
                                 loc__0 = ext__ivy__symeval__mem(s.supertype_of, loc__name);
                                 if(loc__0){
@@ -28929,7 +28322,7 @@ void ivyc_s1::ext__ivy__type_context__push(ivy__type_context& s, ivyc_s1::ivy__e
     {
         {
             ivy__type_context__stack_entry loc__ent;
-    loc__ent.any = (bool)___ivy_choose(0,"loc:ent",16411);
+    loc__ent.any = (bool)___ivy_choose(0,"loc:ent",16055);
             {
                 {
                     ivyc_s1::ivy__expr loc__0;
@@ -29034,10 +28427,6 @@ void ivyc_s1::ext__cpp__asgn__encode(const cpp__asgn& s, pretty& b, int prio){
         }
     }
 }
-void ivyc_s1::ext__cpp__decl__encode(ivyc_s1::cpp__decl s, pretty& b, int prio){
-    {
-    }
-}
 void ivyc_s1::ext__vector__cpp__decl____append(vector__cpp__decl__& a, ivyc_s1::cpp__decl v){
     {
 
@@ -29048,38 +28437,6 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__actdc__get_body(const ivy__actdc& s){
     ivyc_s1::ivy__stmt res;
     res = s.body;
     return res;
-}
-void ivyc_s1::ext__ivy__expr__tup__parse(pstate& st, int prio, vector__ivy__expr__& res){
-    if((st.tok == __lit<str>("("))){
-        {
-            ext__pstate__consume(st);
-            {
-                ivyc_s1::ivy__expr loc__s;
-                {
-                    ext__ivy__expr__parse(st, prio, loc__s);
-                    ext__vector__ivy__expr____append(res, loc__s);
-                    while((st.ok && (st.tok == __lit<str>(",")))){
-                        {
-                            ext__pstate__consume(st);
-                            ext__ivy__expr__parse(st, prio, loc__s);
-                            ext__vector__ivy__expr____append(res, loc__s);
-                        }
-                    }
-                    if((st.ok && (st.tok == __lit<str>(")")))){
-                        {
-                            ext__pstate__consume(st);
-                        }
-                    }
-                    else {
-                        st.ok = false;
-                    }
-                }
-            }
-        }
-    }
-    else {
-        st.ok = false;
-    }
 }
 ivyc_s1::ivy__ident ivyc_s1::ext__ivy__ident__get_member(ivyc_s1::ivy__ident s){
     ivyc_s1::ivy__ident res;
@@ -29096,7 +28453,7 @@ ivyc_s1::ivy__ident ivyc_s1::ext__ivy__expr__get_name(ivyc_s1::ivy__expr s){
 void ivyc_s1::ext__ivy__remove_local_vars(const vector__ivy__ident__& del, ivy__flatst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16415);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16393);
         {
             loc__idx = vector__ivy__ident____begin(del);
             while((loc__idx < vector__ivy__ident____end(del))){
@@ -29130,7 +28487,7 @@ void ivyc_s1::ext__read_string_literal(pstate& st){
         while((st.ok && (st.p < str__end(st.b)) && !(str__value(st.b,st.p) == 34))){
             {
                 int loc__chr;
-    loc__chr = (int)___ivy_choose(0,"loc:chr",16416);
+    loc__chr = (int)___ivy_choose(0,"loc:chr",16394);
                 {
                     loc__chr = str__value(st.b,st.p);
                     if((loc__chr == 92)){
@@ -29200,24 +28557,6 @@ ivyc_s1::ivy__stmt ivyc_s1::ext__ivy__initdc__get_body(const ivy__initdc& s){
     res = s.body;
     return res;
 }
-bool ivyc_s1::ext__ivy__is_input_param(const ivy__actdc& s, ivyc_s1::ivy__expr p){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    {
-        unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16421);
-        {
-            loc__idx = vector__ivy__expr____begin(s.inputs);
-            while((!res && (loc__idx < vector__ivy__expr____end(s.inputs)))){
-                {
-                    res = ext__ivy__expr__eq(vector__ivy__expr____value(s.inputs,loc__idx), p);
-                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
-                }
-            }
-        }
-    }
-    return res;
-}
 void ivyc_s1::ext__vector__ivy__type_context__stack_entry____append(vector__ivy__type_context__stack_entry__& a, const ivy__type_context__stack_entry& v){
     {
 
@@ -29238,25 +28577,31 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__dot__make(ivyc_s1::cpp__expr lhs, ivyc_s1:
     }
     return res;
 }
-ivyc_s1::ivy__verb ivyc_s1::ext__ivy__expr__get_verb(ivyc_s1::ivy__expr s){
-    ivyc_s1::ivy__verb vrb;
-    vrb = (ivy__verb)___ivy_choose(0,"fml:vrb",0);
+ivyc_s1::cpp__expr ivyc_s1::ext__cpp__plus__make(ivyc_s1::cpp__expr lhs, ivyc_s1::cpp__expr rhs, ivyc_s1::annot ann){
+    ivyc_s1::cpp__expr res;
     {
-        vrb = ivy__verb__none;
+        cpp__app loc__s;
+        {
+            loc__s.func = ext__cpp__symbol__makestr(__lit<str>("+"), ann);
+            ext__vector__cpp__expr____append(loc__s.args, lhs);
+            ext__vector__cpp__expr____append(loc__s.args, rhs);
+            loc__s.ann = ann;
+            res = ivyc_s1::cpp__expr(1, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__app>(loc__s));
+        }
     }
-    return vrb;
+    return res;
 }
 void ivyc_s1::ext__ivy__add_standard_traits(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16423);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16423);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16401);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16401);
             {
                 loc__0 = ext__ivy__make_cpp_cons(s);
                 ext__vector__cpp__decl____append(s.members, ivyc_s1::cpp__decl(4, new ivyc_s1::cpp__decl::twrap<ivyc_s1::cpp__funcdecl>(loc__0)));
@@ -29280,8 +28625,8 @@ void ivyc_s1::ext__ivy__vardc__flat(const ivy__vardc& s, ivy__flatst& st){
     {
         {
             ivy__vardc loc__t;
-    loc__t.is_destructor = (bool)___ivy_choose(0,"loc:t",16424);
-    loc__t.has_def = (bool)___ivy_choose(0,"loc:t",16424);
+    loc__t.is_destructor = (bool)___ivy_choose(0,"loc:t",16402);
+    loc__t.has_def = (bool)___ivy_choose(0,"loc:t",16402);
             {
                 loc__t = ext__ivy__vardc__flat_int(s, st);
                 loc__t.ann = s.ann;
@@ -29293,7 +28638,7 @@ void ivyc_s1::ext__ivy__vardc__flat(const ivy__vardc& s, ivy__flatst& st){
 void ivyc_s1::ext__ivy__structspec__auto_flat_spec(const ivy__structspec& s, ivy__flatst& st, ivyc_s1::ivy__expr ty){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16426);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16404);
         {
             loc__idx = vector__ivy__expr____begin(s.destructors);
             while((loc__idx < vector__ivy__expr____end(s.destructors))){
@@ -29324,8 +28669,8 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__
     {
         {
             cpp__structdecl loc__res;
-    loc__res.has_super = (bool)___ivy_choose(0,"loc:res",16309);
-    loc__res.has_members = (bool)___ivy_choose(0,"loc:res",16309);
+    loc__res.has_super = (bool)___ivy_choose(0,"loc:res",16416);
+    loc__res.has_members = (bool)___ivy_choose(0,"loc:res",16416);
             {
                 loc__res.ann = s.ann;
                 {
@@ -29396,7 +28741,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__
                                         {
                                             ivyc_s1::ivy__ident loc__0;
                                             bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16301);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16408);
                                             {
                                                 {
                                                     ivy__symbol self__COLON__ivy__symbol;
@@ -29466,7 +28811,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__
                                                 loc__members = loc__2;
                                                 {
                                                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16304);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16411);
                                                     {
                                                         loc__idx = vector__ivy__decl____begin(loc__members);
                                                         st.in_class = true;
@@ -29534,7 +28879,7 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__
                                                         }
                                                         {
                                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16303);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16410);
                                                             {
                                                                 loc__0 = ext__ivy__is_variant_type(s.sort, st);
                                                                 if(loc__0){
@@ -29590,6 +28935,14 @@ ivyc_s1::cpp__decl ivyc_s1::ext__ivy__typedc__to_cpp(const ivy__typedc& s, ivy__
     }
     return resd;
 }
+void ivyc_s1::ext__ivy__ident_to_moduledc__get(const ivy__ident_to_moduledc& a, ivyc_s1::ivy__ident x, ivy__moduledc& y){
+    {
+
+        ivy__ident_to_moduledc::const_iterator it = a.find(x);
+        if (it != a.end())
+            y = it->second;
+    }
+}
 ivyc_s1::str ivyc_s1::ext__cpp__dotident__to_str(const cpp__dotident& s){
     ivyc_s1::str res;
     {
@@ -29644,10 +28997,14 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__isaop__make(ivyc_s1::ivy__expr lhs, ivyc_s
     }
     return res;
 }
+void ivyc_s1::ext__ivy__expr__encode(ivyc_s1::ivy__expr s, pretty& b, int prio){
+    {
+    }
+}
 void ivyc_s1::ext__ivy__setup_formals(const vector__ivy__expr__& es, bool val, ivy__typeinferst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16431);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16421);
         {
             loc__idx = vector__ivy__expr____begin(es);
             while((loc__idx < vector__ivy__expr____end(es))){
@@ -29658,7 +29015,7 @@ void ivyc_s1::ext__ivy__setup_formals(const vector__ivy__expr__& es, bool val, i
                             loc__e = vector__ivy__expr____value(es,loc__idx);
                             {
                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16429);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16419);
                                 {
                                     {
                                         ivy__app self__COLON__ivy__app;
@@ -29705,9 +29062,26 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__make1(ivyc_s1::ivy__expr func, ivyc_s
     }
     return res;
 }
-void ivyc_s1::ext__ivy__local_tracker__push(ivy__local_tracker& s){
-    {
-        ext__ivy__push_pop_ident_set__push(s.map);
+void ivyc_s1::ext__ivy__add_namespaces(ivyc_s1::cpp__decl& d, ivyc_s1::ivy__ident id){
+    if(((id).tag == 2)){
+        {
+            {
+                ivyc_s1::ivy__ident loc__0;
+                {
+                    {
+                        ivy__dotident self__COLON__ivy__dotident;
+                        if (((id).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(id);
+                        if(((id).tag == 2)){
+                            loc__0 = ext__ivy__dotident__get_namesp(self__COLON__ivy__dotident);
+                        }
+                        else {
+                            loc__0 = ext__ivy__ident__get_namesp(id);
+                        }
+                    }
+                    ext__ivy__add_namespaces_rec(d, loc__0);
+                }
+            }
+        }
     }
 }
 ivyc_s1::str ivyc_s1::ext__cpp__strident__to_str(const cpp__strident& s){
@@ -29720,7 +29094,7 @@ ivyc_s1::str ivyc_s1::ext__cpp__strident__to_str(const cpp__strident& s){
                     ext__str__extend(b, __lit<str>("< "));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16435);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16425);
                         {
                             loc__idx = vector__cpp__ident____begin(s.subscrs);
                             while((loc__idx < vector__cpp__ident____end(s.subscrs))){
@@ -29767,7 +29141,7 @@ ivyc_s1::str ivyc_s1::ext__cpp__strident__to_str(const cpp__strident& s){
         else {
             {
                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16437);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16427);
                 {
                     loc__idx = vector__cpp__ident____begin(s.subscrs);
                     while((loc__idx < vector__cpp__ident____end(s.subscrs))){
@@ -29820,7 +29194,7 @@ void ivyc_s1::ext__ivy__bottom_up_types(vector__ivy__expr__& es, ivyc_s1::ivy__e
         {
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16442);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16432);
                 {
                     {
                         ivy__app self__COLON__ivy__app;
@@ -29852,7 +29226,7 @@ void ivyc_s1::ext__ivy__bottom_up_types(vector__ivy__expr__& es, ivyc_s1::ivy__e
                                         loc__ftype = loc__0;
                                         {
                                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16439);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16429);
                                             {
                                                 {
                                                     ivy__app self__COLON__ivy__app;
@@ -29895,7 +29269,7 @@ void ivyc_s1::ext__ivy__bottom_up_types(vector__ivy__expr__& es, ivyc_s1::ivy__e
             }
             {
                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16444);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16434);
                 {
                     loc__idx = vector__ivy__expr____begin(es);
                     while((loc__idx < vector__ivy__expr____end(es))){
@@ -29963,7 +29337,7 @@ ivyc_s1::cpp__ident ivyc_s1::ext__cpp__strident__prefix(const cpp__strident& s, 
 void ivyc_s1::ext__ivy__check_defined(ivyc_s1::ivy__ident name, const ivy__flatst& st, ivyc_s1::annot ann){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16448);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16438);
         {
             loc__0 = ext__ivy__ident_set__mem(st.defs, name);
             if((!loc__0 && !st.absolute && !st.defining && !st.no_undefined)){
@@ -30060,16 +29434,16 @@ ivyc_s1::ivy__decl ivyc_s1::ext__ivy__actdc__typeinfer(const ivy__actdc& s, ivy_
     {
         {
             ivy__actdc loc__t;
-    loc__t.kind = (ivy__action_kind)___ivy_choose(0,"loc:t",16449);
-    loc__t.has_body = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.has_proto = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.has_ret = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.is_input = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.is_output = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:t",16449);
-    loc__t.proto.ret.is_const = (bool)___ivy_choose(0,"loc:t",16449);
+    loc__t.kind = (ivy__action_kind)___ivy_choose(0,"loc:t",16439);
+    loc__t.has_body = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.has_proto = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.has_ret = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.is_input = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.is_output = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:t",16439);
+    loc__t.proto.ret.is_const = (bool)___ivy_choose(0,"loc:t",16439);
             {
                 loc__t = ext__ivy__actdc__typeinfer_int(s, st);
                 loc__t.ann = s.ann;
@@ -30086,12 +29460,12 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__and__fold_left(const vector__cpp__expr__& 
             res = vector__cpp__expr____value(args,0);
             {
                 unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16451);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16441);
                 {
                     loc__0 = ext__vector__cpp__expr____domain__next(vector__cpp__expr____begin(args));
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16450);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16440);
                         {
                             loc__idx = loc__0;
                             while((loc__idx < vector__cpp__expr____end(args))){
@@ -30159,6 +29533,14 @@ ivyc_s1::annot ivyc_s1::ext__ivy__symbol__get_ann(const ivy__symbol& s){
     res = s.ann;
     return res;
 }
+unsigned long long ivyc_s1::ext__pos__next(unsigned long long x){
+    unsigned long long y;
+    y = (unsigned long long)___ivy_choose(0,"fml:y",0);
+    {
+        y = (x + 1);
+    }
+    return y;
+}
 void ivyc_s1::ext__ivy__decost__map__set(ivy__decost__map& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y){
     {
 
@@ -30169,30 +29551,30 @@ void ivyc_s1::ext__ivy__add_derived_cons(cpp__structdecl& s, ivyc_s1::cpp__expr 
     {
         {
             cpp__funcdecl loc__0;
-    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16455);
-    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16455);
+    loc__0.ftype.base.is_const = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.ftype.is_const = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.ftype.has_initializer = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.has_body = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.is_static = (bool)___ivy_choose(0,"loc:0",16445);
+    loc__0.is_virtual = (bool)___ivy_choose(0,"loc:0",16445);
             {
                 loc__0 = ext__ivy__make_cpp_cons(s);
                 {
                     cpp__funcdecl loc__dcons;
-    loc__dcons.ftype.base.is_const = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.ftype.is_const = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.ftype.has_initializer = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.has_body = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.is_static = (bool)___ivy_choose(0,"loc:dcons",16454);
-    loc__dcons.is_virtual = (bool)___ivy_choose(0,"loc:dcons",16454);
+    loc__dcons.ftype.base.is_const = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.ftype.is_const = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.ftype.has_initializer = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.has_body = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.is_static = (bool)___ivy_choose(0,"loc:dcons",16444);
+    loc__dcons.is_virtual = (bool)___ivy_choose(0,"loc:dcons",16444);
                     {
                         loc__dcons = loc__0;
                         {
                             cpp__simpletype loc__dconsarg0;
-    loc__dconsarg0.is_const = (bool)___ivy_choose(0,"loc:dconsarg0",16453);
-    loc__dconsarg0.is_ref = (bool)___ivy_choose(0,"loc:dconsarg0",16453);
+    loc__dconsarg0.is_const = (bool)___ivy_choose(0,"loc:dconsarg0",16443);
+    loc__dconsarg0.is_ref = (bool)___ivy_choose(0,"loc:dconsarg0",16443);
                             {
                                 loc__dconsarg0._type = t;
                                 loc__dconsarg0.name = ext__cpp__symbol__makestr(__lit<str>("value"), loc__dcons.ann);
@@ -30216,7 +29598,7 @@ bool ivyc_s1::ext__ivy__app__is(const ivy__app& s, ivy__verb vrb){
     {
         {
             ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16456);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16446);
             {
                 {
                     ivy__symbol self__COLON__ivy__symbol;
@@ -30303,16 +29685,16 @@ void ivyc_s1::ext__ivy__parse_action(pstate& st, int prio, ivy__action_kind kind
             ext__pstate__consume(st);
             {
                 ivy__actdc loc__s;
-    loc__s.kind = (ivy__action_kind)___ivy_choose(0,"loc:s",16460);
-    loc__s.has_body = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.has_proto = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.has_ret = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.is_input = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.is_output = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:s",16460);
-    loc__s.proto.ret.is_const = (bool)___ivy_choose(0,"loc:s",16460);
+    loc__s.kind = (ivy__action_kind)___ivy_choose(0,"loc:s",16450);
+    loc__s.has_body = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.has_proto = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.has_ret = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.is_input = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.is_output = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:s",16450);
+    loc__s.proto.ret.is_const = (bool)___ivy_choose(0,"loc:s",16450);
                 {
                     loc__s.kind = kind;
                     ext__pstate__get_ann(st, loc__s.ann);
@@ -30358,7 +29740,7 @@ void ivyc_s1::ext__ivy__symbol__parse(pstate& st, ivyc_s1::ivy__expr& res){
         {
             {
                 ivy__symbol loc__s;
-    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",16462);
+    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",16452);
                 {
                     loc__s.vrb = ext__ivy__verb_from_name(st.tok);
                     ext__pstate__get_ann(st, loc__s.ann);
@@ -30412,21 +29794,21 @@ void ivyc_s1::ext__ivy__add_diseq_pred(cpp__structdecl& s){
     {
         {
             cpp__funcdecl loc__diseq;
-    loc__diseq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.ftype.is_const = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.has_body = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.is_static = (bool)___ivy_choose(0,"loc:diseq",16470);
-    loc__diseq.is_virtual = (bool)___ivy_choose(0,"loc:diseq",16470);
+    loc__diseq.ftype.base.is_const = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.ftype.is_const = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.ftype.has_initializer = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.has_body = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.is_static = (bool)___ivy_choose(0,"loc:diseq",16460);
+    loc__diseq.is_virtual = (bool)___ivy_choose(0,"loc:diseq",16460);
             {
                 loc__diseq.ftype.base._type = ext__cpp__symbol__makestr(__lit<str>("ivy::native_bool"), s.ann);
                 loc__diseq.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("operator !="), s.ann);
                 loc__diseq.ftype.is_const = true;
                 {
                     cpp__simpletype loc__diseqarg0;
-    loc__diseqarg0.is_const = (bool)___ivy_choose(0,"loc:diseqarg0",16469);
-    loc__diseqarg0.is_ref = (bool)___ivy_choose(0,"loc:diseqarg0",16469);
+    loc__diseqarg0.is_const = (bool)___ivy_choose(0,"loc:diseqarg0",16459);
+    loc__diseqarg0.is_ref = (bool)___ivy_choose(0,"loc:diseqarg0",16459);
                     {
                         loc__diseqarg0._type = s.name;
                         loc__diseqarg0.is_const = true;
@@ -30477,23 +29859,23 @@ void ivyc_s1::ext__vector__ivy__expr____append(vector__ivy__expr__& a, ivyc_s1::
 void ivyc_s1::ext__ivy__actdc__reg_member(const ivy__actdc& s, ivy__tocppst& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16473);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16463);
         {
             loc__0 = ext__ivy__actdc__is_member(s);
             if(loc__0){
                 {
                     {
                         ivy__actdc loc__actd;
-    loc__actd.kind = (ivy__action_kind)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.has_body = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.has_proto = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.has_ret = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.is_input = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.is_output = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:actd",16472);
-    loc__actd.proto.ret.is_const = (bool)___ivy_choose(0,"loc:actd",16472);
+    loc__actd.kind = (ivy__action_kind)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.has_body = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.has_proto = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.has_ret = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.is_input = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.is_output = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.is_ref = (bool)___ivy_choose(0,"loc:actd",16462);
+    loc__actd.proto.ret.is_const = (bool)___ivy_choose(0,"loc:actd",16462);
                         {
                             loc__actd = s;
                             loc__actd.has_body = false;
@@ -30954,7 +30336,7 @@ void ivyc_s1::ext__ivy__version__parse(pstate& st, int prio, ivy__version& res){
             {
                 {
                     unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16474);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16464);
                     {
                         loc__0 = ext__pos__from_str(st.tok);
                         ext__vector__pos____append(res.nums, loc__0);
@@ -30968,7 +30350,7 @@ void ivyc_s1::ext__ivy__version__parse(pstate& st, int prio, ivy__version& res){
                             {
                                 {
                                     unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16475);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16465);
                                     {
                                         loc__0 = ext__pos__from_str(st.tok);
                                         ext__vector__pos____append(res.nums, loc__0);
@@ -31186,22 +30568,22 @@ void ivyc_s1::ext__ivy__prog__read_file_int(const str& name, ivyc_s1::annot ann,
         {
             {
                 bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",16503);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",16493);
                 {
                     ext__ivy__file__read(name, loc__text, loc__ok);
                     if(loc__ok){
                         {
                             pstate loc__0;
-    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",16500);
-    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",16500);
-    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16500);
+    loc__0.p = (unsigned long long)___ivy_choose(0,"loc:0",16490);
+    loc__0.ann.line = (unsigned long long)___ivy_choose(0,"loc:0",16490);
+    loc__0.ok = (bool)___ivy_choose(0,"loc:0",16490);
                             {
                                 loc__0 = ext__pstate__make(loc__text);
                                 {
                                     pstate loc__st;
-    loc__st.p = (unsigned long long)___ivy_choose(0,"loc:st",16499);
-    loc__st.ann.line = (unsigned long long)___ivy_choose(0,"loc:st",16499);
-    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16499);
+    loc__st.p = (unsigned long long)___ivy_choose(0,"loc:st",16489);
+    loc__st.ann.line = (unsigned long long)___ivy_choose(0,"loc:st",16489);
+    loc__st.ok = (bool)___ivy_choose(0,"loc:st",16489);
                                     {
                                         loc__st = loc__0;
                                         loc__st.ann.file = name;
@@ -31210,7 +30592,7 @@ void ivyc_s1::ext__ivy__prog__read_file_int(const str& name, ivyc_s1::annot ann,
                                         if(loc__ok){
                                             {
                                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16496);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16486);
                                                 {
                                                     loc__idx = vector__ivy__decl____begin(p.decls);
                                                     while(((loc__idx < vector__ivy__decl____end(p.decls)) && (vector__ivy__error____end(ivy__errors) == 0))){
@@ -31249,7 +30631,7 @@ void ivyc_s1::ext__ivy__prog__read_file_int(const str& name, ivyc_s1::annot ann,
                                                                                     loc__iname = loc__1;
                                                                                     {
                                                                                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16492);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16482);
                                                                                         {
                                                                                             loc__0 = ext__ivy__ident_set__mem(rst.have_read, loc__iname);
                                                                                             if(!loc__0){
@@ -31407,10 +30789,14 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__not__make(ivyc_s1::cpp__expr arg, ivyc_s1:
     }
     return res;
 }
-ivyc_s1::ivy__decl ivyc_s1::ext__ivy__decl__typeinfer(ivyc_s1::ivy__decl s, ivy__typeinferst& st){
-    ivyc_s1::ivy__decl res;
+ivyc_s1::ivy__ident ivyc_s1::ext__ivy__strident__make(const str& val){
+    ivyc_s1::ivy__ident res;
     {
-        res = s;
+        ivy__strident loc__s;
+        {
+            loc__s.val = val;
+            res = ivyc_s1::ivy__ident(0, new ivyc_s1::ivy__ident::twrap<ivyc_s1::ivy__strident>(loc__s));
+        }
     }
     return res;
 }
@@ -31418,12 +30804,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
     ivyc_s1::ivy__expr res;
     {
         bool loc__b;
-    loc__b = (bool)___ivy_choose(0,"loc:b",16518);
+    loc__b = (bool)___ivy_choose(0,"loc:b",16508);
         {
             loc__b = b0;
             {
                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16517);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16507);
                 {
                     loc__0 = ext__ivy__app__is(e, ivy__verb__colon);
                     if(loc__0){
@@ -31455,7 +30841,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                         {
                                             {
                                                 ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16506);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16496);
                                                 {
                                                     {
                                                         ivy__app self__COLON__ivy__app;
@@ -31476,13 +30862,13 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                         {
                                             {
                                                 ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16507);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16497);
                                                 ivyc_s1::ivy__ident loc__1;
                                                 bool loc__2;
-    loc__2 = (bool)___ivy_choose(0,"loc:2",16507);
+    loc__2 = (bool)___ivy_choose(0,"loc:2",16497);
                                                 ivyc_s1::ivy__ident loc__3;
                                                 bool loc__4;
-    loc__4 = (bool)___ivy_choose(0,"loc:4",16507);
+    loc__4 = (bool)___ivy_choose(0,"loc:4",16497);
                                                 {
                                                     {
                                                         ivy__symbol self__COLON__ivy__symbol;
@@ -31576,7 +30962,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                     }
                                     {
                                         ivy__verb loc__0;
-    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16515);
+    loc__0 = (ivy__verb)___ivy_choose(0,"loc:0",16505);
                                         {
                                             {
                                                 ivy__symbol self__COLON__ivy__symbol;
@@ -31590,7 +30976,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                             }
                                             {
                                                 ivy__verb loc__vrb;
-    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16514);
+    loc__vrb = (ivy__verb)___ivy_choose(0,"loc:vrb",16504);
                                                 {
                                                     loc__vrb = loc__0;
                                                     loc__b = ((loc__b && ivy__verb_out_to_in[loc__vrb]) || ivy__verb_mono[loc__vrb]);
@@ -31599,7 +30985,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                                         {
                                                             {
                                                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16512);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16502);
                                                                 {
                                                                     loc__idx = vector__ivy__expr____begin(e.args);
                                                                     while((loc__idx < vector__ivy__expr____end(e.args))){
@@ -31608,7 +30994,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
                                                                             {
                                                                                 {
                                                                                     bool loc__ba;
-    loc__ba = (bool)___ivy_choose(0,"loc:ba",16510);
+    loc__ba = (bool)___ivy_choose(0,"loc:ba",16500);
                                                                                     {
                                                                                         loc__ba = (loc__b || (ivy__verb_first_to_in[loc__vrb] && (0 < loc__idx)));
                                                                                         {
@@ -31656,35 +31042,6 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_elide_int(const ivy__app& e, boo
     }
     return res;
 }
-void ivyc_s1::ext__cpp__retst__encode(const cpp__retst& s, pretty& b, int prio){
-    {
-        {
-            annot_i self__COLON__annot_i;
-            if (((s.ann).tag == 0)) self__COLON__annot_i = ivyc_s1::annot::unwrap< ivyc_s1::annot_i >(s.ann);
-            if(((s.ann).tag == 0)){
-                ext__annot_i__encode(self__COLON__annot_i, b);
-            }
-            else {
-                ext__annot__encode(s.ann, b);
-            }
-        }
-        if((1 < prio)){
-            {
-                ext__pretty__nest(b);
-                ext__pretty__extend(b, __lit<str>("{"));
-                ext__pretty__newline(b);
-            }
-        }
-        ext__cpp__retst__encode_int(s, b, prio);
-        if((1 < prio)){
-            {
-                ext__pretty__unnest(b);
-                ext__pretty__newline(b);
-                ext__pretty__extend(b, __lit<str>("}"));
-            }
-        }
-    }
-}
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__symbol__prefix(const cpp__symbol& s, ivyc_s1::cpp__ident pref){
     ivyc_s1::cpp__expr res;
     {
@@ -31725,8 +31082,8 @@ ivyc_s1::ivy__decl ivyc_s1::ext__ivy__vardc__make(ivyc_s1::ivy__expr typing, boo
     {
         {
             ivy__vardc loc__s;
-    loc__s.is_destructor = (bool)___ivy_choose(0,"loc:s",16520);
-    loc__s.has_def = (bool)___ivy_choose(0,"loc:s",16520);
+    loc__s.is_destructor = (bool)___ivy_choose(0,"loc:s",16510);
+    loc__s.has_def = (bool)___ivy_choose(0,"loc:s",16510);
             {
                 loc__s.typing = typing;
                 loc__s.is_destructor = is_destructor;
@@ -31757,29 +31114,29 @@ void ivyc_s1::ext__ivy__add_hasher(cpp__structdecl& s){
     {
         {
             cpp__structdecl loc__hashstr;
-    loc__hashstr.has_super = (bool)___ivy_choose(0,"loc:hashstr",16536);
-    loc__hashstr.has_members = (bool)___ivy_choose(0,"loc:hashstr",16536);
+    loc__hashstr.has_super = (bool)___ivy_choose(0,"loc:hashstr",16526);
+    loc__hashstr.has_members = (bool)___ivy_choose(0,"loc:hashstr",16526);
             {
                 loc__hashstr.ann = s.ann;
                 loc__hashstr.name = ext__cpp__symbol__makestr(__lit<str>("__hash"), s.ann);
                 loc__hashstr.has_members = true;
                 {
                     cpp__funcdecl loc__hash;
-    loc__hash.ftype.base.is_const = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.ftype.is_const = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.ftype.has_initializer = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.has_body = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.is_static = (bool)___ivy_choose(0,"loc:hash",16535);
-    loc__hash.is_virtual = (bool)___ivy_choose(0,"loc:hash",16535);
+    loc__hash.ftype.base.is_const = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.ftype.base.is_ref = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.ftype.is_const = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.ftype.has_initializer = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.has_body = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.is_static = (bool)___ivy_choose(0,"loc:hash",16525);
+    loc__hash.is_virtual = (bool)___ivy_choose(0,"loc:hash",16525);
                     {
                         loc__hash.ftype.base._type = ext__cpp__symbol__makestr(__lit<str>("std::size_t"), s.ann);
                         loc__hash.ftype.base.name = ext__cpp__symbol__makestr(__lit<str>("operator ()"), s.ann);
                         loc__hash.ftype.is_const = true;
                         {
                             cpp__simpletype loc__hasharg0;
-    loc__hasharg0.is_const = (bool)___ivy_choose(0,"loc:hasharg0",16534);
-    loc__hasharg0.is_ref = (bool)___ivy_choose(0,"loc:hasharg0",16534);
+    loc__hasharg0.is_const = (bool)___ivy_choose(0,"loc:hasharg0",16524);
+    loc__hasharg0.is_ref = (bool)___ivy_choose(0,"loc:hasharg0",16524);
                             {
                                 loc__hasharg0._type = s.name;
                                 loc__hasharg0.is_const = true;
@@ -31792,7 +31149,7 @@ void ivyc_s1::ext__ivy__add_hasher(cpp__structdecl& s){
                                     {
                                         {
                                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16532);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16522);
                                             {
                                                 loc__idx = vector__cpp__decl____begin(s.members);
                                                 while((loc__idx < vector__cpp__decl____end(s.members))){
@@ -31993,32 +31350,94 @@ ivyc_s1::annot ivyc_s1::ext__cpp__enumdecl__get_ann(const cpp__enumdecl& d){
     res = d.ann;
     return res;
 }
-void ivyc_s1::ext__ivy__expr__encode(ivyc_s1::ivy__expr s, pretty& b, int prio){
+void ivyc_s1::ext__ivy__member_name(ivyc_s1::cpp__expr& s){
     {
+        ivyc_s1::cpp__ident loc__0;
+        {
+            {
+                cpp__symbol self__COLON__cpp__symbol;
+                if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
+                if(((s).tag == 0)){
+                    loc__0 = ext__cpp__symbol__get_name(self__COLON__cpp__symbol);
+                }
+                else {
+                    loc__0 = ext__cpp__expr__get_name(s);
+                }
+            }
+            if(((loc__0).tag == 2)){
+                {
+                    ivyc_s1::cpp__ident loc__0;
+                    ivyc_s1::cpp__ident loc__1;
+                    ivyc_s1::annot loc__2;
+                    {
+                        {
+                            cpp__symbol self__COLON__cpp__symbol;
+                            if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
+                            if(((s).tag == 0)){
+                                loc__0 = ext__cpp__symbol__get_name(self__COLON__cpp__symbol);
+                            }
+                            else {
+                                loc__0 = ext__cpp__expr__get_name(s);
+                            }
+                        }
+                        {
+                            cpp__dotident self__COLON__cpp__dotident;
+                            if (((loc__0).tag == 2)) self__COLON__cpp__dotident = ivyc_s1::cpp__ident::unwrap< ivyc_s1::cpp__dotident >(loc__0);
+                            if(((loc__0).tag == 2)){
+                                loc__1 = ext__cpp__dotident__get_member(self__COLON__cpp__dotident);
+                            }
+                            else {
+                                loc__1 = ext__cpp__ident__get_member(loc__0);
+                            }
+                        }
+                        {
+                            cpp__app self__COLON__cpp__app;
+                            if (((s).tag == 1)) self__COLON__cpp__app = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__app >(s);
+                            if(((s).tag == 1)){
+                                loc__2 = ext__cpp__app__get_ann(self__COLON__cpp__app);
+                            }
+                            else {
+                                {
+                                    cpp__symbol self__COLON__cpp__symbol;
+                                    if (((s).tag == 0)) self__COLON__cpp__symbol = ivyc_s1::cpp__expr::unwrap< ivyc_s1::cpp__symbol >(s);
+                                    if(((s).tag == 0)){
+                                        loc__2 = ext__cpp__symbol__get_ann(self__COLON__cpp__symbol);
+                                    }
+                                    else {
+                                        loc__2 = ext__cpp__expr__get_ann(s);
+                                    }
+                                }
+                            }
+                        }
+                        s = ext__cpp__symbol__make(loc__1, loc__2);
+                    }
+                }
+            }
+        }
     }
 }
 ivyc_s1::str ivyc_s1::ext__cpp__prog__enc(const cpp__prog& e){
     ivyc_s1::str s;
     {
         pretty loc__0;
-    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",16538);
-    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",16538);
+    loc__0.st.begin = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.st.total = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.maxline = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.indent = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.space = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.depth = (unsigned long long)___ivy_choose(0,"loc:0",16530);
+    loc__0.cppstyle = (bool)___ivy_choose(0,"loc:0",16530);
         {
             loc__0 = ext__pretty__make(100, 4);
             {
                 pretty loc__p;
-    loc__p.st.begin = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.st.total = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.maxline = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.indent = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.space = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.depth = (unsigned long long)___ivy_choose(0,"loc:p",16537);
-    loc__p.cppstyle = (bool)___ivy_choose(0,"loc:p",16537);
+    loc__p.st.begin = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.st.total = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.maxline = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.indent = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.space = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.depth = (unsigned long long)___ivy_choose(0,"loc:p",16529);
+    loc__p.cppstyle = (bool)___ivy_choose(0,"loc:p",16529);
                 {
                     loc__p = loc__0;
                     loc__p.cppstyle = true;
@@ -32182,19 +31601,66 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__ivy__whilest__to_cpp(const ivy__whilest& s, ivy
     }
     return resd;
 }
+void ivyc_s1::ext__ivy__moduledc__defd(const ivy__moduledc& s, ivy__flatst& st){
+    {
+        {
+            ivyc_s1::ivy__expr loc__name;
+            {
+                st.defining = true;
+                {
+                    ivy__app self__COLON__ivy__app;
+                    if (((s.name).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(s.name);
+                    if(((s.name).tag == 1)){
+                        loc__name = ext__ivy__app__flat(self__COLON__ivy__app, st);
+                    }
+                    else {
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((s.name).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(s.name);
+                            if(((s.name).tag == 0)){
+                                loc__name = ext__ivy__symbol__flat(self__COLON__ivy__symbol, st);
+                            }
+                            else {
+                                loc__name = ext__ivy__expr__flat(s.name, st);
+                            }
+                        }
+                    }
+                }
+                st.defining = false;
+                {
+                    ivyc_s1::ivy__ident loc__0;
+                    {
+                        {
+                            ivy__symbol self__COLON__ivy__symbol;
+                            if (((loc__name).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(loc__name);
+                            if(((loc__name).tag == 0)){
+                                loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                            }
+                            else {
+                                loc__0 = ext__ivy__expr__get_name(loc__name);
+                            }
+                        }
+                        ext__ivy__ident_to_moduledc__set(st.moddecls, loc__0, s);
+                    }
+                }
+                ext__ivy__add_def(s.name, st, false);
+            }
+        }
+    }
+}
 void ivyc_s1::ext__ivy__prog__flat(ivy__prog& p){
     {
         {
             ivy__flatst loc__st;
-    loc__st.has_root = (bool)___ivy_choose(0,"loc:st",16550);
-    loc__st.defining = (bool)___ivy_choose(0,"loc:st",16550);
-    loc__st.absolute = (bool)___ivy_choose(0,"loc:st",16550);
-    loc__st.dot_rhs = (bool)___ivy_choose(0,"loc:st",16550);
-    loc__st.no_undefined = (bool)___ivy_choose(0,"loc:st",16550);
+    loc__st.has_root = (bool)___ivy_choose(0,"loc:st",16542);
+    loc__st.defining = (bool)___ivy_choose(0,"loc:st",16542);
+    loc__st.absolute = (bool)___ivy_choose(0,"loc:st",16542);
+    loc__st.dot_rhs = (bool)___ivy_choose(0,"loc:st",16542);
+    loc__st.no_undefined = (bool)___ivy_choose(0,"loc:st",16542);
             {
                 {
                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16549);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16541);
                     {
                         loc__idx = vector__ivy__decl____begin(p.decls);
                         while((loc__idx < vector__ivy__decl____end(p.decls))){
@@ -32382,7 +31848,7 @@ void ivyc_s1::ext__ivy__prog__flat(ivy__prog& p){
 void ivyc_s1::ext__ivy__auto_flat(ivyc_s1::ivy__expr s, ivy__flatst& st){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16552);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16544);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -32422,12 +31888,12 @@ bool ivyc_s1::ext__ivy__app__is_typed(const ivy__app& s, ivy__verb vrb){
     res = (bool)___ivy_choose(0,"fml:res",0);
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16553);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16545);
         bool loc__1;
-    loc__1 = (bool)___ivy_choose(0,"loc:1",16553);
+    loc__1 = (bool)___ivy_choose(0,"loc:1",16545);
         ivyc_s1::ivy__expr loc__2;
         ivy__verb loc__3;
-    loc__3 = (ivy__verb)___ivy_choose(0,"loc:3",16553);
+    loc__3 = (ivy__verb)___ivy_choose(0,"loc:3",16545);
         {
             loc__0 = ext__ivy__app__is(s, vrb);
             {
@@ -32465,27 +31931,10 @@ bool ivyc_s1::ext__ivy__app__is_typed(const ivy__app& s, ivy__verb vrb){
     }
     return res;
 }
-void ivyc_s1::ext__ivy__push_pop_ident_set__set(ivy__push_pop_ident_set& s, ivyc_s1::ivy__ident id, bool v){
-    {
-        {
-            bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16554);
-            {
-                loc__0 = ext__ivy__push_pop_ident_set__map_t__mem(s.map, id);
-                if(!loc__0){
-                    {
-                        ext__ivy__push_pop_ident_set__vec_t__append(s.del, id);
-                    }
-                }
-            }
-        }
-        ext__ivy__push_pop_ident_set__map_t__set(s.map, id, v);
-    }
-}
 void ivyc_s1::ext__ivy__local_vec(const vector__ivy__expr__& es, bool val, ivy__flatst& st){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16558);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16549);
         {
             loc__idx = vector__ivy__expr____begin(es);
             while((loc__idx < vector__ivy__expr____end(es))){
@@ -32552,7 +32001,7 @@ void ivyc_s1::ext__ivy__push_pop_ident_set__push(ivy__push_pop_ident_set& s){
 void ivyc_s1::ext__ivy__structspec__to_destrs(const ivy__structspec& s, ivy__flatst& st, ivyc_s1::ivy__expr ty){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16569);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16560);
         {
             loc__idx = vector__ivy__expr____begin(s.destructors);
             while((loc__idx < vector__ivy__expr____end(s.destructors))){
@@ -32563,7 +32012,7 @@ void ivyc_s1::ext__ivy__structspec__to_destrs(const ivy__structspec& s, ivy__fla
                             loc__e = vector__ivy__expr____value(s.destructors,loc__idx);
                             {
                                 bool loc__old_has_root;
-    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",16567);
+    loc__old_has_root = (bool)___ivy_choose(0,"loc:old_has_root",16558);
                                 {
                                     loc__old_has_root = st.has_root;
                                     {
@@ -32749,14 +32198,6 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__make(ivyc_s1::ivy__expr func, const v
     }
     return res;
 }
-bool ivyc_s1::ext__ivy__symbol__has_numident(const ivy__symbol& e){
-    bool res;
-    res = (bool)___ivy_choose(0,"fml:res",0);
-    {
-        res = ((e.name).tag == 1);
-    }
-    return res;
-}
 void ivyc_s1::ext__vector__ivy__expr____extend(vector__ivy__expr__& a, const vector__ivy__expr__& b){
     {
 
@@ -32787,11 +32228,210 @@ void ivyc_s1::ext__ivy__interpdc__reg_member(const ivy__interpdc& s, ivy__tocpps
 void ivyc_s1::ext__ivy__decost__typeinf_show_str(const str& s){
     imp__ivy__decost__typeinf_show_str(s);
 }
-void ivyc_s1::ext__ivy__symeval__set(ivy__symeval& a, ivyc_s1::ivy__ident x, ivyc_s1::ivy__expr y){
+ivyc_s1::str ivyc_s1::ext__ivy__strident__to_str(const ivy__strident& s){
+    ivyc_s1::str b;
     {
-
-        a[x] = y;
+        b = s.val;
+        if(false){
+            if((0 < vector__ivy__ident____end(s.subscrs))){
+                {
+                    ext__str__extend(b, __lit<str>("< "));
+                    {
+                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16564);
+                        {
+                            loc__idx = vector__ivy__ident____begin(s.subscrs);
+                            while((loc__idx < vector__ivy__ident____end(s.subscrs))){
+                                {
+                                    if((0 < loc__idx)){
+                                        {
+                                            ext__str__extend(b, __lit<str>(","));
+                                        }
+                                    }
+                                    {
+                                        str loc__0;
+                                        {
+                                            {
+                                                ivy__dotident self__COLON__ivy__dotident;
+                                                if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                                if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)){
+                                                    loc__0 = ext__ivy__dotident__to_str(self__COLON__ivy__dotident);
+                                                }
+                                                else {
+                                                    {
+                                                        ivy__strident self__COLON__ivy__strident;
+                                                        if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                                        if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)){
+                                                            loc__0 = ext__ivy__strident__to_str(self__COLON__ivy__strident);
+                                                        }
+                                                        else {
+                                                            loc__0 = ext__ivy__ident__to_str(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            ext__str__extend(b, loc__0);
+                                        }
+                                    }
+                                    loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
+                                }
+                            }
+                            ext__str__extend(b, __lit<str>(" >"));
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            {
+                unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16566);
+                {
+                    loc__idx = vector__ivy__ident____begin(s.subscrs);
+                    while((loc__idx < vector__ivy__ident____end(s.subscrs))){
+                        {
+                            ext__str__extend(b, __lit<str>("["));
+                            {
+                                str loc__0;
+                                {
+                                    {
+                                        ivy__dotident self__COLON__ivy__dotident;
+                                        if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)) self__COLON__ivy__dotident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__dotident >(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                        if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 2)){
+                                            loc__0 = ext__ivy__dotident__to_str(self__COLON__ivy__dotident);
+                                        }
+                                        else {
+                                            {
+                                                ivy__strident self__COLON__ivy__strident;
+                                                if (((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)) self__COLON__ivy__strident = ivyc_s1::ivy__ident::unwrap< ivyc_s1::ivy__strident >(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                                if(((vector__ivy__ident____value(s.subscrs,loc__idx)).tag == 0)){
+                                                    loc__0 = ext__ivy__strident__to_str(self__COLON__ivy__strident);
+                                                }
+                                                else {
+                                                    loc__0 = ext__ivy__ident__to_str(vector__ivy__ident____value(s.subscrs,loc__idx));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ext__str__extend(b, loc__0);
+                                }
+                            }
+                            ext__str__extend(b, __lit<str>("]"));
+                            loc__idx = ext__vector__ivy__ident____domain__next(loc__idx);
+                        }
+                    }
+                }
+            }
+        }
     }
+    return b;
+}
+ivyc_s1::vector__ivy__ident__ ivyc_s1::ext__ivy__setup_local_vars(ivyc_s1::ivy__stmt s, ivy__flatst& st){
+    ivyc_s1::vector__ivy__ident__ del;
+    {
+        ivyc_s1::ivy__expr loc__0;
+        {
+            {
+                ivy__asgn self__COLON__ivy__asgn;
+                if (((s).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(s);
+                if(((s).tag == 0)){
+                    loc__0 = ext__ivy__asgn__get_lhs(self__COLON__ivy__asgn);
+                }
+                else {
+                    loc__0 = ext__ivy__stmt__get_lhs(s);
+                }
+            }
+            {
+                ivyc_s1::ivy__expr loc__alhs;
+                {
+                    loc__alhs = loc__0;
+                    {
+                        vector__ivy__expr__ loc__0;
+                        {
+                            loc__0 = ext__ivy__comma__unfold_left(loc__alhs);
+                            {
+                                vector__ivy__expr__ loc__lhs;
+                                {
+                                    loc__lhs = loc__0;
+                                    {
+                                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16382);
+                                        {
+                                            loc__idx = vector__ivy__expr____begin(loc__lhs);
+                                            while((loc__idx < vector__ivy__expr____end(loc__lhs))){
+                                                {
+                                                    ivyc_s1::ivy__expr loc__e;
+                                                    {
+                                                        loc__e = vector__ivy__expr____value(loc__lhs,loc__idx);
+                                                        {
+                                                            bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16380);
+                                                            {
+                                                                {
+                                                                    ivy__app self__COLON__ivy__app;
+                                                                    if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
+                                                                    if(((loc__e).tag == 1)){
+                                                                        loc__0 = ext__ivy__app__is(self__COLON__ivy__app, ivy__verb__varv);
+                                                                    }
+                                                                    else {
+                                                                        loc__0 = ext__ivy__expr__is(loc__e, ivy__verb__varv);
+                                                                    }
+                                                                }
+                                                                if(loc__0){
+                                                                    {
+                                                                        ivyc_s1::ivy__expr loc__0;
+                                                                        ivyc_s1::ivy__ident loc__1;
+                                                                        {
+                                                                            {
+                                                                                ivy__app self__COLON__ivy__app;
+                                                                                if (((loc__e).tag == 1)) self__COLON__ivy__app = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__app >(loc__e);
+                                                                                if(((loc__e).tag == 1)){
+                                                                                    loc__0 = ext__ivy__app__get_arg(self__COLON__ivy__app, 0);
+                                                                                }
+                                                                                else {
+                                                                                    loc__0 = ext__ivy__expr__get_arg(loc__e, 0);
+                                                                                }
+                                                                            }
+                                                                            loc__1 = ext__ivy__formal_ident(loc__0);
+                                                                            {
+                                                                                ivyc_s1::ivy__ident loc__id;
+                                                                                {
+                                                                                    loc__id = loc__1;
+                                                                                    {
+                                                                                        bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16377);
+                                                                                        {
+                                                                                            loc__0 = ext__ivy__ident_set__mem(st.locals, loc__id);
+                                                                                            if(!loc__0){
+                                                                                                {
+                                                                                                    ext__vector__ivy__ident____append(del, loc__id);
+                                                                                                    ext__ivy__ident_set__set(st.locals, loc__id, true);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return del;
 }
 ivyc_s1::str ivyc_s1::ext__env__get(const str& name){
     ivyc_s1::str res;
@@ -32840,25 +32480,12 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__makenum(unsigned long long num, iv
     ivyc_s1::ivy__expr res;
     {
         ivy__symbol loc__s;
-    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",16572);
+    loc__s.vrb = (ivy__verb)___ivy_choose(0,"loc:s",16567);
         {
             loc__s.name = ext__ivy__numident__make(num);
             loc__s.vrb = ivy__verb__none;
             loc__s.ann = ann;
             res = ivyc_s1::ivy__expr(0, new ivyc_s1::ivy__expr::twrap<ivyc_s1::ivy__symbol>(loc__s));
-        }
-    }
-    return res;
-}
-ivyc_s1::cpp__expr ivyc_s1::ext__cpp__voidtype(ivyc_s1::annot ann){
-    ivyc_s1::cpp__expr res;
-    {
-        {
-            ivyc_s1::cpp__ident loc__0;
-            {
-                loc__0 = ext__cpp__strident__make(__lit<str>("void"));
-                res = ext__cpp__namedtype(loc__0, ann);
-            }
         }
     }
     return res;
@@ -32925,7 +32552,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__type_decorate(const ivy__symbol& e
             else {
                 {
                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16578);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16572);
                     {
                         loc__0 = ext__ivy__symeval__mem(st.ty, e.name);
                         if(loc__0){
@@ -32952,6 +32579,76 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__symbol__type_decorate(const ivy__symbol& e
     }
     return res;
 }
+void ivyc_s1::ext__ivy__typedc__build_global_types(const ivy__typedc& s, ivy__global_types& st){
+    if(s.has_spec){
+        if(((s.spec).tag == 0)){
+            {
+                ivyc_s1::ivy__decl loc__foobar;
+                {
+                    loc__foobar = ivyc_s1::ivy__decl(2, new ivyc_s1::ivy__decl::twrap<ivyc_s1::ivy__typedc>(s));
+                    {
+                        vector__ivy__expr__ loc__0;
+                        {
+                            {
+                                ivy__structspec self__COLON__ivy__structspec;
+                                if (((s.spec).tag == 1)) self__COLON__ivy__structspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__structspec >(s.spec);
+                                if(((s.spec).tag == 1)){
+                                    loc__0 = ext__ivy__structspec__get_elems(self__COLON__ivy__structspec);
+                                }
+                                else {
+                                    {
+                                        ivy__enumspec self__COLON__ivy__enumspec;
+                                        if (((s.spec).tag == 0)) self__COLON__ivy__enumspec = ivyc_s1::ivy__typespec::unwrap< ivyc_s1::ivy__enumspec >(s.spec);
+                                        if(((s.spec).tag == 0)){
+                                            loc__0 = ext__ivy__enumspec__get_elems(self__COLON__ivy__enumspec);
+                                        }
+                                        else {
+                                            loc__0 = ext__ivy__typespec__get_elems(s.spec);
+                                        }
+                                    }
+                                }
+                            }
+                            {
+                                vector__ivy__expr__ loc__conss;
+                                {
+                                    loc__conss = loc__0;
+                                    {
+                                        unsigned long long loc__idx;
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16574);
+                                        {
+                                            loc__idx = vector__ivy__expr____begin(loc__conss);
+                                            while((loc__idx < vector__ivy__expr____end(loc__conss))){
+                                                {
+                                                    {
+                                                        ivyc_s1::ivy__ident loc__0;
+                                                        {
+                                                            {
+                                                                ivy__symbol self__COLON__ivy__symbol;
+                                                                if (((vector__ivy__expr____value(loc__conss,loc__idx)).tag == 0)) self__COLON__ivy__symbol = ivyc_s1::ivy__expr::unwrap< ivyc_s1::ivy__symbol >(vector__ivy__expr____value(loc__conss,loc__idx));
+                                                                if(((vector__ivy__expr____value(loc__conss,loc__idx)).tag == 0)){
+                                                                    loc__0 = ext__ivy__symbol__get_name(self__COLON__ivy__symbol);
+                                                                }
+                                                                else {
+                                                                    loc__0 = ext__ivy__expr__get_name(vector__ivy__expr____value(loc__conss,loc__idx));
+                                                                }
+                                                            }
+                                                            ext__ivy__symeval__set(st.type_of, loc__0, s.sort);
+                                                        }
+                                                    }
+                                                    loc__idx = ext__vector__ivy__expr____domain__next(loc__idx);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 ivyc_s1::cpp__expr ivyc_s1::ext__cpp__app__get_func(const cpp__app& s){
     ivyc_s1::cpp__expr res;
     res = s.func;
@@ -32967,7 +32664,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_decorate(const ivy__app& e, ivy_
                 {
                     {
                         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16593);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16592);
                         {
                             loc__0 = ext__ivy__app__is(e, ivy__verb__colon);
                             if(loc__0){
@@ -33001,7 +32698,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_decorate(const ivy__app& e, ivy_
                             else {
                                 {
                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16592);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16591);
                                     {
                                         loc__0 = ext__ivy__app__is(e, ivy__verb__dot);
                                         if(loc__0){
@@ -33096,7 +32793,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_decorate(const ivy__app& e, ivy_
                                         else {
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16591);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16590);
                                                 {
                                                     loc__0 = ext__ivy__app__is(e, ivy__verb__isav);
                                                     if(loc__0){
@@ -33134,7 +32831,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_decorate(const ivy__app& e, ivy_
                                                                         {
                                                                             {
                                                                                 unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16588);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16587);
                                                                                 {
                                                                                     loc__idx = vector__ivy__expr____begin(e.args);
                                                                                     while((loc__idx < vector__ivy__expr____end(e.args))){
@@ -33235,13 +32932,6 @@ ivyc_s1::cpp__expr ivyc_s1::ext__cpp__equals__make(ivyc_s1::cpp__expr lhs, ivyc_
             loc__s.ann = ann;
             res = ivyc_s1::cpp__expr(1, new ivyc_s1::cpp__expr::twrap<ivyc_s1::cpp__app>(loc__s));
         }
-    }
-    return res;
-}
-ivyc_s1::ivy__decl ivyc_s1::ext__ivy__decl__func_to_action(ivyc_s1::ivy__decl s){
-    ivyc_s1::ivy__decl res;
-    {
-        res = s;
     }
     return res;
 }
@@ -33422,12 +33112,12 @@ ivyc_s1::ivy__ident ivyc_s1::ext__ivy__make_auto_key(ivyc_s1::ivy__ident id, boo
                     loc__skey = loc__0;
                     {
                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16604);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16603);
                         {
                             loc__idx = vector__ivy__ident____begin(loc__skey.subscrs);
                             {
                                 unsigned long long loc__num;
-    loc__num = (unsigned long long)___ivy_choose(0,"loc:num",16603);
+    loc__num = (unsigned long long)___ivy_choose(0,"loc:num",16602);
                                 {
                                     loc__num = 0;
                                     while((loc__idx < vector__ivy__ident____end(loc__skey.subscrs))){
@@ -33529,7 +33219,7 @@ void ivyc_s1::ext__ivy__local_tracker__add_var(ivy__local_tracker& s, ivyc_s1::i
     {
         {
             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16609);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16608);
             ivyc_s1::ivy__expr loc__1;
             {
                 {
@@ -33711,7 +33401,7 @@ void ivyc_s1::ext__ivy__undefined__encode(const ivy__undefined& e, pretty& b){
 void ivyc_s1::ext__ivy__structspec__defd(const ivy__structspec& s, ivy__flatst& st, ivyc_s1::ivy__ident id){
     {
         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16616);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16615);
         {
             loc__idx = vector__ivy__expr____begin(s.destructors);
             while((loc__idx < vector__ivy__expr____end(s.destructors))){
@@ -33805,12 +33495,12 @@ ivyc_s1::cpp__stmt ivyc_s1::ext__cpp__sequence__fold_right(const vector__cpp__st
     if((0 < vector__cpp__stmt____end(args))){
         {
             unsigned long long loc__0;
-    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16618);
+    loc__0 = (unsigned long long)___ivy_choose(0,"loc:0",16617);
             {
                 loc__0 = ext__vector__cpp__stmt____domain__prev(vector__cpp__stmt____end(args));
                 {
                     unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16617);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16616);
                     {
                         loc__idx = loc__0;
                         res = vector__cpp__stmt____value(args,loc__idx);
@@ -33831,24 +33521,24 @@ void ivyc_s1::ext__ivy__actdc__record_prototypes(const ivy__actdc& s, ivy__tocpp
     {
         {
             ivy__prototype loc__0;
-    loc__0.has_ret = (bool)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.is_input = (bool)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.is_output = (bool)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.is_ref = (bool)___ivy_choose(0,"loc:0",16621);
-    loc__0.ret.is_const = (bool)___ivy_choose(0,"loc:0",16621);
+    loc__0.has_ret = (bool)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.is_input = (bool)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.is_output = (bool)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.is_ref = (bool)___ivy_choose(0,"loc:0",16620);
+    loc__0.ret.is_const = (bool)___ivy_choose(0,"loc:0",16620);
             {
                 loc__0 = ext__ivy__actdc__get_proto(s);
                 {
                     ivy__prototype loc__proto;
-    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",16620);
-    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",16620);
+    loc__proto.has_ret = (bool)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.is_input = (bool)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.inpos = (unsigned long long)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.is_output = (bool)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.outpos = (unsigned long long)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.is_ref = (bool)___ivy_choose(0,"loc:proto",16619);
+    loc__proto.ret.is_const = (bool)___ivy_choose(0,"loc:proto",16619);
                     {
                         loc__proto = loc__0;
                         {
@@ -33974,7 +33664,7 @@ ivyc_s1::ivy__type_context__stack_entry ivyc_s1::ext__vector__ivy__type_context_
 void ivyc_s1::ext__ivy__lvalue_paths(ivyc_s1::ivy__expr s, vector__ivy__access_path__& paths, bool ao){
     {
         bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16636);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16631);
         {
             {
                 ivy__app self__COLON__ivy__app;
@@ -34012,7 +33702,7 @@ void ivyc_s1::ext__ivy__lvalue_paths(ivyc_s1::ivy__expr s, vector__ivy__access_p
                             {
                                 {
                                     bool loc__ok;
-    loc__ok = (bool)___ivy_choose(0,"loc:ok",16629);
+    loc__ok = (bool)___ivy_choose(0,"loc:ok",16624);
                                     {
                                         ext__ivy__lvalue_path(s, loc__path, loc__ok);
                                         if(loc__ok){
@@ -34028,7 +33718,7 @@ void ivyc_s1::ext__ivy__lvalue_paths(ivyc_s1::ivy__expr s, vector__ivy__access_p
                     if(((s).tag == 1)){
                         {
                             bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16635);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16630);
                             {
                                 {
                                     ivy__app self__COLON__ivy__app;
@@ -34080,7 +33770,7 @@ void ivyc_s1::ext__ivy__lvalue_paths(ivyc_s1::ivy__expr s, vector__ivy__access_p
                                                     loc__args = loc__0;
                                                     {
                                                         unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16632);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16627);
                                                         {
                                                             loc__idx = vector__ivy__expr____begin(loc__args);
                                                             while((loc__idx < vector__ivy__expr____end(loc__args))){
@@ -34145,7 +33835,7 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_fill_in(const ivy__app& e, ivy__
                     {
                         {
                             unsigned long long loc__idx;
-    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16640);
+    loc__idx = (unsigned long long)___ivy_choose(0,"loc:idx",16635);
                             {
                                 loc__idx = vector__ivy__expr____begin(e.args);
                                 while((loc__idx < vector__ivy__expr____end(e.args))){
@@ -34178,13 +33868,13 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_fill_in(const ivy__app& e, ivy__
                                 }
                                 {
                                     bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16639);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16634);
                                     {
                                         loc__0 = ext__ivy__app__is(e, ivy__verb__colon);
                                         if(loc__0){
                                             {
                                                 bool loc__0;
-    loc__0 = (bool)___ivy_choose(0,"loc:0",16638);
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16633);
                                                 {
                                                     {
                                                         ivy__app self__COLON__ivy__app;
@@ -34217,6 +33907,308 @@ ivyc_s1::ivy__expr ivyc_s1::ext__ivy__app__type_fill_in(const ivy__app& e, ivy__
                                     }
                                 }
                                 res = ext__ivy__app__make(loc__func, loc__newargs, e.ann);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+ivyc_s1::ivy__sequence ivyc_s1::ext__ivy__sequence__flat_int(const ivy__sequence& s, ivy__flatst& st){
+    ivyc_s1::ivy__sequence res;
+    {
+        res = s;
+        if(((res.lhs).tag == 0)){
+            {
+                {
+                    vector__ivy__ident__ loc__del;
+                    {
+                        loc__del = ext__ivy__setup_local_vars(res.lhs, st);
+                        {
+                            ivy__varst self__COLON__ivy__varst;
+                            if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
+                            if(((res.lhs).tag == 6)){
+                                res.lhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
+                            }
+                            else {
+                                {
+                                    ivy__whilest self__COLON__ivy__whilest;
+                                    if (((res.lhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.lhs);
+                                    if(((res.lhs).tag == 4)){
+                                        res.lhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__ifst self__COLON__ivy__ifst;
+                                            if (((res.lhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.lhs);
+                                            if(((res.lhs).tag == 3)){
+                                                res.lhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__sequence self__COLON__ivy__sequence;
+                                                    if (((res.lhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.lhs);
+                                                    if(((res.lhs).tag == 1)){
+                                                        res.lhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__asgn self__COLON__ivy__asgn;
+                                                            if (((res.lhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.lhs);
+                                                            if(((res.lhs).tag == 0)){
+                                                                res.lhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
+                                                            }
+                                                            else {
+                                                                res.lhs = ext__ivy__stmt__flat(res.lhs, st);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        {
+                            ivy__varst self__COLON__ivy__varst;
+                            if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
+                            if(((res.rhs).tag == 6)){
+                                res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
+                            }
+                            else {
+                                {
+                                    ivy__whilest self__COLON__ivy__whilest;
+                                    if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
+                                    if(((res.rhs).tag == 4)){
+                                        res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__ifst self__COLON__ivy__ifst;
+                                            if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
+                                            if(((res.rhs).tag == 3)){
+                                                res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__sequence self__COLON__ivy__sequence;
+                                                    if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
+                                                    if(((res.rhs).tag == 1)){
+                                                        res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__asgn self__COLON__ivy__asgn;
+                                                            if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
+                                                            if(((res.rhs).tag == 0)){
+                                                                res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
+                                                            }
+                                                            else {
+                                                                res.rhs = ext__ivy__stmt__flat(res.rhs, st);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        ext__ivy__remove_local_vars(loc__del, st);
+                    }
+                }
+            }
+        }
+        else {
+            {
+                {
+                    ivy__varst self__COLON__ivy__varst;
+                    if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
+                    if(((res.lhs).tag == 6)){
+                        res.lhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
+                    }
+                    else {
+                        {
+                            ivy__whilest self__COLON__ivy__whilest;
+                            if (((res.lhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.lhs);
+                            if(((res.lhs).tag == 4)){
+                                res.lhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
+                            }
+                            else {
+                                {
+                                    ivy__ifst self__COLON__ivy__ifst;
+                                    if (((res.lhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.lhs);
+                                    if(((res.lhs).tag == 3)){
+                                        res.lhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__sequence self__COLON__ivy__sequence;
+                                            if (((res.lhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.lhs);
+                                            if(((res.lhs).tag == 1)){
+                                                res.lhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__asgn self__COLON__ivy__asgn;
+                                                    if (((res.lhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.lhs);
+                                                    if(((res.lhs).tag == 0)){
+                                                        res.lhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
+                                                    }
+                                                    else {
+                                                        res.lhs = ext__ivy__stmt__flat(res.lhs, st);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if(((res.lhs).tag == 6)){
+                    {
+                        {
+                            vector__ivy__ident__ loc__del;
+                            {
+                                {
+                                    ivyc_s1::ivy__expr loc__0;
+                                    ivyc_s1::ivy__ident loc__1;
+                                    {
+                                        {
+                                            ivy__varst self__COLON__ivy__varst;
+                                            if (((res.lhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.lhs);
+                                            if(((res.lhs).tag == 6)){
+                                                loc__0 = ext__ivy__varst__get_expr(self__COLON__ivy__varst);
+                                            }
+                                            else {
+                                                loc__0 = ext__ivy__stmt__get_expr(res.lhs);
+                                            }
+                                        }
+                                        loc__1 = ext__ivy__formal_ident(loc__0);
+                                        {
+                                            ivyc_s1::ivy__ident loc__id;
+                                            {
+                                                loc__id = loc__1;
+                                                {
+                                                    bool loc__0;
+    loc__0 = (bool)___ivy_choose(0,"loc:0",16639);
+                                                    {
+                                                        loc__0 = ext__ivy__ident_set__mem(st.locals, loc__id);
+                                                        if(!loc__0){
+                                                            {
+                                                                ext__vector__ivy__ident____append(loc__del, loc__id);
+                                                                ext__ivy__ident_set__set(st.locals, loc__id, true);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                {
+                                                    ivy__varst self__COLON__ivy__varst;
+                                                    if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
+                                                    if(((res.rhs).tag == 6)){
+                                                        res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__whilest self__COLON__ivy__whilest;
+                                                            if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
+                                                            if(((res.rhs).tag == 4)){
+                                                                res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
+                                                            }
+                                                            else {
+                                                                {
+                                                                    ivy__ifst self__COLON__ivy__ifst;
+                                                                    if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
+                                                                    if(((res.rhs).tag == 3)){
+                                                                        res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
+                                                                    }
+                                                                    else {
+                                                                        {
+                                                                            ivy__sequence self__COLON__ivy__sequence;
+                                                                            if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
+                                                                            if(((res.rhs).tag == 1)){
+                                                                                res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
+                                                                            }
+                                                                            else {
+                                                                                {
+                                                                                    ivy__asgn self__COLON__ivy__asgn;
+                                                                                    if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
+                                                                                    if(((res.rhs).tag == 0)){
+                                                                                        res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
+                                                                                    }
+                                                                                    else {
+                                                                                        res.rhs = ext__ivy__stmt__flat(res.rhs, st);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                ext__ivy__remove_local_vars(loc__del, st);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    {
+                        {
+                            ivy__varst self__COLON__ivy__varst;
+                            if (((res.rhs).tag == 6)) self__COLON__ivy__varst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__varst >(res.rhs);
+                            if(((res.rhs).tag == 6)){
+                                res.rhs = ext__ivy__varst__flat(self__COLON__ivy__varst, st);
+                            }
+                            else {
+                                {
+                                    ivy__whilest self__COLON__ivy__whilest;
+                                    if (((res.rhs).tag == 4)) self__COLON__ivy__whilest = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__whilest >(res.rhs);
+                                    if(((res.rhs).tag == 4)){
+                                        res.rhs = ext__ivy__whilest__flat(self__COLON__ivy__whilest, st);
+                                    }
+                                    else {
+                                        {
+                                            ivy__ifst self__COLON__ivy__ifst;
+                                            if (((res.rhs).tag == 3)) self__COLON__ivy__ifst = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__ifst >(res.rhs);
+                                            if(((res.rhs).tag == 3)){
+                                                res.rhs = ext__ivy__ifst__flat(self__COLON__ivy__ifst, st);
+                                            }
+                                            else {
+                                                {
+                                                    ivy__sequence self__COLON__ivy__sequence;
+                                                    if (((res.rhs).tag == 1)) self__COLON__ivy__sequence = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__sequence >(res.rhs);
+                                                    if(((res.rhs).tag == 1)){
+                                                        res.rhs = ext__ivy__sequence__flat(self__COLON__ivy__sequence, st);
+                                                    }
+                                                    else {
+                                                        {
+                                                            ivy__asgn self__COLON__ivy__asgn;
+                                                            if (((res.rhs).tag == 0)) self__COLON__ivy__asgn = ivyc_s1::ivy__stmt::unwrap< ivyc_s1::ivy__asgn >(res.rhs);
+                                                            if(((res.rhs).tag == 0)){
+                                                                res.rhs = ext__ivy__asgn__flat(self__COLON__ivy__asgn, st);
+                                                            }
+                                                            else {
+                                                                res.rhs = ext__ivy__stmt__flat(res.rhs, st);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -34499,6 +34491,14 @@ ivyc_s1::str ivyc_s1::ext__ivy__mangle(ivyc_s1::cpp__ident s){
         }
     }
     return res;
+}
+void ivyc_s1::ext__ivy__file_not_found__encode(const ivy__file_not_found& e, pretty& b){
+    {
+        ext__pretty__extend(b, __lit<str>("File not found:"));
+        ext__pretty__extend(b, __lit<str>(" "));
+        ext__pretty__extend(b, e.n);
+        ext__pretty__newline(b);
+    }
 }
 void ivyc_s1::ext__ivy__objectdc__reg_member(const ivy__objectdc& s, ivy__tocppst& st){
     {

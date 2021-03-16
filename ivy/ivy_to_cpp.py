@@ -4698,7 +4698,7 @@ inline z3::expr forall(const std::vector<z3::expr> &exprs, z3::expr const & b) {
     std::copy(exprs.begin(),exprs.end(),vars);
     Z3_ast r = Z3_mk_forall_const(b.ctx(), 0, exprs.size(), vars, 0, 0, b);
     b.check_error();
-    delete vars;
+    delete[] vars;
     return z3::expr(b.ctx(), r);
 }
 
@@ -4922,6 +4922,7 @@ public:
         z3::expr pred = apply_expr == val_expr;
         //        std::cout << "pred: " << pred << std::endl;
         slvr.add(pred);
+        return 0;
     }
 
     int set(const char *decl_name, int value) {

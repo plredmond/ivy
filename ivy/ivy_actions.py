@@ -1277,7 +1277,8 @@ def call_set(action_name,env):
 def prefix_action(self,stmts):
     res = Sequence(*(stmts + [self]))
     self.copy_formals(res)
-    res.lineno = self.lineno    
+    if hasattr(self,"lineno"):
+        res.lineno = self.lineno    
     return res
     
 # adds a list of statements at the end of an action.
@@ -1287,7 +1288,8 @@ def postfix_action(self,stmts):
         return self
     res = Sequence(*([self] + stmts))
     self.copy_formals(res)
-    res.lineno = self.lineno    
+    if hasattr(self,"lineno"):
+        res.lineno = self.lineno    
     return res
 
 # Annotations let us reconstruct an execution trace from a satisfying assignment.

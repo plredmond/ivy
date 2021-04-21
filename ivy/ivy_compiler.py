@@ -1696,7 +1696,7 @@ def check_definitions(mod):
 # but not complete, and not very transparent. Maybe we should throw an error.
 # TODO: First-order quantifiers in shemata are handled like second-order quantifiers!
 
-def theorem_to_property(prop):
+def theorem_to_property(prop,pos=True):
     if isinstance(prop.formula,ivy_ast.SchemaBody):
         vocab = ip.goal_vocab(prop)
         match = dict()
@@ -1725,7 +1725,8 @@ def theorem_to_property(prop):
                 if x.definition:
                     im.module.definitions.append(prop_to_def(x))
                 else:
-                    prems.append(theorem_to_property(x).formula)
+                    if not x.explicit:
+                        prems.append(theorem_to_property(x,False).formula)
         conc = prop.formula.conc()
         if isinstance(conc,ivy_logic.Definition):
             raise iu.IvyError(prop,"definitional subgoal must be discharged")

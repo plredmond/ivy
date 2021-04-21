@@ -641,16 +641,18 @@ class SchemaBody(AST):
         lines = []
         def indent(ind,s):
             lines.append(ind * '    ' + s)
+        def propdecl(x):
+            return ('explicit ' if x.explicit else '') + 'property '
         def sub(thing,ind):
             indent(0,'{\n')
             for x in thing.prems():
                 if isinstance(x,LabeledFormula):
                     fmla = x.formula
                     if isinstance(fmla,SchemaBody):
-                        indent(ind+1,'property ' + ('[{}] '.format(x.label) if x.label is not None else ''))
+                        indent(ind+1,propdecl(x) + ('[{}] '.format(x.label) if x.label is not None else ''))
                         sub(fmla,ind+1)
                     else:
-                        indent(ind+1,'property ' + str(x) + '\n')
+                        indent(ind+1,propdecl(x) + str(x) + '\n')
                 elif isinstance(x,ivy_logic.UninterpretedSort):
                     indent(ind+1,'type ' + str(x) + '\n')
                 else:

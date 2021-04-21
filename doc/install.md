@@ -30,7 +30,9 @@ also work on other Debian-based distributions.
 
 ### Prerequisites
 
-    $ sudo apt-get install python python-pip g++ cmake python-ply python-pygraphviz git python-tk tix pkg-config libssl-dev
+    $ sudo apt-get install python python-pip g++ cmake python-ply python-pygraphviz git python-tk tix pkg-config libssl-dev libreadline-dev
+    $ sudo pip install pyparsing==2.1.4 pexpect
+
 
 ### Install IVy
 
@@ -275,7 +277,8 @@ Ivy is released as a Python package in the PyPI repository.
 
 ### <a name="linuxbinary"> Install binary release on Linux
 
-    $ sudo apt-get install python python-pip g++ python-ply python-pygraphviz python-tk tix libssl-dev
+    $ sudo apt-get install python python-pip g++ python-ply python-pygraphviz python-tk tix libssl-dev libreadline-dev
+    $ sudo pip install pyparsing==2.1.4
     $ sudo pip install ms-ivy
 
 Note, if you omit `sudo` in the second command, Ivy will be installed

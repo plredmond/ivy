@@ -269,12 +269,12 @@ module rel_array(domain,range) = {
 	}
 	after resize {
 	    assert end(a) = s;
-	    assert 0 <= X & X < end(old a) -> value_is(a,X,Y) <-> value_is(old a,X,Y);
-	    assert end(old a) <= X & X < s -> value_is(a,X,Y) <-> Y = v
+	    assert 0 <= X & X < end(old a) -> (value_is(a,X,Y) <-> value_is(old a,X,Y));
+	    assert end(old a) <= X & X < s -> (value_is(a,X,Y) <-> Y = v)
 	}
 	after append {
 	    assert end(a) > end(old a) & ~(end(old a) < X & X < end(a));
-	    assert 0 <= X & X < end(old a) -> value_is(a,X,Y) <-> value_is(old a,X,Y);
+	    assert 0 <= X & X < end(old a) -> (value_is(a,X,Y) <-> value_is(old a,X,Y));
 	    assert value_is(a,end(old a),Y) <-> Y = v
 	}
 
@@ -286,7 +286,7 @@ module rel_array(domain,range) = {
 
     instantiate array_impl
 
-    implementation {
+    object impl = {...
 	definition value_is(A,X,V) = (value(A,X) = V)
     }
 

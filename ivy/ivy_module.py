@@ -144,6 +144,7 @@ class Module(object):
 
     def update_theory(self):
         theory = list(self.get_axioms())
+        defs = []
         # axioms of the derived relations TODO: used only the
         # referenced ones, but we need to know abstract domain for
         # this
@@ -153,10 +154,13 @@ class Module(object):
                 if not isinstance(ldf.formula,il.DefinitionSchema):
 #                    theory.append(ldf.formula) # TODO: make this a def?
                     ax = ldf.formula
-                    ax = ax.to_constraint() if isinstance(ax.rhs(),il.Some) else ax
-                    if ldf.formula.args[0].args:
-                        ax = il.ForAll(ldf.formula.args[0].args,ax)
-                    theory.append(ax) # TODO: make this a def?
+                    if isinstance(ax.rhs(),il.Some):
+                        ax = ax.to_constraint()
+                        if ldf.formula.args[0].args:
+                            ax = il.ForAll(ldf.formula.args[0].args,ax)
+                            theory.append(ax) # TODO: make this a def?
+                    else:
+                        defs.append(ax)
         # extensionality axioms for structs
         for sort in sorted(self.sort_destructors):
             destrs = self.sort_destructors[sort]
@@ -166,7 +170,7 @@ class Module(object):
                     theory.append(ea)
         # exclusivity axioms for variants
         theory.extend(self.variant_axioms())
-        self.theory = lu.Clauses(theory)
+        self.theory = lu.Clauses(theory,defs)
 
     def variant_axioms(self):
         theory = []

@@ -167,7 +167,7 @@ def substitute(t, subs):
             assert False, (t, subs) # capturing would be created
 
     else:
-        assert False, type(e)
+        assert False, t
 
 
 def substitute_apply(t, subs, by_name=False):

@@ -710,7 +710,7 @@ class ChoiceAction(Action):
         result = [], false_clauses(annot=EmptyAnnotation()), false_clauses(annot=EmptyAnnotation())
         for a in self.args:
             foo = a.int_update(domain, pvars)
-            result = join_action(result, foo, domain.relations)
+            result = join_action(result, foo, domain.background_theory(pvars))
         return result
     def __repr__(self):
         if hasattr(self, 'label'):
@@ -737,7 +737,7 @@ class EnvAction(ChoiceAction):
         for a in self.args:
             foo = a.update(domain, pvars)
 #            print 'sub vars = {}'.format([str(x) for x in used_symbols_clauses(foo[1])])
-            result = join_action(result, foo, domain.relations)
+            result = join_action(result, foo, domain.background_theory(pvars))
 #            print 'join vars = {}'.format([str(x) for x in used_symbols_clauses(result[1])])
 #            print 'annot = {}'.format(result[1].annot)
         return result
@@ -810,12 +810,12 @@ class IfAction(Action):
 #                print 'ite at {}'.format(self.lineno)
 #            print 'if vars = {}'.format([str(x) for x in used_symbols_clauses(upds[0][1])])
 #            print 'else vars = {}'.format([str(x) for x in used_symbols_clauses(upds[1][1])])
-            res =  ite_action(self.args[0],upds[0],upds[1],domain.relations)
+            res =  ite_action(self.args[0],upds[0],upds[1],domain.background_theory(pvars))
 #            print 'join vars = {}'.format([str(x) for x in used_symbols_clauses(res[1])])
             return res
         if_part,else_part = (a.int_update(domain,pvars) for a in self.subactions())
 
-        res = join_action(if_part,else_part,domain.relations)
+        res = join_action(if_part,else_part,domain.background_theory(pvars))
         # Hack: the ite annotation comes out reversed. Fix it.
         for i in range(1,3):
             x = res[i].annot

@@ -847,7 +847,7 @@ class Qelim(object):
             consts = [self.get_consts(x.sort,sort_constants) for x in expr.variables]
             values = itertools.product(*consts)
             maps = [dict(zip(expr.variables,v)) for v in values]
-            insts = [normalize(il.substitute(expr.body,m)) for m in maps]
+            insts = [self.qe(il.substitute(expr.body,m),sort_constants) for m in maps]
 #            for i in insts:
 #                print '    {}'.format(i)
             for inst in insts:
@@ -1111,8 +1111,9 @@ def to_aiger(mod,ext_act):
     
     # compute the transition relation
 
-    stvars,trans,error = action.update(mod,None)
-#    iu.dbg('trans')
+    stvars,trans,error = tr.add_post_axioms(action.update(mod,None),mod.background_theory())
+    trans = ilu.and_clauses(trans,ilu.Clauses(defs=mod.background_theory().defs))
+    #    iu.dbg('trans')
     
 
 #    print 'action : {}'.format(action)
@@ -1195,6 +1196,8 @@ def to_aiger(mod,ext_act):
     ax_def = il.Definition(ax_var,ax_conj)
     invariant = il.Implies(ax_var,invariant)
     trans = ilu.Clauses(trans.fmlas+[ax_var],trans.defs+[ax_def])
+
+#    iu.dbg('trans')
 
     # step 4b: handle the finite-domain functions specially
 

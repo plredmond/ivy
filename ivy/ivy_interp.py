@@ -210,8 +210,7 @@ def concrete_join(state1,state2):
     that are implicitly existentially quantified and are prefixed with "__old".
     """
  
-    relations = state1.domain.relations
-    value = join_state(state1.value,state2.value,relations)
+    value = join_state(state1.value,state2.value,domain.background_theory())
     res = new_state(value,domain = state1.domain,expr=state_join(state1,state2))
     res.join_of = [state1,state2]
     return res

@@ -206,7 +206,7 @@ class IvyCheck(Test):
 class IvyTest(Test):
     def command(self):
         import platform
-        return './build/'+self.name
+        return '/bin/bash -c "`ivy_shell`; ./build/{}"'.format(self.name)
 
     def preprocess_commands(self):
         make_directory_exist('build')
@@ -214,7 +214,8 @@ class IvyTest(Test):
 
 class IvyRepl(Test):
     def command(self):
-        return './build/'+self.name
+        return '/bin/bash -c "`ivy_shell`; ./build/{}"'.format(self.name)
+#        return '`ivy_shell`; ./build/'+self.name
     def preprocess_commands(self):
         make_directory_exist('build')
         return ['ivy_to_cpp target=repl build=true '+' '.join(self.opts) + ' '+self.name+'.ivy']

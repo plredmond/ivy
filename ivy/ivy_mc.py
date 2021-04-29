@@ -850,9 +850,16 @@ class Qelim(object):
             insts = [self.qe(il.substitute(expr.body,m),sort_constants) for m in maps]
 #            for i in insts:
 #                print '    {}'.format(i)
-            for inst in insts:
-                c = il.Implies(res,inst) if il.is_forall(expr) else il.Implies(inst,res)
+            if is_finite_sort(x.sort):
+                return (il.And if il.is_forall(expr) else il.Or)(*insts)
+                c = il.Iff(res,(il.And if il.is_forall(expr) else il.Or)(*insts))
+                if res.name == "__qe[1601]":
+                    print "__qe[1601]:{}".format(c)
                 self.fmlas.append(c)
+            else:
+                for inst in insts:
+                    c = il.Implies(res,inst) if il.is_forall(expr) else il.Implies(inst,res)
+                    self.fmlas.append(c)
             return res
         if il.is_macro(expr):
             return self.qe(il.expand_macro(expr),sort_constants)
@@ -1178,6 +1185,7 @@ def to_aiger(mod,ext_act):
     print '\nInstantiating quantifiers (see {} for instantiations)...'.format(logfile_name)
     logfile.write('\ninstantiations:\n')
     trans,invariant = Qelim(sort_constants,sort_constants2)(trans,invariant,indhyps)
+    iu.dbg('invariant')
     
     
 #    print 'after qe:'

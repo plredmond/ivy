@@ -79,7 +79,7 @@ def l2s_tactic(prover,goals,proof):
     
     # Add all the assumed invariants to the model
 
-    assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal]
+    assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal and isinstance(x.formula,lg.Globally)]
     model.asms.extend([p.clone([p.label,p.formula.args[0]]) for p in assumed_gprops])
 
     # TRICKY: We postpone compiling formulas in the tactic until now, so

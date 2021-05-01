@@ -569,8 +569,11 @@ if iu.get_numeric_version() <= [1,6]:
 else:
 
     def p_schdecl_propdecl(p):
-        'schdecl : PROPERTY lgprop'
-        p[0] = [check_non_temporal(addlabel(p[2],'prop'))]
+        'schdecl : optexplicit PROPERTY lgprop'
+        lf = addlabel(p[3],'prop')
+        if p[1]:
+            lf.explicit = True
+        p[0] = [check_non_temporal(lf)]
 
     def p_schdecl_theorem_lgprop(p):
         'schdecl : THEOREM lgprop'
@@ -589,8 +592,8 @@ if iu.get_numeric_version() <= [1,6]:
 else:
 
     def p_schconc_propdecl(p):
-        'schconc : PROPERTY lgprop'
-        fmla = p[2].formula
+        'schconc : optexplicit PROPERTY lgprop'
+        fmla = p[3].formula
         if isinstance(fmla,SchemaBody):
             report_error(IvyError(fmla,"formula expected"))
         p[0] = check_non_temporal(fmla)

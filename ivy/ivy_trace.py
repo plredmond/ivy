@@ -80,7 +80,7 @@ class TraceBase(art.AnalysisGraph):
             foo = False
             for c in state.clauses.fmlas:
                 s1,s2 = map(str,c.args)
-                if not(s1 in hash and hash[s1] == s2):
+                if not(s1 in hash and hash[s1] == s2): # or state is self.states[0]:
                     hash[s1] = s2
                     if not foo:
                         lines.append(indent * '    ' + '[\n')

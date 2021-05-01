@@ -843,17 +843,20 @@ class Qelim(object):
             old = self.syms.get(expr,None)
             if old is not None:
                 return old
-            res = self.fresh(expr)
+#            res = self.fresh(expr)
             consts = [self.get_consts(x.sort,sort_constants) for x in expr.variables]
             values = itertools.product(*consts)
             maps = [dict(zip(expr.variables,v)) for v in values]
-            insts = [normalize(il.substitute(expr.body,m)) for m in maps]
-#            for i in insts:
-#                print '    {}'.format(i)
-            for inst in insts:
-                c = il.Implies(res,inst) if il.is_forall(expr) else il.Implies(inst,res)
-                self.fmlas.append(c)
-            return res
+            insts = [self.qe(il.substitute(expr.body,m),sort_constants) for m in maps]
+            if is_finite_sort(x.sort):
+                thing = (il.And if il.is_forall(expr) else il.Or)(*insts)
+                return thing
+            else:
+                res = self.fresh(expr)
+                for inst in insts:
+                    c = il.Implies(res,inst) if il.is_forall(expr) else il.Implies(inst,res)
+                    self.fmlas.append(c)
+                return res
         if il.is_macro(expr):
             return self.qe(il.expand_macro(expr),sort_constants)
         return clone_normal(expr,[self.qe(e,sort_constants) for e in expr.args])
@@ -1111,7 +1114,14 @@ def to_aiger(mod,ext_act):
     
     # compute the transition relation
 
-    stvars,trans,error = action.update(mod,None)
+    bgt = mod.background_theory()
+    stvars,trans,error = tr.add_post_axioms(action.update(mod,None),bgt)
+    trans = ilu.and_clauses(trans,ilu.Clauses(defs=bgt.defs))
+    defsyms = set(x.defines() for x in bgt.defs)
+    rn = dict((tr.new(sym),tr.new(sym).prefix('__')) for sym in defsyms)
+    trans = ilu.rename_clauses(trans,rn)
+    error = ilu.rename_clauses(error,rn)
+    stvars = [x for x in stvars if x not in defsyms]  # Remove symbols with state-dependent definitions
 #    iu.dbg('trans')
     
 
@@ -1177,6 +1187,7 @@ def to_aiger(mod,ext_act):
     print '\nInstantiating quantifiers (see {} for instantiations)...'.format(logfile_name)
     logfile.write('\ninstantiations:\n')
     trans,invariant = Qelim(sort_constants,sort_constants2)(trans,invariant,indhyps)
+#    iu.dbg('invariant')
     
     
 #    print 'after qe:'
@@ -1195,6 +1206,17 @@ def to_aiger(mod,ext_act):
     ax_def = il.Definition(ax_var,ax_conj)
     invariant = il.Implies(ax_var,invariant)
     trans = ilu.Clauses(trans.fmlas+[ax_var],trans.defs+[ax_def])
+
+#    iu.dbg('trans')
+    # print "\ndefinitions:"
+    # for df3 in trans.defs:
+    #     print df3
+    # print ""
+    # print "\nconstraints:"
+    # for df3 in trans.fmlas:
+    #     print df3
+    # print ""
+    
 
     # step 4b: handle the finite-domain functions specially
 
@@ -1257,8 +1279,10 @@ def to_aiger(mod,ext_act):
     def is_immutable_expr(expr):
         res = not any(my_is_skolem(sym) or tr.is_new(sym) or sym in stvarset for sym in ilu.used_symbols_ast(expr))
         return res
+    def expr_is_defined(expr):
+        return il.is_app(expr) and expr.rep in defsyms
     for expr,v in itertools.chain(prop_abs.iteritems(),((x,x) for x in finite_syms)):
-        if is_immutable_expr(expr):
+        if is_immutable_expr(expr) and not expr_is_defined(expr):
             new_stvars.append(v)
             logfile.write('new state: {}\n'.format(expr))
             new_defs.append(il.Definition(tr.new(v),v))
@@ -1321,7 +1345,7 @@ def to_aiger(mod,ext_act):
     outputs = [fail]
     
 
-#    iu.dbg('trans')
+    #    iu.dbg('trans')
     
     # make an aiger
 
@@ -1446,17 +1470,17 @@ class AigerMatchHandler2(ivy_trace.TraceBase):
             return tr.is_skolem(x) and x not in self.cnsts
 
         def show_sym(v,decd,val,eqns):
+            if il.is_app(decd) and decd.rep.name.startswith('__new_'):
+                decd = decd.rep.drop_prefix('__')(*decd.args)
             if all(x in inv_env or not my_is_skolem(x) and
                    not tr.is_new(x) and x not in env for x in ilu.used_symbols_ast(decd)):
                 expr = ilu.rename_ast(decd,inv_env)
-#                if isinstance(expr,il.ForAll):
-#                    print "OMG: {}".format(expr)
                 if not il.is_app(expr) or not tr.is_new(expr.rep):
                     if il.is_constant(expr) and expr in il.sig.constructors:
                         return
                     eqns.append(il.Equals(expr,val))
 
-        inv_env = dict((y,x) for x,y in env.iteritems() if not my_is_skolem(x))
+        inv_env = dict((y,x) for x,y in env.iteritems() if not my_is_skolem(x) and not tr.is_new(x))
         eqns = []
         for v in self.aiger.inputs:
             if v in self.decoder:
@@ -1465,7 +1489,11 @@ class AigerMatchHandler2(ivy_trace.TraceBase):
         for v in self.aiger.latches:
             if v in self.decoder:
                 decd = self.decoder[v]
-                show_sym(v,ilu.rename_ast(decd,rn),self.aiger.get_next_sym(v),eqns)
+                show_sym(v,decd,self.aiger.get_sym(v),eqns)
+                next_decd = ilu.rename_ast(decd,rn)
+                cur_decd = ilu.rename_ast(decd,env)
+                if next_decd == cur_decd:
+                    show_sym(v,next_decd,self.aiger.get_next_sym(v),eqns)
 
         self.add_state(eqns)
         
@@ -1559,6 +1587,9 @@ def aiger_witness_to_ivy_trace2(aiger,witnessfilename,action,stvarset,ext_act,an
         print 80*'-'
         current = dict()
         count = 0
+#        for v in aiger.inputs:
+#            if v in decoder:
+#                print "input: {}".format(decoder[v])
         handler = AigerMatchHandler2(aiger,decoder,consts,stvarset,current)
         for line in lines:
             cols = line.split(' ')

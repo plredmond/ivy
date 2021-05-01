@@ -523,7 +523,17 @@ def get_assumes_and_asserts(preconds_only):
             foo = ilu.close_epr(ilu.clauses_to_formula(triple[2]))
             #        print 'ivy_theory.py: foo (2): {}'.format(foo)
             assumes.append((foo,action))
-        
+#         for (name,action) in im.module.initializers:
+#             triple = action.update(im.module,[])
+# #            print 'ivy_theory.py: triple[1]: {}'.format(triple[1])
+# #            print 'ivy_theory.py: triple[2]: {}'.format(triple[2])
+#             foo = ilu.close_epr(ilu.clauses_to_formula(triple[1]))
+#             assumes.append((foo,action))
+#             foo = ilu.close_epr(ilu.clauses_to_formula(triple[2]))
+# #            print 'ivy_theory.py: foo (2): {}'.format(foo)
+#             assumes.append((foo,action))
+            
+
     for ldf in im.module.definitions:
         if not isinstance(ldf.formula,il.DefinitionSchema):
             if (ldf.formula.defines() not in ilu.symbols_ast(ldf.formula.rhs())

@@ -349,6 +349,7 @@ class ProofChecker(object):
                 decl = goal_remove_prem(decl,schemaname)
         else:
             schema = self.lookup_schema(schemaname,decl,proof,close=False)
+        schema = remove_explicit(schema)
         prob, pmatch = self.setup_schema_matching(decl,proof,schema,allow_witness=True)
         def iswit(x):
             return isinstance(x,il.Variable) and x not in prob.freesyms
@@ -1476,6 +1477,14 @@ def drop_supplied_prems(schema,goal,proof_match):
         return False
     return clone_goal(schema,[x for x in goal_prems(schema) if not is_supplied(x)],
                       goal_conc(schema))
+
+# Remove the "explicit" tag from a goal
+
+def remove_explicit(goal):
+    if hasattr(goal,'explicit') and goal.explicit:
+        goal = goal.clone(goal.args)
+        goal.explicit = False
+    return goal
 
 class AddSymbols(object):
     """ temporarily add some symbols to a set of symbols """

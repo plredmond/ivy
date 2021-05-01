@@ -153,7 +153,7 @@ def frame_def(sym,op):
     dfn = Definition(lhs,rhs)
     return dfn
 
-def frame(updated,relations,op):
+def frame(updated,op):
     """ Return a clause list constraining all updated symbols
     to keep their op values, for op = new,old """
     return Clauses([],[frame_def(sym,op) for sym in updated])
@@ -175,20 +175,22 @@ def frame_update(update,in_scope,sig):
             dfns.append(frame_def(sym,new))
     return (updated,and_clauses(clauses,Clauses([],dfns)),pre)
 
-def diff_frame(updated1,updated2,relations,op):
+def diff_frame(updated1,updated2,op,axioms):
     if updated1 == None or updated2 == None: return Clauses([])
     updated = list_diff(updated2,updated1)
-    return frame(updated,relations,op)
+    defnd = set(df.defines() for df in axioms.defs)
+    updated = [sym for sym in updated if sym not in defnd]
+    return frame(updated,op)
 
 def updated_join(updated1,updated2):
     if updated1 == None or updated1 == None: return None
     return list_union(updated1,updated2)
 
-def join(s1,s2,relations,op):
+def join(s1,s2,op,axioms):
     u1,c1,p1 = s1
     u2,c2,p2 = s2
-    df12 = diff_frame(u1,u2,relations,op)
-    df21 = diff_frame(u2,u1,relations,op)
+    df12 = diff_frame(u1,u2,op,axioms)
+    df21 = diff_frame(u2,u1,op,axioms)
     c1 = and_clauses(c1,df12)
     c2 = and_clauses(c2,df21)
     p1 = and_clauses(p1,df12)
@@ -198,11 +200,11 @@ def join(s1,s2,relations,op):
     p = or_clauses(p1,p2)
     return (u,c,p)
 
-def ite(cond,s1,s2,relations,op):
+def ite(cond,s1,s2,op,axioms):
     u1,c1,p1 = s1
     u2,c2,p2 = s2
-    df12 = diff_frame(u1,u2,relations,op)
-    df21 = diff_frame(u2,u1,relations,op)
+    df12 = diff_frame(u1,u2,op,axioms)
+    df21 = diff_frame(u2,u1,op,axioms)
     c1 = and_clauses(c1,df12)
     c2 = and_clauses(c2,df21)
     p1 = and_clauses(p1,df12)
@@ -244,16 +246,16 @@ def implies(s1,s2,axioms,relations,op):
 #    print "c1: {}".format(c1)
 #    print "axioms: {}".format(axioms)
 #    print "df: {}".format(diff_frame(u1,u2,relations,op))
-    c1 = and_clauses(c1,axioms,diff_frame(u1,u2,relations,op))
+    c1 = and_clauses(c1,axioms,diff_frame(u1,u2,op,axioms))
     if isinstance(c2,Clauses):
         if not c2.is_universal_first_order() or not p2.is_universal_first_order():
             return False
-        c2 = and_clauses(c2,diff_frame(u2,u1,relations,op))
+        c2 = and_clauses(c2,diff_frame(u2,u1,op,axioms))
         return clauses_imply(p1,p2) and clauses_imply(c1,c2)
     else:
         if not is_prenex_universal(c2) or not is_prenex_universal(p2):
             return False
-        c2 = And(c2,clauses_to_formula(diff_frame(u2,u1,relations,op)))
+        c2 = And(c2,clauses_to_formula(diff_frame(u2,u1,op,axioms)))
         return clauses_imply_formula_cex(p1,p2) and clauses_imply_formula_cex(c1,c2)
 
 def implies_state(s1,s2,axioms,relations):
@@ -262,14 +264,14 @@ def implies_state(s1,s2,axioms,relations):
 def implies_action(s1,s2,axioms,relations):
     return implies(s1,s2,axioms,relations,new)
 
-def join_state(s1,s2,relations):
-    return join(clausify_state(s1),clausify_state(s2),relations,old)
+def join_state(s1,s2,axioms):
+    return join(clausify_state(s1),clausify_state(s2),old,axioms)
 
-def join_action(s1,s2,relations):
-    return join(s1,s2,relations,new)
+def join_action(s1,s2,axioms):
+    return join(s1,s2,new,axioms)
 
-def ite_action(cond,s1,s2,relations):
-    return ite(cond,s1,s2,relations,new)
+def ite_action(cond,s1,s2,axioms):
+    return ite(cond,s1,s2,new,axioms)
 
 def condition_update_on_fmla(update,fmla,relations):
     """Given an update, return an update conditioned on fmla. Maybe an "else" would
@@ -330,7 +332,7 @@ def compose_updates(update1,axioms,update2):
 #    print "pre1 before = {}".format(pre1)
 #    iu.dbg('pre1.annot')
 #    iu.dbg('pre1')
-    pre1 = and_clauses(pre1,diff_frame(updated1,updated2,None,new))  # keep track of post-state of assertion failure
+    pre1 = and_clauses(pre1,diff_frame(updated1,updated2,new,axioms))  # keep track of post-state of assertion failure
 #    print "pre1 = {}".format(pre1)
     temp = and_clauses(clauses1,rename_clauses(and_clauses(pre2,mid_ax),map2),annot_op=my_annot_op)
 #    iu.dbg('temp.annot')
@@ -340,6 +342,12 @@ def compose_updates(update1,axioms,update2):
 #    iu.dbg('new_clauses')
 #    iu.dbg('new_clauses.annot')
     return (new_updated,new_clauses,new_pre)
+
+def add_post_axioms(update,axioms):
+    map = dict((sym,new(sym)) for sym in update[0])
+    syms = set(update[0])
+    post_ax = clauses_using_symbols(syms,axioms)
+    return (update[0],and_clauses(update[1],rename_clauses(post_ax,map)),update[2])
 
 def exist_quant_map(syms,clauses):
     used = used_symbols_clauses(clauses)

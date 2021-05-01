@@ -330,7 +330,7 @@ def l2s_tactic_int(prover,goals,proof,full):
             monitor_edge(l2s_frozen, l2s_saved) +
             save_state +
             reset_w
-        )),
+        )).set_lineno(lineno),
         # stay in same state (self edge)
         Sequence().set_lineno(lineno),
     ).set_lineno(lineno)]

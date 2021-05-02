@@ -286,6 +286,12 @@ class Ivy(object):
     def clone(self,args):
         return self
 
+    def rewrite(self,rewrite):
+        if isinstance(rewrite,AstRewriteSubstPrefix):
+            res = Ivy()
+            inst_mod(res,self,None,rewrite.subst,dict())
+            return res
+        return self
 
 def p_top(p):
     'top :'

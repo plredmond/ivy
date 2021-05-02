@@ -58,15 +58,25 @@ module udp_impl(host,pkt,ser,des) = {
             { std::cerr << "cannot create socket\n"; exit(1); }
         return sock;
     }
-    
+>>>
+
+<<< impl
 
     // This structure holds all the callbacks for the endpoint. These are function objects
     // that are called asynchronously.
 
     struct udp_callbacks {
-        %`impl.handle_recv` rcb;
-        udp_callbacks(const %`impl.handle_recv` &rcb)
-            : rcb(rcb) {}
+        virtual void rcb(int,`ip.endpoint`,`pkt`) const = 0;
+    };
+
+    template<class rcb_thunk>
+    struct udp_callbacks_thunk : udp_callbacks {
+        rcb_thunk rcbt;
+        udp_callbacks_thunk(const rcb_thunk &rcb)
+        : rcbt(rcb) {}
+        virtual void rcb(int sock, `ip.endpoint` src, `pkt` pkt) const {
+            rcbt(sock,src,pkt);
+        }
     };
 
     // This is a general class for an asynchronous task. These objects are called in a loop
@@ -78,12 +88,12 @@ module udp_impl(host,pkt,ser,des) = {
       protected:
         int sock;           // socket associated to this task, or -1 if task complete
         `host` my_id;       // host id associated to this task
-        udp_callbacks cb;   // callbacks to ivy
+        const udp_callbacks *cb;   // callbacks to ivy
         ivy_class *ivy;     // pointer to main ivy object (mainly to get lock)
 
       public:
 
-        udp_task(`host` my_id, int sock, const udp_callbacks &cb, ivy_class *ivy)
+        udp_task(`host` my_id, int sock, const udp_callbacks *cb, ivy_class *ivy)
           : my_id(my_id), sock(sock), cb(cb), ivy(ivy) {} 
 
         virtual int fdes() {
@@ -98,7 +108,7 @@ module udp_impl(host,pkt,ser,des) = {
     class udp_reader : public udp_task {
         std::vector<char> buf;
       public:
-        udp_reader(`host` my_id, int sock, const udp_callbacks &cb, ivy_class *ivy)
+        udp_reader(`host` my_id, int sock, const udp_callbacks *cb, ivy_class *ivy)
             : udp_task(my_id, sock, cb, ivy) {
         }
 
@@ -142,7 +152,7 @@ module udp_impl(host,pkt,ser,des) = {
 	src.addr = ntohl(srcaddr.sin_addr.s_addr);
 	src.port = ntohs(srcaddr.sin_port);
 	    ivy->__lock();
-	    cb.rcb(sock,src,pkt);
+	    cb->rcb(sock,src,pkt);
 	    ivy->__unlock();
 	}
 
@@ -181,7 +191,7 @@ object impl(me:host) = {
 	// that captures the instance environment, in this case including
 	// the instance's endpoint id "me".
 
-	`cb` = new udp_callbacks(`handle_recv`);
+	`cb` = new udp_callbacks_thunk<%`impl.handle_recv`>(`handle_recv`);
 
     >>>
 
@@ -206,7 +216,7 @@ object impl(me:host) = {
 		// std::cout << "binding id: " << `me` << " addr: " << ntohl(myaddr.sin_addr.s_addr) << " port: " << ntohs(myaddr.sin_port) << std::endl;
 		if (::bind(s, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0)
 		    { perror("bind failed"); exit(1); }
-		install_reader(new udp_reader(`me`,s, *`cb`, this));
+		install_reader(new udp_reader(`me`,s, `cb`, this));
 
 	    >>>
 	}

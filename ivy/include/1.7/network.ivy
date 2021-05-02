@@ -1,0 +1,65 @@
+#lang ivy
+
+
+include udp_impl
+include serdes
+
+object udp = {
+
+    object endpoint = {
+        type this = struct {
+            addr : ip.addr,
+            port : ip.port
+        }
+    }
+
+    action to_ip_endpoint(id:endpoint) returns (res:ip.endpoint) = {
+        res.addr := id.addr;
+        res.port := id.port;
+        res.protocol := ip.udp;
+    }
+        
+    action from_ip_endpoint(id:ip.endpoint) returns (res:endpoint) = {
+        res.addr := id.addr;
+        res.port := id.port;
+    }
+        
+    type host = {me}
+
+    module net_serdes(msg_t,ser,des) = {
+
+        module socket = {
+
+            parameter id : udp.endpoint
+
+            action send(dst : udp.endpoint, msg : msg_t)
+            action recv(src : udp.endpoint, msg : msg_t)
+
+            implementation {
+
+                instance intf : udp_impl(udp.host,msg_t,ser,des)
+                var sock :intf.socket
+                
+                after init {
+                    sock := intf.open(udp.me,udp.to_ip_endpoint(id));
+                }
+
+                implement send {
+                    call intf.send(udp.me,sock,udp.to_ip_endpoint(dst),msg);
+                }
+
+                implement intf.recv(h:udp.host, s:intf.socket, src:ip.endpoint, msg:msg_t) {
+                    call recv(udp.from_ip_endpoint(src), msg:msg_t);
+                }
+            }
+        }
+        
+        trusted isolate iso = this
+        
+        attribute test = impl
+    }
+
+    module net(msg_t) = {
+        instantiate net_serdes(msg_t,std_serializer,std_deserializer)
+    }
+}

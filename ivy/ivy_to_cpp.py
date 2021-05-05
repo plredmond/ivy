@@ -5232,10 +5232,10 @@ def main_int(is_ivyc):
                     isolates = ['this']
 
         import json
+        processes = []
         for isolate in isolates:
             with im.module.copy():
                 with iu.ErrorPrinter():
-
 
                     def do_cmd(cmd):
                         print cmd
@@ -5362,8 +5362,33 @@ def main_int(is_ivyc):
                     sys.stdout.flush()
                     with iu.WorkingDir(builddir):
                         status = os.system(cmd)
-                    if status:
-                        exit(1)
+                        if status:
+                            exit(1)
+                        if target.get() == 'repl' and not iu.version_le(iu.get_string_version(),"1.6"):
+                            def describe_params(params,defaults):
+                                res = []
+                                for param,default in zip(params,defaults):
+                                    desc = {}
+                                    desc['name'] = param.name
+                                    desc['type'] = str(param.sort)
+                                    res.append(desc)
+                                return res
+                            descriptor = {}
+                            descriptor['binary'] = basename
+                            descriptor['name'] = str(isolate)
+                            if isolate in im.module.isolates:
+                                the_iso = im.module.isolates[isolate]
+                                descriptor['indices'] = describe_params(the_iso.params(),[None for x in the_iso.params()])
+                            descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
+                            processes.append(descriptor)
+        if target.get() == 'repl':
+            try:
+                descriptor = {'processes' : processes}
+                with open(basename + '.dsc','w') as dscf:
+                    json.dump(descriptor,dscf)
+            except:
+                sys.stderr.write('cannot write to file: {}\n'.format(basename + '.dsc'))
+                exit(1)
 
 def outfile(name):
     return (opt_outdir.get() + '/' + name) if opt_outdir.get() else name

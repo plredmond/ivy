@@ -4,6 +4,8 @@
 include udp_impl
 include serdes
 
+global {
+
 object udp = {
 
     object endpoint = {
@@ -60,6 +62,8 @@ object udp = {
     }
 
     module net(msg_t) = {
-        instantiate net_serdes(msg_t,std_serializer,std_deserializer)
+        instantiate net_serdes(msg_t,std_serdes.serializer,std_serdes.deserializer)
     }
+}
+
 }

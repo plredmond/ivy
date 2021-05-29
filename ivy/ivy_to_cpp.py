@@ -5206,13 +5206,16 @@ def main_int(is_ivyc):
                 else:
                     extracts = list((x,y) for x,y in im.module.isolates.iteritems()
                                     if isinstance(y,ivy_ast.ExtractDef))
+                    iu.dbg('extracts')
                     if len(extracts) == 0:
                         isol = ivy_ast.ExtractDef(ivy_ast.Atom('extract'),ivy_ast.Atom('this'))
                         isol.with_args = 1
                         im.module.isolates['extract'] = isol
                         isolates = ['extract']
-                    elif len(extracts) == 1:
-                        isolates = [extracts[0][0]]
+                    else:
+                        isolates = [ex[0] for ex in extracts]
+#                    elif len(extracts) == 1:
+#                        isolates = [extracts[0][0]]
         else:
             if isolate != None:
                 isolates = [isolate]
@@ -5233,6 +5236,7 @@ def main_int(is_ivyc):
 
         import json
         processes = []
+        mod_name = opt_classname.get() or im.module.name
         for isolate in isolates:
             with im.module.copy():
                 with iu.ErrorPrinter():
@@ -5268,7 +5272,7 @@ def main_int(is_ivyc):
 #                    if target.get() != 'repl':
 #                        ifc.check_fragment(True)
                     with im.module.theory_context():
-                        basename = opt_classname.get() or im.module.name
+                        basename = mod_name
                         if len(isolates) > 1:
                             basename = basename + '_' + isolate
                         classname = varname(basename)
@@ -5384,10 +5388,10 @@ def main_int(is_ivyc):
         if target.get() == 'repl':
             try:
                 descriptor = {'processes' : processes}
-                with open(basename + '.dsc','w') as dscf:
+                with open(mod_name + '.dsc','w') as dscf:
                     json.dump(descriptor,dscf)
             except:
-                sys.stderr.write('cannot write to file: {}\n'.format(basename + '.dsc'))
+                sys.stderr.write('cannot write to file: {}\n'.format(mod_name + '.dsc'))
                 exit(1)
 
 def outfile(name):

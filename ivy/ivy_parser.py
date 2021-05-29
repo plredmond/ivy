@@ -193,6 +193,7 @@ def check_non_temporal(x):
 
 special_attribute = None
 parent_object = None
+global_attribute = None
 
 class Ivy(object):
     def __init__(self):
@@ -207,8 +208,11 @@ class Ivy(object):
         self.is_module = False
         self.params = []
         global special_attribute
-        self.attributes = (special_attribute,) if special_attribute is not None else ()
+        global global_attribute
+        self.attributes = (((special_attribute,) if special_attribute is not None else ()) +
+                           ((global_attribute,) if global_attribute is not None else ()))
         special_attribute = None
+        global_attribute = None
         # if we are a continuation object, inherent defined symbols from previous declaration
         global parent_object
         if parent_object is not None:
@@ -1710,6 +1714,15 @@ if not (iu.get_numeric_version() <= [1,1]):
         d.args[0].with_args = len(p[10])
         d.lineno = get_lineno(p,3)
         p[0].declare(d)
+    def p_top_opttrusted_extract_callatom_eq_lcb_top_rcb_optwith(p):
+        'top : top EXTRACT SYMBOL optargs EQ LCB top RCB optwith'
+        p[0] = p[1]
+        create_object(p[0],p[3],p[4],p[7],get_lineno(p,3))
+        ty = ExtractDef
+        d = IsolateObjectDecl(ty(*([Atom(p[3],p[4]),Atom(p[3],p[4])]+p[9])))
+        d.args[0].with_args = len(p[9])+1
+        d.lineno = get_lineno(p,2)
+        p[0].declare(d)
     def p_top_extract_callatom_eq_callatoms(p):
         'top : top EXTRACT SYMBOL optargs EQ callatoms'
         d = IsolateDecl(ExtractDef(*([Atom(p[3],p[4])] + p[6])))
@@ -1773,6 +1786,12 @@ if not (iu.get_numeric_version() <= [1,6]):
         p[0] = p[1]
         global special_attribute
         special_attribute =  "private"
+
+    def p_specimpl_private(p):
+        'specimpl : GLOBAL'
+        p[0] = p[1]
+        global global_attribute
+        global_attribute =  "global"
 
     def p_top_specification_lcb_top_rcb(p):
         'top : top specimpl LCB top RCB'

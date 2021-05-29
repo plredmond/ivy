@@ -2100,6 +2100,21 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
             # for x,y in mod.actions.iteritems():
             #     print iu.pretty("action {} = {}".format(x,y))
 
+        # find all the global roots and add them to the "with" lists of all of the isolates
+
+        global_objects = []
+        for name in im.module.attributes:
+            p,c = iu.parent_child_name(name)
+            if c == 'global':
+                pp,pc = iu.parent_child_name(p)
+                if pp == 'this' or iu.compose_names(pp,'global') not in im.module.attributes:
+                    global_objects.append(ivy_ast.Atom(p,[]))
+        iu.dbg('[str(x) for x in global_objects]')
+        for iso in im.module.isolates.values():
+            iso.args += tuple(global_objects)
+            iso.with_args += len(global_objects)
+                    
+
         create_sort_order(mod)
         create_constructor_schemata(mod)
         attach_proofs(mod)

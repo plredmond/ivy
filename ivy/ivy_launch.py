@@ -3,6 +3,7 @@ import ivy_init
 import sys
 import json
 import platform
+import os
 
 def usage():
     print "usage: \n {} {{option=value...}} <file>.dsc".format(sys.argv[0])
@@ -18,12 +19,13 @@ def get_unused_port(protocol):
 def lookup_ip_addr(hostname):
     return '0x7f000001'
 
-def run_in_terminal(cmd):
-    if platform.system() == 'Darwin':
-        from applescript import tell
-        term_cmd = cmd.replace('"','\\"')
-        tell.app( 'Terminal', 'do script "' + term_cmd + '"')
-
+def run_in_terminal(cmd,name):
+    # if platform.system() == 'Darwin':
+    #     from applescript import tell
+    #     term_cmd = cmd.replace('"','\\"')
+    #     tell.app( 'Terminal', 'do script "' + term_cmd + '"')
+    os.system("xterm -T '{}' -e '{}'&\n".format(name,cmd))
+    
 def main():
     ivy_init.read_params()
     if len(sys.argv) < 2 or len(sys.argv) > 3:
@@ -69,7 +71,7 @@ def main():
                 else:
                     cmd.append('{}'.format(val))
         print ' '.join(cmd)
-        run_in_terminal(' '.join(cmd))
+        run_in_terminal(' '.join(cmd),process['name'])
         
         
 if __name__ == "__main__":

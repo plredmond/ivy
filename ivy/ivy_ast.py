@@ -5,7 +5,7 @@
 Ivy abstract syntax trees.
 """
 
-from ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name
+from ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name, ivy_compose_character
 import ivy_utils as iu
 import ivy_logic
 import re
@@ -36,11 +36,22 @@ class Symbol(AST):
         self.sort = sort
     def __repr__(self):
         return self.rep
+    def __str__(self):
+        return self.rep
     def __hash__(self):
         return hash(self.rep)
     def __eq__(self,other):
         return type(self) == type(other) and self.rep == other.rep
-
+    def subst(self,subst,root):
+        if not root:
+            return self
+        thing = subst.get(self.rep,self.rep)
+        if isinstance(thing,This):
+            return thing
+        return Symbol(thing,self.sort)
+    def apply(self,fun,root):
+        return Symbol(fun(self.rep),self.sort) if root else self
+    
 def nary_repr(op,args):
     res = (' ' + op + ' ').join([repr(a) for a in args])
     return ('(' + res + ')') if len(args) > 1 else res
@@ -249,6 +260,8 @@ class Atom(Formula):
         res.rep = s
         if hasattr(self,'lineno'):
             res.lineno = self.lineno
+        if hasattr(self,'sort'):
+            res.sort = self.sort
         return res
         
     # following for backward compat
@@ -317,6 +330,8 @@ class App(Term):
         res.rep = s
         if hasattr(self,'lineno'):
             res.lineno = self.lineno
+        if hasattr(self,'sort'):
+            res.sort = self.sort
         return res
 
 
@@ -1379,53 +1394,102 @@ def app_to_atom(app):
 def apps_to_atoms(apps):
     return [app_to_atom(app) for app in apps]
 
+
+class Dot(AST):
+    def __str__(self):
+        return str(self.args[0]) + ivy_compose_character + str(self.args[1])
+    def subst(self,subst,root):
+        lhs,rhs = self.args[0].subst(subst,root),self.args[1].subst(subst,False)
+        return rhs if isinstance(lhs,This) else Dot(lhs,rhs)
+    def apply(self,fun,root):
+        return Dot(self.args[0].apply(fun,root),self.args[1].apply(fun,False))
+    
+    
+class Bracket(AST):
+    def __str__(self):
+        return str(self.args[0]) + '[' + str(self.args[1]) + ']'
+    def subst(self,subst,root):
+        return Bracket(self.args[0].subst(subst,root),self.args[1].subst(subst,True))
+    def apply(self,fun,root):
+        return Bracket(self.args[0].apply(fun,root),self.args[1].apply(fun,True))
+
+
+symbol_chars_parser = re.compile(r'[^\[\]\.]*')
+    
+    
+def parse_name(name):
+    def recur(pos):
+        match = symbol_chars_parser.match(name,pos)
+        assert match
+        pref = Symbol(match.group(0),None)
+        pos = match.end()
+        while len(name) > pos and name[pos] != ']':
+            if name[pos] == '[':
+                suff,pos = recur(pos+1)
+                pref = Bracket(pref,suff)
+                pos = pos + 1;
+            elif name[pos] == ivy_compose_character:
+                suff,pos = recur(pos+1)
+                pref = Dot(pref,suff)
+        return pref,pos
+    res,pos = recur(0)
+    return res
+    
+
 # AST rewriting
 
-name_parser = re.compile(r'[^\[\]]+|\[[^\[\]]*\]')
+# name_parser = re.compile(r'[^\[\]]+|\[[^\[\]]*\]')
 
 
-def str_subst(s,subst):
-    names = split_name(s)
-    it = subst.get(names[0],names[0])
-    if isinstance(it,This):
-        if len(names) > 1:
-            return compose_names(*names[1:])
-        return it
-    return compose_names(it,*names[1:])
-#    return subst.get(s,s)
+# def str_subst(s,subst):
+#     names = split_name(s)
+#     it = subst.get(names[0],names[0])
+#     if isinstance(it,This):
+#         if len(names) > 1:
+#             return compose_names(*names[1:])
+#         return it
+#     return compose_names(it,*names[1:])
+# #    return subst.get(s,s)
 
-def str_subst_str(s,subst):
-    if s == 'this':
-        return subst.get(s,s)
-    return str_subst(s,subst)
+# def str_subst_str(s,subst):
+#     if s == 'this':
+#         return subst.get(s,s)
+#     return str_subst(s,subst)
 
-def subst_subscripts_comp(s,subst):
-    if isinstance(s,This) or s.startswith('"') :
-        return s
-    assert s!=None
-#    print 's: {} subst: {}'.format(s,subst)
-    try:
-        g = name_parser.findall(s)
-    except:
-        assert False, s
-#    print 'g: {}'.format(g)
-    if not g:
-        return s
-    pref = str_subst(g[0],subst)
-    if isinstance(pref,This):
-        if len(g) > 1:
-            raise iu.IvyError(None,'cannot substitute "this" for {} in {}'.format(g[0],s))
-        return pref
-    try:
-        res =  pref + ''.join(('[' + str_subst_str(x[1:-1],subst) + ']' if x.startswith('[') else x) for x in g[1:])
-    except:
-        print "s: {} subst : {}".format(s,subst)
-#    print "res: {}".format(res)
-    return res
+# def subst_subscripts_comp(s,subst):
+#     if isinstance(s,This) or s.startswith('"') :
+#         return s
+#     assert s!=None
+# #    print 's: {} subst: {}'.format(s,subst)
+#     try:
+#         g = name_parser.findall(s)
+#     except:
+#         assert False, s
+# #    print 'g: {}'.format(g)
+#     if not g:
+#         return s
+#     pref = str_subst(g[0],subst)
+#     if isinstance(pref,This):
+#         if len(g) > 1:
+#             raise iu.IvyError(None,'cannot substitute "this" for {} in {}'.format(g[0],s))
+#         return pref
+#     try:
+#         res =  pref + ''.join(('[' + str_subst_str(x[1:-1],subst) + ']' if x.startswith('[') else x) for x in g[1:])
+#     except:
+#         print "s: {} subst : {}".format(s,subst)
+# #    print "res: {}".format(res)
+#     return res
+
+# def subst_subscripts(s,subst):
+# #    return compose_names(*[subst_subscripts_comp(t,subst) for t in split_name(s)])
+#     return subst_subscripts_comp(s,subst)
 
 def subst_subscripts(s,subst):
-#    return compose_names(*[subst_subscripts_comp(t,subst) for t in split_name(s)])
-    return subst_subscripts_comp(s,subst)
+    if isinstance(s,This) or s.startswith('"') :
+        return s
+    ast = parse_name(s)
+    return str(ast.subst(subst,True))
+        
 
 def my_base_name(x):
     return x if isinstance(x,This) else base_name(x)
@@ -1461,15 +1525,16 @@ class AstRewriteSubstPrefix(object):
     def prefix_str(self,name,always):
         if name == 'this' and self.pref:
             return self.pref.rep
-        if not (self.pref and (always or self.to_pref == None or split_name(name)[0] in self.to_pref)):
+        if not (self.pref and (always or self.to_pref == None or name in self.to_pref)):
             return name
         return iu.compose_names(self.pref.rep,name)
     def rewrite_atom(self,atom,always=False):
         if not(isinstance(atom.rep,This) or atom.rep.startswith('"')):
-            g = name_parser.findall(atom.rep)
-            if len(g) > 1:
-                n = g[0] + ''.join(('[' + self.prefix_str(x[1:-1],always) + ']' if x.startswith('[') else x) for x in g[1:])
-                atom = atom.rename(n)
+            atom = atom.rename(str(parse_name(atom.rep).apply(lambda x: self.prefix_str(x,always),False)))
+            # g = name_parser.findall(atom.rep)
+            # if len(g) > 1:
+            #     n = g[0] + ''.join(('[' + self.prefix_str(x[1:-1],always) + ']' if x.startswith('[') else x) for x in g[1:])
+            #     atom = atom.rename(n)
         if not (self.pref and (always or self.to_pref == None or isinstance(atom.rep,This) or 
                 split_name(atom.rep)[0] in self.to_pref)):
             return atom

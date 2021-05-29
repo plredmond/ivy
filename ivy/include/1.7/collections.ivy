@@ -1263,6 +1263,8 @@ module ordered_map_impl(key,value) = {
     instantiate map_wrapper(key,value)
 }
 
+autoinstance ordered_map[key][value] : ordered_map(key,value)
+
 ################################################################################
 #
 # Key/value arrays
@@ -1456,19 +1458,6 @@ module segment(domain,range,arr) = {
     
     isolate iso = this with domain.impl,arr
 }
-
-
-# This module represents an unordered map
-
-module unordered_map(key,value_t) = {
-    type this = struct {
-        value(K:key) : value_t
-    }
-}
-
-autoinstance unordered_map[key][value_t] : unordered_map(key,value_t)
-
-
 
 
     

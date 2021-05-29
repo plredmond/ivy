@@ -534,6 +534,8 @@ def emit_cpp_sorts(header):
             if nt in ['int','bool']:
                 header.append("    typedef " + nt + ' ' + varname(name) + ";\n");
             else:
+                if nt == 'std::vector<bool>':
+                    nt = 'std::vector<int>'
                 header.append("    class " + varname(name) + ' : public ' + nt +  "{\n")
                 header.append("        public: size_t __hash() const { return hash_space::hash<"+nt+" >()(*this);};\n")
                 header.append("    };\n");
@@ -2363,6 +2365,12 @@ void __ser<bool>(ivy_ser &res, const bool &inp) {
 }
 
 template <>
+void __ser<std::vector<bool>::const_reference>(ivy_ser &res, const std::vector<bool>::const_reference &inp) {
+    bool thing = inp;
+    res.set(thing);
+}
+
+template <>
 void __ser<__strlit>(ivy_ser &res, const __strlit &inp) {
     res.set(inp);
 }
@@ -2402,6 +2410,12 @@ void __deser<__strlit>(ivy_deser &inp, __strlit &res) {
 
 template <>
 void __deser<bool>(ivy_deser &inp, bool &res) {
+    long long thing;
+    inp.get(thing);
+    res = thing;
+}
+
+void __deser(ivy_deser &inp, std::vector<bool>::reference res) {
     long long thing;
     inp.get(thing);
     res = thing;
@@ -3574,6 +3588,8 @@ def get_all_bounds(header,variables,body,exists,varnames):
 
 
 def emit_quant(variables,body,header,code,exists=False):
+    iu.dbg('variables')
+    iu.dbg('body')
     global indent_level
     if len(variables) == 0:
         body.emit(header,code)
@@ -5296,7 +5312,7 @@ def main_int(is_ivyc):
                             exit(1)
                     else:
                         libs = []    
-                    cpp11 = any(x.endswith('.cppstd') and y.rep=='cpp11' for x,y in im.module.attributes.iteritems())
+                    cpp11 = any((x == 'cppstd' or x.endswith('.cppstd')) and y.rep=='cpp11' for x,y in im.module.attributes.iteritems())
                     gpp11_spec = ' -std=c++11 ' if cpp11 else '' 
                     libspec = ''
                     for x,y in im.module.attributes.iteritems():
@@ -5439,6 +5455,7 @@ hash_h = """
 
 #include <string>
 #include <vector>
+#include <map>
 #include <iterator>
 #include <fstream>
 
@@ -5517,6 +5534,19 @@ namespace hash_space {
             size_t res = 0;
             for (unsigned i = 0; i < p.size(); i++)
                 res += h(p[i]);
+            return res;
+        }
+    };
+
+    template <typename K, typename V>
+        class hash<std::map<K,V> > {
+    public:
+        size_t operator()(const std::map<K,V> &p) const {
+            hash<K> hk;
+            hash<V> hv;
+            size_t res = 0;
+            for (typename std::map<K,V>::const_iterator it = p.begin(), en = p.end(); it != en; ++it)
+                res += hk(it->first) + hv(it->second);
             return res;
         }
     };
@@ -5998,7 +6028,7 @@ namespace hash_space {
 // I'm using Bob Jenkin's hash function.
 // http://burtleburtle.net/bob/hash/doobs.html
 unsigned string_hash(const char * str, unsigned length, unsigned init_value) {
-    register unsigned a, b, c, len;
+    unsigned a, b, c, len;
 
     /* Set up the internal state */
     len = length;

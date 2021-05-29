@@ -159,9 +159,9 @@ void __deser<CLASSNAME>(ivy_deser &inp, CLASSNAME &res) {
     inp.get(tmp);
     res = tmp;
 }
-//BASECLASS CLASSNAME::random_x(){
-//    return __random_string<CLASSNAME>();
-//}
+BASECLASS CLASSNAME::random_x(){
+    return __random_string<CLASSNAME>();
+}
 """.replace('BITS',str(self.bits)).replace('CLASSNAME',self.short_name()).replace('BASECLASS',self.baseclass))
 
     def card(self):

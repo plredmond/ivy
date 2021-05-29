@@ -544,14 +544,17 @@ ivy_compose_character = '.'
 ivy_have_polymorphism = True
 ivy_use_polymorphic_macros = False
 ivy_forbid_ghost_init = False
+symbol_chars_parser = re.compile(r'[^\[\]\.]*')
 
 def set_string_version(version):
     global ivy_language_version
     global ivy_compose_character
     global ivy_have_polymorphism
     global ivy_use_polymorphic_macros
+    global symbol_chars_parser
     ivy_language_version = version
     ivy_compose_character = ':' if get_numeric_version() <= [1,1] else '.'
+    symbol_chars_parser = re.compile(r'[^\[\]' + ivy_compose_character + r']*')
     ivy_have_polymorphism = not get_numeric_version() <= [1,2]
     ivy_use_polymorphic_macros = not get_numeric_version() <= [1,5]
     ivy_forbid_ghost_init = not get_numeric_version() <= [1,6]
@@ -587,9 +590,40 @@ def compose_names(*names):
         return ivy_compose_character.join(names[1:])
     return ivy_compose_character.join(names)
 
-def split_name(name):
-    return name.split(ivy_compose_character)
+    
+def skip_symbol(name,pos):
+    match = symbol_chars_parser.match(name,pos)
+    assert match
+    return match.end()
 
+def skip_subscript(name,pos):
+    pos = skip_symbol(name,pos)
+    while pos < len(name) and name[pos] != ']':
+        if name[pos] == ivy_compose_character:
+            pos = skip_symbol(name,pos+1)
+        elif name[pos] == '[':
+            pos = skip_subscript(name,pos+1)
+            pos = pos + 1
+    return pos
+
+
+def split_name(name):
+    res = []
+    old = 0
+    pos = skip_symbol(name,old)
+    while pos < len(name):
+        if name[pos] == ivy_compose_character:
+            res.append(name[old:pos])
+            old = pos + 1
+            pos = skip_symbol(name,old)
+        elif name[pos] == '[':
+            pos = skip_subscript(name,pos+1)
+            pos = pos + 1
+        else:
+            assert False,(name,pos)
+    res.append(name[old:pos])
+    return res
+            
 def base_name(name):
     return split_name(name)[0]
 

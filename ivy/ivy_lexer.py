@@ -23,8 +23,7 @@ tokens = (
    'RCB',
    'ARROW',
    'IFF',
-   'SYMBOL',
-   'LABEL',
+   'PRESYMBOL',
    'VARIABLE',
    'COLON',
    'LE',
@@ -38,6 +37,8 @@ tokens = (
    'PTO',
    'DOLLAR',
    'CARET',
+    'LB',
+    'RB',
 )
 
 reserved = all_reserved = {
@@ -182,6 +183,8 @@ t_DOTS = r'\.\.'
 t_DOTDOTDOT = r'\.\.\.'
 t_DOLLAR = r'\$'
 t_CARET = r'\^'
+t_LB  = r'\['
+t_RB  = r'\]'
 
 t_ignore  = ' \t\r'
 t_ignore_COMMENT = r'\#.*'
@@ -190,14 +193,9 @@ def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-def t_SYMBOL(t):
-    r'[_a-z0-9][_a-zA-Z0-9]*(\[[ab-zA-Z_0-9.]*\])*|".*?"'
-    t.type = reserved.get(t.value,'SYMBOL')
-    return t
-
-def t_LABEL(t):
-    r'\[[_a-zA-Z0-9\]\[]+\]'
-    t.type = reserved.get(t.value,'LABEL')
+def t_PRESYMBOL(t):
+    r'[_a-z0-9][_a-zA-Z0-9]*|".*?"'
+    t.type = reserved.get(t.value,'PRESYMBOL')
     return t
 
 def t_VARIABLE(t):

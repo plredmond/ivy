@@ -12,6 +12,18 @@ def get_lineno(p,n):
 def symbol(s):
     return Variable(s,universe) if str.isupper(s[0]) else Constant(s)
 
+def p_SYMBOL_PRESYMBOL(p):
+    'SYMBOL : PRESYMBOL'
+    p[0] = p[1]
+
+def p_SYMBOL_SYMBOL_LB_SYMBOL_RB(p):
+    'SYMBOL : SYMBOL LB SYMBOL RB'
+    p[0] = p[1] + p[2] + p[3] + p[4]
+
+def p_LABEL_LB_SYMBOL_RB(p):
+    'LABEL : LB SYMBOL RB'
+    p[0] = p[1] + p[2] + p[3]
+
 def p_atype_symbol(p):
     'atype : SYMBOL'
     p[0] = p[1]

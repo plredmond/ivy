@@ -258,6 +258,7 @@ class Ivy(object):
             if conflict:
                 if allow_redef:
                     return
+                assert False
                 report_error(Redefining(name,lineno,olineno))
         self.defined[name].append((lineno,cls))
 
@@ -2679,6 +2680,18 @@ parser = yacc.yacc(start='top',tabmodule='ivy_parsetab',errorlog=yacc.NullLogger
 #parser = yacc.yacc(start='top',tabmodule='ivy_parsetab')
 # formula_parser = yacc.yacc(start = 'fmla', tabmodule='ivy_formulatab')
 
+class TypeNames(object):
+    def __init__(self):
+        self.namelist = []
+        self.nameset = set()
+    def add(self,tname):
+        if tname not in self.nameset:
+            pref,refparms = iu.extract_parameters_name(tname)
+            for rp in refparms:
+                self.add(rp)
+            self.namelist.append(tname)
+            self.nameset.add(tname)
+
 def expand_autoinstances(ivy):
     autos = defaultdict(list)
     trefs = set()
@@ -2692,9 +2705,9 @@ def expand_autoinstances(ivy):
                     key = (pref,len(parms))
                     autos[key].append(inst)
         else:
-            drefs = set()
+            drefs = TypeNames()
             decl.get_type_names(drefs)
-            for tname in drefs:
+            for tname in drefs.namelist:
                 if tname not in trefs:
                     trefs.add(tname)
                     pref,refparms = iu.extract_parameters_name(tname)

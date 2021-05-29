@@ -24,7 +24,7 @@ def run_in_terminal(cmd):
     #     from applescript import tell
     #     term_cmd = cmd.replace('"','\\"')
     #     tell.app( 'Terminal', 'do script "' + term_cmd + '"')
-    
+    os.system("xterm -e '{}'\n".format(cmd))
     
 def main():
     ivy_init.read_params()

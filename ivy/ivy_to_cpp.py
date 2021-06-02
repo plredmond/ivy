@@ -1384,10 +1384,10 @@ def may_alias(x,y):
 
 def emit_param_decls(header,name,params,extra=[],classname=None,ptypes=None):
     header.append(funname(name) + '(')
-    for p in params:
-        if il.is_function_sort(p.sort):
-            raise(iu.IvyError(None,'Cannot compile parameter {} with function sort'.format(p)))
-    header.append(', '.join(extra + [ctype(p.sort,classname=classname,ptype = ptypes[idx] if ptypes else None) + ' ' + varname(p.name) for idx,p in enumerate(params)]))
+#    for p in params:
+#        if il.is_function_sort(p.sort):
+#            raise(iu.IvyError(None,'Cannot compile parameter {} with function sort'.format(p)))
+    header.append(', '.join(extra + [sym_decl(p) if il.is_function_sort(p.sort) else (ctype(p.sort,classname=classname,ptype = ptypes[idx] if ptypes else None) + ' ' + varname(p.name)) for idx,p in enumerate(params)]))
     header.append(')')
 
 def emit_param_decls_with_inouts(header,name,params,classname,ptypes,returns,return_ptypes):
@@ -1645,7 +1645,7 @@ def emit_tick(header,impl,classname):
 
 def csortcard(s):
     card = sort_card(s)
-    return str(card) if card else "0"
+    return str(card) if card and card < 2 ** 64 else "0"
 
 def check_member_names(classname):
     names = map(varname,(list(il.sig.symbols) + list(il.sig.sorts) + list(im.module.actions)))
@@ -3028,7 +3028,8 @@ class z3_thunk : public thunk<D,R> {
                 impl.append("        int test_iters = TEST_ITERS;\n".replace('TEST_ITERS',opt_test_iters.get()))
                 impl.append("        int runs = TEST_RUNS;\n".replace('TEST_RUNS',opt_test_runs.get()))
                 for p,d in zip(im.module.params,im.module.param_defaults):
-                    impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
+#                    impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
+                    impl.append('    {};\n'.format(sym_decl(p.prefix('p__'),classname=classname)))
                     if d is not None:
                         emit_value_parser(impl,p,'"{}"'.format(d.rep),classname,lineno=d.lineno)
                 impl.append("""
@@ -3119,8 +3120,34 @@ class z3_thunk : public thunk<D,R> {
                     impl.append('    try {\n')
                     impl.append('        int pos = 0;\n')
                     impl.append('        arg_values[{}] = parse_value(args[{}],pos);\n'.format(idx,idx))
-                    impl.append('        p__'+varname(s)+' =  _arg<{}>(arg_values,{},{});\n'
-                                .format(ctype(s.sort,classname=classname),idx,csortcard(s.sort)))
+                    if not il.is_function_sort(s.sort):
+                        impl.append('        p__'+varname(s)+' =  _arg<{}>(arg_values,{},{});\n'
+                                    .format(ctype(s.sort,classname=classname),idx,csortcard(s.sort)))
+                    else:
+                        def make_function_app(s,args):
+                            res = varname(s)
+                            if is_large_type(s.sort) and len(s.sort.dom) > 1:
+                                res +=('[' + ctuple(s.sort.dom,classname=classname) + '(')
+                                first = True
+                                for a in args:
+                                    if not first:
+                                        res += ','
+                                    res += a
+                                    first = False
+                                res += ')]'
+                            else: 
+                                for a in args:
+                                    res += '[{}]'.format(a)
+                            return res
+                        impl.append('        ivy_value &arg = arg_values[{}];\n'.format(idx))
+                        impl.append('        if (arg.atom.size())\n')
+                        impl.append('            throw out_of_bounds({});\n'.format(idx))
+                        impl.append('        for (unsigned i = 0; i < arg.fields.size(); i++) {\n')
+                        impl.append('            if (arg.fields[i].fields.size() != {})\n'.format(1 + len(s.sort.dom))) 
+                        impl.append('                throw out_of_bounds({});\n'.format(idx))
+                        impl.append('            ' + make_function_app(s.prefix('p__'),['_arg<{}>(arg.fields[i].fields,{},0)'.format(ctype(domt,classname=classname),q) for q,domt in enumerate(s.sort.dom)]))
+                        impl.append('= _arg<{}>(arg.fields[i].fields,{},0);\n'.format(ctype(s.sort.rng,classname=classname),len(s.sort.dom)))
+                        impl.append('        }\n')
                     impl.append('    }\n    catch(out_of_bounds &) {\n')
                     impl.append('        std::cerr << "parameter {} out of bounds\\n";\n'.format(varname(s)))
                     impl.append('        __ivy_exit(1);\n    }\n')
@@ -5206,7 +5233,6 @@ def main_int(is_ivyc):
                 else:
                     extracts = list((x,y) for x,y in im.module.isolates.iteritems()
                                     if isinstance(y,ivy_ast.ExtractDef))
-                    iu.dbg('extracts')
                     if len(extracts) == 0:
                         isol = ivy_ast.ExtractDef(ivy_ast.Atom('extract'),ivy_ast.Atom('this'))
                         isol.with_args = 1
@@ -5371,10 +5397,16 @@ def main_int(is_ivyc):
                         if target.get() == 'repl' and not iu.version_le(iu.get_string_version(),"1.6"):
                             def describe_params(params,defaults):
                                 res = []
+                                print params
                                 for param,default in zip(params,defaults):
                                     desc = {}
-                                    desc['name'] = param.name
+                                    if isinstance(param,ivy_ast.App):
+                                        desc['name'] = param.rep
+                                    else:
+                                        desc['name'] = param.name
                                     desc['type'] = str(param.sort)
+                                    if default is not None:
+                                        desc['default'] = str(default)
                                     res.append(desc)
                                 return res
                             descriptor = {}
@@ -5386,6 +5418,7 @@ def main_int(is_ivyc):
                             descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
                             processes.append(descriptor)
         if target.get() == 'repl':
+            print 'descriptor:{}'.format(descriptor)
             try:
                 descriptor = {'processes' : processes}
                 with open(mod_name + '.dsc','w') as dscf:

@@ -958,6 +958,13 @@ class ActionDecl(Decl):
         for a in self.args:
             res.extend(a.iter_internal_defines())
         return res
+    def get_type_names(self,names):
+        for c in self.args:
+            for tt in c.formal_params:
+                tterm_type_names(tt,names)
+            for tt in c.formal_returns:
+                tterm_type_names(tt,names)
+            c.args[1].get_type_names(names)
 
 class StateDecl(Decl):
     def name(self):
@@ -1113,6 +1120,9 @@ class AliasDecl(Decl):
         return 'alias'
     def defines(self):
         return [(c.defines(),lineno(c)) for c in self.args]
+    def get_type_names(self,names):
+        for c in self.args:
+            names.add(c.args[1].rep)
     
 
 class DelegateDecl(Decl):    

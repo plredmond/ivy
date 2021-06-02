@@ -196,6 +196,7 @@ def main():
     out.write('\n')
     out.write('# File generated from {}. Do not edit.\n'.format(inpname))
     out.write('\n')
+    out.write('type txid_t\n')
     out.write('type unit\n')
     out.write('type string\n')
     out.write('type integer\n')
@@ -397,16 +398,16 @@ def main():
         opname = op["name"]
         out.write("\n# operation: {}\n".format(operation))
         out.write("object {} = {{\n".format(operation_name(op)))
-        out.write("\n    action {}".format(request_name(op)))
+        out.write("\n    action {}(txid:txid_t".format(request_name(op)))
         if "input" in op:
             param = op["input"]
             ty = get_ref_or_type("input",opname,param)
-            out.write("(\n")
+            out.write(",\n")
             out.write('        {} : {}'.format("input",ty))
             if "description" in param:
                 out.write(' # {}'.format(param["description"]))
             out.write('\n')
-            out.write('    )')
+        out.write('    )')
         out.write('\n')
         responses = []
         if "output" in op:
@@ -415,7 +416,7 @@ def main():
             responses.extend(op["errors"])
         for resp in responses:
             ty = get_ref_or_type(opname,opname,resp)
-            out.write('\n    action {}(val:{})\n'.format(response_name(op,resp["shape"]),ty))
+            out.write('\n    action {}(txid: txid_t, val:{})\n'.format(response_name(op,resp["shape"]),ty))
         out.write("}\n")
     
 
@@ -496,7 +497,7 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                     out.write("            out_fld.resize(1);\n")
                     out.write("            {}".format(from_aws(out_fld+"[0]",res_fld,df)))
                     out.write("        }\n")
-            out.write("        `{}.{}`(res);\n".format(operation_name(op),response_name(op,output_shape)))
+            out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
             out.write("    }}\n".format())
         out.write("    >>>\n")
         out.write("}}\n".format())

@@ -412,6 +412,8 @@ def main():
         responses = []
         if "output" in op:
             responses.append(op["output"])
+        else:
+            out.write('\n    action response(txid: txid_t)\n')
         if "errors" in op:
             responses.extend(op["errors"])
         for resp in responses:
@@ -428,6 +430,7 @@ def main():
 #include <aws/core/Aws.h>
 #include <aws/s3/S3Client.h>
 #include <sstream>
+#include <functional>
 
 std::shared_ptr<Aws::IOStream> blob_to_iostream(const `blob` &data) {
     Aws::String s;
@@ -461,14 +464,16 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
 
        int fildes[2];
        ivy_class *ivy;     // pointer to main ivy object (mainly to get lock)
-       `OUTPUT` output;
+""" + ("`{}` output;\n".format(outtype) if outtype else "") + """
        `txid_t` txid;
        %`CALLBACK` cb;
-       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb) : ivy(ivy),txid(txid),cb(cb) {
+       std::thread *thr;
+       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*)> func) : ivy(ivy),txid(txid),cb(cb) {
            if (::pipe(fildes)) {
                perror("failed to create pipe");
                exit(1);
            }
+           thr = new std::thread(func,this);
        }
        virtual int fdes() {
            return fildes[0];
@@ -483,16 +488,16 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
            if (buf[0]) {
                std::cout << "about to do callback" << std::endl;
                ivy->__lock();
-               cb(txid,output);
+               cb(txid""" + (",output" if outtype else "") + """);
                ivy->__unlock();
                std::cout << "finished callback" << std::endl;
            }
+           thr->join();
+           delete thr;
        }
     };
-    auto rdr = new myreader(this,txid,`CALLBACK`);
-    install_reader(rdr);
         """
-        return text.replace('OUTPUT',outtype).replace('CALLBACK',outaction)
+        return text.replace('CALLBACK',outaction)
     
 
     for operation,op in operations.iteritems():
@@ -505,14 +510,13 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
         if "output" in op:
             callback = "{}.{}".format(operation_name(op),response_name(op,op["output"]["shape"]))
             output = iname(op["output"]["shape"])
-            out.write('std::cout << "about to install reader" << std::endl;\n')
-            out.write(install_reader_object(output,callback))
-            out.write('std::cout << "about to create thread" << std::endl;\n')
-            out.write("    auto t = new std::thread([input,rdr](){\n")
-            out.write('std::cout << "in threat, output" << std::endl;\n')
         else:
-            out.write("    auto t = new std::thread([input](){\n")
-            out.write('std::cout << "in threat, no output" << std::endl;\n')
+            callback = "{}.response".format(operation_name(op))
+            output = None
+        out.write(install_reader_object(output,callback))
+        out.write('std::cout << "about to create function" << std::endl;\n')
+        out.write("    auto func = [input](myreader *rdr){\n")
+        out.write('std::cout << "in thread" << std::endl;\n')
         out.write("        Aws::Client::ClientConfiguration config;\n")
         out.write("        Aws::S3::S3Client s3_client(config);\n")
         if "input" in op:
@@ -534,8 +538,8 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
             out.write('std::cout << "about to do request without output" << std::endl;\n')
             out.write("    Aws::S3::Model::{}Outcome outcome = s3_client.{}();\n".format(name,name));
         out.write('std::cout << "finished request" << std::endl;\n')
+        out.write("    if (outcome.IsSuccess()) {\n")
         if "output" in op:
-            out.write("    if (outcome.IsSuccess()) {\n")
             out.write("        auto result = outcome.GetResultWithOwnership();\n")
             output_shape = op["output"]["shape"]
             output_fields = defs[output_shape]["members"]
@@ -552,13 +556,18 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                     out.write("            {}".format(from_aws(out_fld+"[0]",res_fld,df)))
                     out.write("        }\n")
             out.write("        rdr->output = res;\n")
-            out.write("        char buf[1] = {1};\n")
-            out.write('std::cout << "about to write" << std::endl;\n')
-            out.write("        ::write(rdr->fildes[1],buf,1);\n")
+        out.write("        char buf[1] = {1};\n")
+        out.write('std::cout << "about to write" << std::endl;\n')
+        out.write("        ::write(rdr->fildes[1],buf,1);\n")
         out.write("    }}\n".format())
         out.write("    else {char buf[1] = {0}; ::write(rdr->fildes[1],buf,1);}\n")
-        out.write("    });\n")
-#        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
+        out.write("    };\n")
+        #        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
+        out.write('std::cout << "about to create reader" << std::endl;\n')
+        out.write("""
+        auto rdr = new myreader(this,txid,`CALLBACK`,func);
+        install_reader(rdr);
+        """.replace('CALLBACK',callback))
         out.write("    >>>\n")
         out.write("}}\n".format())
             

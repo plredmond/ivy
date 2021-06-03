@@ -455,6 +455,46 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
 """
     )
 
+    def install_reader_object(outtype,outaction):
+        text = """
+    struct myreader : reader {
+
+       int fildes[2];
+       ivy_class *ivy;     // pointer to main ivy object (mainly to get lock)
+       `OUTPUT` output;
+       `txid_t` txid;
+       %`CALLBACK` cb;
+       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb) : ivy(ivy),txid(txid),cb(cb) {
+           if (::pipe(fildes)) {
+               perror("failed to create pipe");
+               exit(1);
+           }
+       }
+       virtual int fdes() {
+           return fildes[0];
+       }
+       virtual void read () {
+           std::cout << "about to read" << std::endl;
+           char buf[1];
+           ::read(fildes[0],buf,1);
+           ::close(fildes[0]);
+           ::close(fildes[1]);
+           fildes[0] = -1;
+           if (buf[0]) {
+               std::cout << "about to do callback" << std::endl;
+               ivy->__lock();
+               cb(txid,output);
+               ivy->__unlock();
+               std::cout << "finished callback" << std::endl;
+           }
+       }
+    };
+    auto rdr = new myreader(this,txid,`CALLBACK`);
+    install_reader(rdr);
+        """
+        return text.replace('OUTPUT',outtype).replace('CALLBACK',outaction)
+    
+
     for operation,op in operations.iteritems():
         if "input" in op and operation not in missing_headers: 
             out.write("\n\n<<< impl\n")
@@ -462,11 +502,22 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
             out.write(">>>\n")
         out.write("\n\nimplement {}.{} {{\n".format(operation_name(op),request_name(op)))
         out.write("    <<<\n")
-        out.write("    Aws::Client::ClientConfiguration config;\n")
-        out.write("    Aws::S3::S3Client s3_client(config);\n")
+        if "output" in op:
+            callback = "{}.{}".format(operation_name(op),response_name(op,op["output"]["shape"]))
+            output = iname(op["output"]["shape"])
+            out.write('std::cout << "about to install reader" << std::endl;\n')
+            out.write(install_reader_object(output,callback))
+            out.write('std::cout << "about to create thread" << std::endl;\n')
+            out.write("    auto t = new std::thread([input,rdr](){\n")
+            out.write('std::cout << "in threat, output" << std::endl;\n')
+        else:
+            out.write("    auto t = new std::thread([input](){\n")
+            out.write('std::cout << "in threat, no output" << std::endl;\n')
+        out.write("        Aws::Client::ClientConfiguration config;\n")
+        out.write("        Aws::S3::S3Client s3_client(config);\n")
         if "input" in op:
             input_shape = op["input"]["shape"]
-            out.write("    Aws::S3::Model::{} request;\n".format(input_shape))
+            out.write("        Aws::S3::Model::{} request;\n".format(input_shape))
             input_fields = defs[input_shape]["members"]
             input_req = defs[input_shape].get("required",None)
             for name,df in input_fields.iteritems():
@@ -477,9 +528,12 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                     out.write("    if ({}.size()) {{\n".format(inp_fld))
                     out.write("        request.Set{}({});\n".format(name,to_aws(inp_fld+"[0]",df)))
                     out.write("    }\n")
+            out.write('std::cout << "about to do request with output" << std::endl;\n')
             out.write("    Aws::S3::Model::{}Outcome outcome = s3_client.{}(request);\n".format(operation,operation));
         else:
-            out.write("        Aws::S3::Model::{}Outcome outcome = s3_client.{}();\n".format(name,name));
+            out.write('std::cout << "about to do request without output" << std::endl;\n')
+            out.write("    Aws::S3::Model::{}Outcome outcome = s3_client.{}();\n".format(name,name));
+        out.write('std::cout << "finished request" << std::endl;\n')
         if "output" in op:
             out.write("    if (outcome.IsSuccess()) {\n")
             out.write("        auto result = outcome.GetResultWithOwnership();\n")
@@ -497,8 +551,14 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                     out.write("            out_fld.resize(1);\n")
                     out.write("            {}".format(from_aws(out_fld+"[0]",res_fld,df)))
                     out.write("        }\n")
-            out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
-            out.write("    }}\n".format())
+            out.write("        rdr->output = res;\n")
+            out.write("        char buf[1] = {1};\n")
+            out.write('std::cout << "about to write" << std::endl;\n')
+            out.write("        ::write(rdr->fildes[1],buf,1);\n")
+        out.write("    }}\n".format())
+        out.write("    else {char buf[1] = {0}; ::write(rdr->fildes[1],buf,1);}\n")
+        out.write("    });\n")
+#        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
         out.write("    >>>\n")
         out.write("}}\n".format())
             

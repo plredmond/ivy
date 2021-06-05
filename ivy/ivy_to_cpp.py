@@ -3588,8 +3588,6 @@ def get_all_bounds(header,variables,body,exists,varnames):
 
 
 def emit_quant(variables,body,header,code,exists=False):
-    iu.dbg('variables')
-    iu.dbg('body')
     global indent_level
     if len(variables) == 0:
         body.emit(header,code)

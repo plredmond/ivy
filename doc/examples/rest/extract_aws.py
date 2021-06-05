@@ -208,8 +208,7 @@ def main():
     out.write('type byte\n')
     out.write('interpret byte->bv[8]\n')
     out.write('instance blob : vector(byte)\n')
-    out.write('attribute libspec="aws-cpp-sdk-s3,aws-cpp-sdk-core,aws-crt-cpp,aws-c-common"')
-    
+    out.write('attribute libspec="aws-cpp-sdk-s3,aws-cpp-sdk-core,aws-crt-cpp,aws-c-common"\n')
     if not isinstance(spec,dict):
         format_error(inpname,'top-level not a dictionary')
 
@@ -448,6 +447,24 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
     return res;
 }
 
+std::vector<Aws::S3::S3Client *> aws_client_pool;
+
+Aws::S3::S3Client *get_aws_client() {
+    Aws::S3::S3Client *s3_client;
+    if (aws_client_pool.size()) {
+        s3_client = aws_client_pool.back();
+        aws_client_pool.pop_back();
+    } else {
+        Aws::Client::ClientConfiguration config;
+        s3_client = new Aws::S3::S3Client(config);
+    }
+    return s3_client;
+}
+
+void return_aws_client(Aws::S3::S3Client *s3_client) {
+    aws_client_pool.push_back(s3_client);
+}
+
 >>>
 <<< init 
 {
@@ -468,12 +485,14 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
        `txid_t` txid;
        %`CALLBACK` cb;
        std::thread *thr;
-       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*)> func) : ivy(ivy),txid(txid),cb(cb) {
+       Aws::S3::S3Client *s3_client;
+       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*,Aws::S3::S3Client *)> func) : ivy(ivy),txid(txid),cb(cb) {
            if (::pipe(fildes)) {
                perror("failed to create pipe");
                exit(1);
            }
-           thr = new std::thread(func,this);
+           s3_client = get_aws_client();
+           thr = new std::thread(func,this,s3_client);
        }
        virtual int fdes() {
            return fildes[0];
@@ -489,6 +508,7 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                std::cout << "about to do callback" << std::endl;
                ivy->__lock();
                cb(txid""" + (",output" if outtype else "") + """);
+               return_aws_client(s3_client);
                ivy->__unlock();
                std::cout << "finished callback" << std::endl;
            }
@@ -515,10 +535,8 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
             output = None
         out.write(install_reader_object(output,callback))
         out.write('std::cout << "about to create function" << std::endl;\n')
-        out.write("    auto func = [input](myreader *rdr){\n")
+        out.write("    auto func = [input](myreader *rdr, Aws::S3::S3Client *s3_client){\n")
         out.write('std::cout << "in thread" << std::endl;\n')
-        out.write("        Aws::Client::ClientConfiguration config;\n")
-        out.write("        Aws::S3::S3Client s3_client(config);\n")
         if "input" in op:
             input_shape = op["input"]["shape"]
             out.write("        Aws::S3::Model::{} request;\n".format(input_shape))
@@ -533,10 +551,10 @@ Aws::Map<Aws::String, Aws::String> map_to_aws(`unordered_map[string][string]` ma
                     out.write("        request.Set{}({});\n".format(name,to_aws(inp_fld+"[0]",df)))
                     out.write("    }\n")
             out.write('std::cout << "about to do request with output" << std::endl;\n')
-            out.write("    Aws::S3::Model::{}Outcome outcome = s3_client.{}(request);\n".format(operation,operation));
+            out.write("    Aws::S3::Model::{}Outcome outcome = s3_client->{}(request);\n".format(operation,operation));
         else:
             out.write('std::cout << "about to do request without output" << std::endl;\n')
-            out.write("    Aws::S3::Model::{}Outcome outcome = s3_client.{}();\n".format(name,name));
+            out.write("    Aws::S3::Model::{}Outcome outcome = s3_client->{}();\n".format(name,name));
         out.write('std::cout << "finished request" << std::endl;\n')
         out.write("    if (outcome.IsSuccess()) {\n")
         if "output" in op:

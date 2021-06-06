@@ -475,7 +475,7 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
 """
     )
 
-    def install_reader_object(outtype,outaction):
+    def install_reader_object(outtype,outaction,opname,errors):
         text = """
     struct myreader : reader {
 
@@ -484,9 +484,11 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
 """ + ("`{}` output;\n".format(outtype) if outtype else "") + """
        `txid_t` txid;
        %`CALLBACK` cb;
+""" + ''.join('        %`{}.response_{}` err{};\n'.format(opname,err["shape"],idx) for idx,err in enumerate(errors)) + """
        std::thread *thr;
        Aws::S3::S3Client *s3_client;
-       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*,Aws::S3::S3Client *)> func) : ivy(ivy),txid(txid),cb(cb) {
+       Aws::S3::S3Error errcode;
+       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*,Aws::S3::S3Client *)> func""" + ''.join(',%`{}.response_{}` err{}'.format(opname,err["shape"],idx) for idx,err in enumerate(errors)) + """ ) : ivy(ivy),txid(txid),cb(cb)""" + ''.join(',err{}(err{})'.format(idx,idx) for idx,err in enumerate(errors)) + """ {
            if (::pipe(fildes)) {
                perror("failed to create pipe");
                exit(1);
@@ -511,6 +513,9 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
                return_aws_client(s3_client);
                ivy->__unlock();
                std::cout << "finished callback" << std::endl;
+           } else {
+               std::cout << "exception" << errcode.GetExceptionName() << std::endl;
+""" + ''.join('if ("{}" == errcode.GetExceptionName()) {{`{}` thing; err{}(txid,thing);}}\n'.format(err["shape"],iname(err["shape"]),idx) for idx,err in enumerate(errors)) + """               
            }
            thr->join();
            delete thr;
@@ -527,13 +532,14 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
             out.write(">>>\n")
         out.write("\n\nimplement {}.{} {{\n".format(operation_name(op),request_name(op)))
         out.write("    <<<\n")
+        errors = op["errors"] if "errors" in op else []
         if "output" in op:
             callback = "{}.{}".format(operation_name(op),response_name(op,op["output"]["shape"]))
             output = iname(op["output"]["shape"])
         else:
             callback = "{}.response".format(operation_name(op))
             output = None
-        out.write(install_reader_object(output,callback))
+        out.write(install_reader_object(output,callback,operation_name(op),errors))
         out.write('std::cout << "about to create function" << std::endl;\n')
         out.write("    auto func = [input](myreader *rdr, Aws::S3::S3Client *s3_client){\n")
         out.write('std::cout << "in thread" << std::endl;\n')
@@ -578,14 +584,14 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
         out.write('std::cout << "about to write" << std::endl;\n')
         out.write("        ::write(rdr->fildes[1],buf,1);\n")
         out.write("    }}\n".format())
-        out.write("    else {char buf[1] = {0}; ::write(rdr->fildes[1],buf,1);}\n")
+        out.write("    else {char buf[1] = {0}; rdr->errcode = outcome.GetError(); ::write(rdr->fildes[1],buf,1);}\n")
         out.write("    };\n")
         #        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
         out.write('std::cout << "about to create reader" << std::endl;\n')
-        out.write("""
-        auto rdr = new myreader(this,txid,`CALLBACK`,func);
+        out.write(("""
+        auto rdr = new myreader(this,txid,`CALLBACK`,func""" + ''.join(',`{}.{}`'.format(operation_name(op),response_name(op,err["shape"])) for err in errors) + """);
         install_reader(rdr);
-        """.replace('CALLBACK',callback))
+        """).replace('CALLBACK',callback))
         out.write("    >>>\n")
         out.write("}}\n".format())
             

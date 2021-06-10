@@ -105,11 +105,19 @@ module linmap(txid_t,data_t) = {
     #################################
     # Specification of put operation.
 
-    # The precondion of 'begin' is that the txid has bnot been used
-    # before.
+    # The precondion of 'begin' is that the txid has not been used
+    # before and the data value doesn't match any existing put.
+    #
+    # In addition, if the txid type is bounded, it is possible that
+    # a test can deadlock, when all available txid's are used for
+    # concurrent puts. To prvent this deadlock we require that on a put
+    # there is at least one other txid that is not a put.
     
     before put {
         require ~pending(txid) & ~completed(txid) & ~failed(txid);
+        require ~((pending(T) | completed(T)) & is_put(T) & value(T) = data);
+        # Restriction to avoid deadlock:
+        require exists T. T ~= txid & ~((pending(T) | completed(T)) & is_put(T));
     }
 
     # A 'begin' action records the transaction's operation type and
@@ -141,6 +149,7 @@ module linmap(txid_t,data_t) = {
         pending(txid) := false;
         completed(txid) := ok;
         failed(txid) := ~ok;
+        call scrub;
     }
 
     #################################
@@ -182,6 +191,8 @@ module linmap(txid_t,data_t) = {
             used(T,txid) := is_put(T) & (pending(T) | completed(T)) & value(T) = data;
             # Require every get has a corresponding put
             assert exists T. used(T,txid);
+            # A put happens before any get that uses it.
+            hb(T,txid) := hb(T,txid) | used(T,txid);
             # After we add a used arc, we need to update the 'happens-before' rules
             call update_hb
         }
@@ -195,6 +206,7 @@ module linmap(txid_t,data_t) = {
         pending(txid) := false;
         completed(txid) := ok;
         failed(txid) := ~ok;
+        call scrub;
     }
 
 
@@ -205,9 +217,9 @@ module linmap(txid_t,data_t) = {
         # Transitivity rule
         hb(T,U) := hb(T,U) | exists V. hb(T,V) & hb(V,U);
         # Use/def rule #1
-        hb(R,Z) := hb(R,Z) | exists W. hb(W,Z) & used(W,R) & is_put(Z);
+        hb(R,Z) := hb(R,Z) | exists W. hb(W,Z) & used(W,R) & is_put(Z) & W ~= Z;
         # Use/def rule #2
-        hb(Z,W) := hb(Z,W) | exists R. hb(Z,R) & used(W,R) & is_put(Z);
+        hb(Z,W) := hb(Z,W) | exists R. hb(Z,R) & used(W,R) & is_put(Z) & W ~= Z;
         changed := ~forall T,U. (hb(T,U) <-> old_hb(T,U));
     }
 
@@ -219,5 +231,30 @@ module linmap(txid_t,data_t) = {
         };
         assert ~hb(T,T);
     }
+
+    # A put can be forgotten if it failed or:
+    # - is completed and
+    # - happens before some completed put
+    # - for every pending get there exists an intervening put
+    # A get can be forgotten if it has failed or uses a put that is
+    # completed
+    
+    relation dead(T:txid_t)
+    
+    action scrub = {
+        dead(T) :=
+            failed(T) 
+            | is_put(T) & completed(T)
+              & (forall G. is_put(G) & pending(G) -> hb(T,G))
+              & (exists U. is_put(U) & completed(U) & hb(T,U))
+              & (forall G. ~is_put(G) & pending(G) -> exists U. is_put(U) & completed(U) & hb(T,U) & hb(U,G))
+            | ~is_put(T) & exists U. completed(U) & used(U,T);
+        pending(T) := pending(T) & ~dead(T);
+        completed(T) := completed(T) & ~dead(T);
+        failed(T) := failed(T) & ~dead(T);
+        used(T,U) := used(T,U) & ~dead(T) & ~dead(U);
+        hb(T,U) := hb(T,U) & ~dead(T) & ~dead(U);
+    }
+
 }
 

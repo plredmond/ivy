@@ -205,9 +205,11 @@ def main():
     out.write('type long\n')
     out.write('include collections\n')
     out.write('include mymap\n')
-    out.write('type byte\n')
-    out.write('interpret byte->bv[8]\n')
-    out.write('instance blob : vector(byte)\n')
+#    out.write('type byte\n')
+#    out.write('interpret byte->bv[8]\n')
+#    out.write('instance blob : vector(byte)\n')
+    out.write('type blob\n')
+    out.write('interpret blob -> strbv[3]\n')
     out.write('attribute libspec="aws-cpp-sdk-s3,aws-cpp-sdk-core,aws-crt-cpp,aws-c-common"\n')
     if not isinstance(spec,dict):
         format_error(inpname,'top-level not a dictionary')
@@ -500,21 +502,21 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
            return fildes[0];
        }
        virtual void read () {
-           std::cout << "about to read" << std::endl;
+//           std::cout << "about to read" << std::endl;
            char buf[1];
            ::read(fildes[0],buf,1);
            ::close(fildes[0]);
            ::close(fildes[1]);
            fildes[0] = -1;
            if (buf[0]) {
-               std::cout << "about to do callback" << std::endl;
+//               std::cout << "about to do callback" << std::endl;
                ivy->__lock();
                cb(txid""" + (",output" if outtype else "") + """);
                return_aws_client(s3_client);
                ivy->__unlock();
-               std::cout << "finished callback" << std::endl;
+//               std::cout << "finished callback" << std::endl;
            } else {
-               std::cout << "exception" << errcode.GetExceptionName() << std::endl;
+//               std::cout << "exception" << errcode.GetExceptionName() << std::endl;
 """ + ''.join('if ("{}" == errcode.GetExceptionName()) {{`{}` thing; err{}(txid,thing);}}\n'.format(err["shape"],iname(err["shape"]),idx) for idx,err in enumerate(errors)) + """               
            }
            thr->join();
@@ -540,9 +542,9 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
             callback = "{}.response".format(operation_name(op))
             output = None
         out.write(install_reader_object(output,callback,operation_name(op),errors))
-        out.write('std::cout << "about to create function" << std::endl;\n')
+        out.write('//std::cout << "about to create function" << std::endl;\n')
         out.write("    auto func = [input](myreader *rdr, Aws::S3::S3Client *s3_client){\n")
-        out.write('std::cout << "in thread" << std::endl;\n')
+        out.write('//std::cout << "in thread" << std::endl;\n')
         if "input" in op:
             input_shape = op["input"]["shape"]
             out.write("        Aws::S3::Model::{} request;\n".format(input_shape))
@@ -556,12 +558,12 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
                     out.write("    if ({}.size()) {{\n".format(inp_fld))
                     out.write("        request.Set{}({});\n".format(name,to_aws(inp_fld+"[0]",df)))
                     out.write("    }\n")
-            out.write('std::cout << "about to do request with output" << std::endl;\n')
+            out.write('//std::cout << "about to do request with output" << std::endl;\n')
             out.write("    Aws::S3::Model::{}Outcome outcome = s3_client->{}(request);\n".format(operation,operation));
         else:
-            out.write('std::cout << "about to do request without output" << std::endl;\n')
+            out.write('//std::cout << "about to do request without output" << std::endl;\n')
             out.write("    Aws::S3::Model::{}Outcome outcome = s3_client->{}();\n".format(name,name));
-        out.write('std::cout << "finished request" << std::endl;\n')
+        out.write('//std::cout << "finished request" << std::endl;\n')
         out.write("    if (outcome.IsSuccess()) {\n")
         if "output" in op:
             out.write("        auto result = outcome.GetResultWithOwnership();\n")
@@ -581,13 +583,13 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
                     out.write("        }\n")
             out.write("        rdr->output = res;\n")
         out.write("        char buf[1] = {1};\n")
-        out.write('std::cout << "about to write" << std::endl;\n')
+        out.write('//std::cout << "about to write" << std::endl;\n')
         out.write("        ::write(rdr->fildes[1],buf,1);\n")
         out.write("    }}\n".format())
         out.write("    else {char buf[1] = {0}; rdr->errcode = outcome.GetError(); ::write(rdr->fildes[1],buf,1);}\n")
         out.write("    };\n")
         #        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
-        out.write('std::cout << "about to create reader" << std::endl;\n')
+        out.write('//std::cout << "about to create reader" << std::endl;\n')
         out.write(("""
         auto rdr = new myreader(this,txid,`CALLBACK`,func""" + ''.join(',`{}.{}`'.format(operation_name(op),response_name(op,err["shape"])) for err in errors) + """);
         install_reader(rdr);

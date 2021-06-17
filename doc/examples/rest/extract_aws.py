@@ -2,13 +2,18 @@
 # Copyright (c) Microsoft Corporation. All Rights Reserved.
 #
 
-# This script extracts some Ivy declarations from a Swagger
-# specification in JSON format.
+# This script extracts stubs in Ivy for interfaces describe in tha AWS SDK format.
 #
 # Usage:
 #
-#     python extract.py file.json
+#     python extract_aws.py file.json
 #
+# Here, 'file.jon' is the service description in json format. For example,
+# in the AWS Java SDK, you can find the interface description for S3 here:
+#
+#     services/s3/src/main/resources/codegen-resources/service-2.json
+#
+
 
 import sys
 import os

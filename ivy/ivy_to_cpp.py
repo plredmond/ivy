@@ -3044,7 +3044,7 @@ class z3_thunk : public thunk<D,R> {
                 for p,d in zip(im.module.params,im.module.param_defaults):
                     impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
                     if d is not None:
-                        emit_value_parser(impl,p,'"{}"'.format(d.rep),classname,lineno=d.lineno)
+                        emit_value_parser(impl,p,'"{}"'.format(d.rep.replace('"','\\"')),classname,lineno=d.lineno)
                 impl.append("""
     int seed = 1;
     int sleep_ms = 10;

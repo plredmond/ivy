@@ -1008,7 +1008,15 @@ class AssertDecl(Decl):
 class InterpretDecl(LabeledDecl):
     def name(self):
         return 'interpret'
-
+    def defines(self):
+        res = []
+        rhs = self.args[0].formula.args[1]
+        if isinstance(rhs,Range):
+            for arg in rhs.args:
+                if not arg.rep.isdigit():
+                    res.append((arg.rep,self.lineno))
+        return res
+    
 class MixinDecl(Decl):    
     def name(self):
         return 'mixin'
@@ -1695,19 +1703,24 @@ def is_false(ast):
 
 class Range(AST):
     def __init__(self,lo,hi):
-        self.args = []
-        self.lo, self.hi = lo,hi
+        self.args = [lo,hi]
     def __str__(self):
         return '{' + str(self.lo) + '..' + str(self.hi) + '}'
-    def clone(self,args):
-        return Range(self.lo,self.hi)
+    def __repr__(self):
+        return '{' + str(self.lo) + '..' + str(self.hi) + '}'
     @property
     def rep(self):
         return self
     @property
     def card(self):
         return int(self.hi) - int(self.lo) + 1
-
+    @property
+    def lo(self):
+        return self.args[0]
+    @property
+    def hi(self):
+        return self.args[1]
+    
 class ASTContext(object):
     """ ast compiling context, handles line numbers """
     def __init__(self,ast):

@@ -758,6 +758,7 @@ UninterpretedSort.is_relational = lambda self: False
 UninterpretedSort.rename = lambda self,rn: UninterpretedSort(rn(self.name))
 
 EnumeratedSort = lg.EnumeratedSort
+RangeSort = lg.RangeSort
 
 EnumeratedSort.defines = lambda self: self.extension
 EnumeratedSort.is_relational = lambda self: False
@@ -802,6 +803,9 @@ lg.BooleanSort.dom = property(lambda self: [])
 
 def is_enumerated_sort(s):
     return isinstance(s,EnumeratedSort)
+
+def is_range_sort(s):
+    return isinstance(s,RangeSort)
 
 def is_boolean_sort(s):
     return s == lg.Boolean

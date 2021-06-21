@@ -63,6 +63,14 @@ class EnumeratedSort(recstruct('EnumeratedSort', ['name','extension'], [])):
     def card(self):
         return len(self.extension)
 
+class RangeSort(recstruct('RangeSort', ['name','lb','ub'], [])):
+    __slots__ = ()
+    @classmethod
+    def _preprocess_(cls, name, lb, ub):
+        return name,lb,ub
+    def __str__(self):
+        return '{' + str(self.lb) + ' .. ' + str(self.ub) + '}'
+
 class TopSort(recstruct('TopSort', ['name="TopSort"'], [])):
     """
     An unknown sort. Either 1st order or 2nd order.

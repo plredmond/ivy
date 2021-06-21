@@ -229,6 +229,8 @@ def get_encoding_bits(sort):
     interp = thy.get_sort_theory(sort)
     if il.is_enumerated_sort(interp):
         n = ceillog2(len(interp.defines()))
+    if il.is_range_sort(interp) and il.is_numeral(interp.ub):
+        n = ceillog2(int(interp.ub.name)+1)
     elif isinstance(interp,thy.BitVectorTheory):
         n = interp.bits
     elif il.is_boolean_sort(interp):
@@ -398,16 +400,25 @@ class Encoder(object):
                 res += 1 << (n - 1 - i)
         return res
 
+    def saturate(self,sort,x):
+        interp = thy.get_sort_theory(sort)
+        ub = int(interp.ub.name)
+        if il.is_range_sort(x):
+            x = self.encode_ite(sort,self.gebin(x,ub),self.binenc(ub,len(x)))
+        return x
+
     def encode_equality(self,sort,*eterms):
         interp = thy.get_sort_theory(sort)
-        n = len(interp.defines()) if il.is_enumerated_sort(interp) else 2**len(eterms[0])
+        n = (len(interp.defines()) if il.is_enumerated_sort(interp) else
+             int(interp.ub.name)+1 if il.is_range_sort(interp) else
+             2**len(eterms[0]))
         bits = ceillog2(n)
         eqs = self.sub.andl(*[self.sub.iff(x,y) for x,y in zip(*eterms)])
         alt = self.sub.andl(*[self.gebin(e,n-1) for e in eterms])
         res =  [self.sub.orl(eqs,alt)]
         return res
 
-    def encode_plus(self,sort,x,y,cy=None):
+    def encode_plus_int(self,sort,x,y,cy=None):
         res = []
         if cy is None:
             cy = self.sub.false()
@@ -415,13 +426,25 @@ class Encoder(object):
             res.append(self.sub.xor(self.sub.xor(x[i],y[i]),cy))
             cy = self.sub.orl(self.sub.andl(x[i],y[i]),self.sub.andl(x[i],cy),self.sub.andl(y[i],cy))
         res.reverse()
+        return res,cy
+
+    def encode_plus(self,sort,x,y):
+        x,y = self.saturate(sort,x),self.saturate(sort,y) 
+        res,cy =self.encode_plus_int(sort,x,y,self.sub.false())
+        if il.is_range_sort(sort):
+            res = self.encode_ite(cy,self.binenc(-1,len(x)),res)
+        return res
+    
+    def encode_minus(self,sort,x,y):
+        x,y = self.saturate(sort,x),self.saturate(sort,y) 
+        ycom = self.notl(y)
+        res,cy = self.encode_plus_int(sort,x,ycom,self.sub.true())
+        if il.is_range_sort(sort):
+            res = self.ite(cy,res,binenc(0,len(x)))
         return res
 
-    def encode_minus(self,sort,x,y):
-        ycom = self.notl(y)
-        return self.encode_plus(sort,x,ycom,self.sub.true())
-
     def encode_times(self,sort,x,y):
+        x,y = self.saturate(sort,x),self.saturate(sort,y) 
         res = [self.sub.false() for _ in x]
         for i in range(0,len(x)):
             res = res[1:] + [self.sub.false()]
@@ -429,6 +452,7 @@ class Encoder(object):
         return res
 
     def encode_lt(self,sort,x,y,cy=None):
+        x,y = self.saturate(sort,x),self.saturate(sort,y) 
         if cy is None:
             cy = self.sub.false()
         for i in range(len(x)-1,-1,-1):
@@ -439,6 +463,7 @@ class Encoder(object):
         return self.encode_lt(sort,x,y,cy=self.sub.true())
         
     def encode_div(self,sort,x,y):
+        x,y = self.saturate(sort,x),self.saturate(sort,y) 
         thing = [self.sub.false() for _ in x]
         res = []
         for i in range(0,len(x)):
@@ -449,7 +474,7 @@ class Encoder(object):
         return res
 
     def encode_mod(self,sort,x,y):
-        return self.encode_sub(x,self.encode_div(x,y))
+        return self.encode_sub(x,self.encode_times(self.encode_div(x,y),y))
 
     def decode_val(self,bits,v):
         interp = thy.get_sort_theory(v.sort)
@@ -458,6 +483,10 @@ class Encoder(object):
             vals = interp.defines()
             val = vals[num] if num < len(vals) else vals[-1]
             val = il.Symbol(val,v.sort)
+        elif il.is_range_sort(interp):
+            num = self.bindec(bits)
+            maxval = int(interp.ub.name)
+            val = il.Symbol(str(num if num < maxval else maxval),v.sort)
         elif isinstance(interp,thy.BitVectorTheory):
             num = self.bindec(bits)
             val = il.Symbol(str(num),v.sort)
@@ -494,6 +523,7 @@ def is_finite_sort(sort):
         return False
     interp = thy.get_sort_theory(sort)
     return (il.is_enumerated_sort(interp) or 
+            il.is_range_sort(interp) or
             isinstance(interp,thy.BitVectorTheory) or
             il.is_boolean_sort(interp))
 
@@ -501,6 +531,8 @@ def sort_values(sort):
     interp = thy.get_sort_theory(sort)
     if il.is_enumerated_sort(interp):
         return [il.Symbol(s,sort) for s in interp.extension]
+    if il.is_range_sort(interp):
+        return [il.Symbol(str(n),sort) for n in range(int(interp.lb.name),int(interp.ub.name)+1)]
     if isinstance(interp,thy.BitVectorTheory):
         if interp.bits > 8:
             raise iu.IvyError(None,'Cowardly refusing to enumerate the type bv[{}]'.format(interp.bits))
@@ -1185,7 +1217,7 @@ def to_aiger(mod,ext_act):
     print '\nInstantiating quantifiers (see {} for instantiations)...'.format(logfile_name)
     logfile.write('\ninstantiations:\n')
     trans,invariant = Qelim(sort_constants,sort_constants2)(trans,invariant,indhyps)
-    iu.dbg('invariant')
+#    iu.dbg('invariant')
     
     
 #    print 'after qe:'

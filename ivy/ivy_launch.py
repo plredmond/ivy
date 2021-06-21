@@ -6,6 +6,7 @@ import platform
 import os
 import string
 import time
+import itertools
 
 def usage():
     print "usage: \n {} {{option=value...}} <file>.dsc".format(sys.argv[0])
@@ -83,7 +84,28 @@ def main():
                 exit(1)
             dim = [x if isinstance(x,list) else [x] for x in dim]
         else:
-            dim = [[]]
+            pparms = process['indices']
+            ranges = []
+            for p in pparms:
+                if 'range' not in p:
+                    sys.stderr.write('parameter {} of process {} is not bounded\n'.format(p['name'],pname))
+                    sys.exit(1)
+                rng = p['range']
+                def get_bound(b):
+                    if not isinstance(b,int):
+                        if b not in ps:
+                            sys.stderr.write('need a value on command line for parameter {}\n'.format(b))
+                            sys.exit(1)
+                        try:
+                            b = int(ps[b])
+                        except:
+                            sys.stderr.write('need an integer value on command line for parameter {}\n'.format(b))
+                            sys.exit(1)
+                    return b
+                rng = map(get_bound,rng)
+                print rng
+                ranges.append(list(range(rng[0],rng[1]+1)))
+            dim = list(itertools.product(*ranges))
         return dim
     
     for process in processes:
@@ -92,6 +114,7 @@ def main():
         pparms = process['indices']
         if not all(len(d) == len(pparms) for d in dim):
             print "wrong number of parameters in instance list for process {}".format(pname)
+            exit(1)
         for param in process['params']:
             if param['type'].endswith('udp.endpoint'):
                 if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':

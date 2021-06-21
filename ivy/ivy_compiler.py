@@ -291,17 +291,18 @@ def old_sym(sym,old):
     return sym.prefix('old_') if old else sym
 
 def compile_app(self,old=False):
-    if self.rep == "true" or self.rep == "false":
+    rep = resolve_alias(self.rep) if isinstance(self.rep,str) else self.rep
+    if rep == "true" or rep == "false":
         if len(self.args) > 0:
-            raise IvyError(self,"{} is not a function".format(self.rep))
-        return ivy_logic.And() if self.rep == "true" else ivy_logic.Or()
+            raise IvyError(self,"{} is not a function".format(rep))
+        return ivy_logic.And() if rep == "true" else ivy_logic.Or()
     with ReturnContext(None):
         args = [a.compile() for a in self.args]
     # handle action calls in rhs of assignment
-    if expr_context and top_context and self.rep in top_context.actions:
+    if expr_context and top_context and rep in top_context.actions:
         # note, we are taking 'old' of an action to be the action, since actions are immutable
         return compile_inline_call(self,args)
-    sym = self.rep.cmpl() if isinstance(self.rep,ivy_ast.NamedBinder) else ivy_logic.Equals if self.rep == '=' else ivy_logic.find_polymorphic_symbol(self.rep,throw=False) 
+    sym = rep.cmpl() if isinstance(rep,ivy_ast.NamedBinder) else ivy_logic.Equals if rep == '=' else ivy_logic.find_polymorphic_symbol(rep,throw=False) 
     if sym is not ivy_logic.Equals:
         if ivy_logic.is_numeral(sym):
             if hasattr(self,'sort') and self.sort != 'S':
@@ -309,7 +310,7 @@ def compile_app(self,old=False):
     if sym is not None:
         sym = old_sym(sym,old)
         return (sym)(*args)
-    res = compile_field_reference(self.rep,args,self.lineno,old=old)
+    res = compile_field_reference(rep,args,self.lineno,old=old)
     return res
     
 def compile_method_call(self):
@@ -1224,8 +1225,24 @@ class IvyDomainSetup(IvyDeclInterp):
                 raise IvyError(thing,"{} is already interpreted".format(lhs))
             return
         if isinstance(rhs,ivy_ast.Range):
-#            interp[lhs] = ivy_logic.EnumeratedSort(lhs,["{}:{}".format(i,lhs) for i in range(int(rhs.lo),int(rhs.hi)+1)])
-            interp[lhs] = ivy_logic.EnumeratedSort(lhs,["{}".format(i) for i in range(int(rhs.lo),int(rhs.hi)+1)])
+            #            interp[lhs] = ivy_logic.EnumeratedSort(lhs,["{}:{}".format(i,lhs) for i in range(int(rhs.lo),int(rhs.hi)+1)])
+            if lhs not in sig.sorts:
+                raise IvyError(thing,"{} is not a sort".format(lhs))
+            sort = sig.sorts[lhs]
+            if not isinstance(sort,ivy_logic.UninterpretedSort):
+                raise IvyError(thing,"{} is already interpreted".format(lhs))
+            def compile_bound(b):
+                if not ivy_logic.is_numeral_name(b.rep):
+                    b.sort = lhs
+                    self.parameter(b)
+                with top_sort_as_default():
+                    res = b.compile()
+                with ASTContext(thing):
+                    res = sort_infer(res,sort)
+                return res
+            lo = compile_bound(rhs.lo)
+            hi = compile_bound(rhs.hi)
+            interp[lhs] = ivy_logic.RangeSort(lhs,lo,hi)
             return
         if isinstance(rhs,ivy_ast.EnumeratedSort):
             if lhs not in self.domain.sig.sorts:
@@ -1238,6 +1255,7 @@ class IvyDomainSetup(IvyDeclInterp):
                 self.domain.functions[sym] = 0
                 self.domain.sig.symbols[c] = sym
                 self.domain.sig.constructors.add(sym)
+            print interp[lhs]
             return
         for x,y,z in zip([sig.sorts,sig.symbols],
                          [slv.is_solver_sort,slv.is_solver_op],
@@ -2105,7 +2123,7 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
         global_objects = []
         for name in im.module.attributes:
             p,c = iu.parent_child_name(name)
-            if c == 'global':
+            if c == 'global' and p not in im.module.aliases:
                 pp,pc = iu.parent_child_name(p)
                 if pp == 'this' or iu.compose_names(pp,'global') not in im.module.attributes:
                     global_objects.append(ivy_ast.Atom(p,[]))

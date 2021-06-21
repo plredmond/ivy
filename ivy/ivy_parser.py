@@ -1344,12 +1344,20 @@ def p_top_type_symbol_eq_sort(p):
     p[0] = p[1]
     scnst = Atom(p[5])
     scnst.lineno = get_lineno(p,5)
-    tdfn = (GhostTypeDef if p[3] else TypeDef)(scnst,p[7])
+    defsort = UninterpretedSort() if isinstance(p[7],Range) else p[7]
+    tdfn = (GhostTypeDef if p[3] else TypeDef)(scnst,defsort)
     if p[2]:
         tdfn.finite = True
     tdfn.lineno = get_lineno(p,6)
     p[0].declare(TypeDecl(tdfn))
+    if isinstance(p[7],Range):
+        imp = Implies(scnst,p[7])
+        imp.lineno = get_lineno(p,4)
+        thing = InterpretDecl(addlabel(mk_lf(imp),'interp'))
+        thing.lineno = get_lineno(p,4)
+        p[0].declare(thing)
 
+    
 def p_tsyms_tsym(p):
     'tsyms : var'
     p[0] = [p[1]]
@@ -1448,9 +1456,18 @@ def p_tterms_tterms_comma_tterm(p):
     p[0] = p[1]
     p[0].append(p[3])
 
+def p_sort_lcb_symbol_rcb(p):
+    'sort : LCB SYMBOL RCB'
+    p[0] = EnumeratedSort(Atom(p[2]))
+
 def p_sort_lcb_names_rcb(p):
-    'sort : LCB names RCB'
-    p[0] = EnumeratedSort(*[Atom(n) for n in p[2]])
+    'sort : LCB SYMBOL COMMA names RCB'
+    p[0] = EnumeratedSort(*([Atom(p[2])] + [Atom(n) for n in p[4]]))
+
+def p_sort_lcb_symbol_dots_symbol_rcb(p):
+    'sort : LCB SYMBOL DOTS SYMBOL RCB'
+    p[0] = Range(Atom(p[2]),Atom(p[4]))
+    p[0].lineno = get_lineno(p,2)
 
 def p_sort_struct_lcb_names_rcb(p):
     'sort : STRUCT LCB tterms RCB'
@@ -1863,7 +1880,7 @@ def p_top_interpret_symbol_arrow_symbol(p):
     p[0].declare(thing)
     
 def p_top_interpret_symbol_arrow_lcb_symbol_dots_symbol_rcb(p):
-    'top : top INTERPRET oper ARROW LCB SYMBOL DOTS SYMBOL RCB'
+    'top : top INTERPRET oper ARROW LCB term DOTS term RCB'
     p[0] = p[1]
     imp = Implies(p[3],Range(p[6],p[8]))
     imp.lineno = get_lineno(p,4)
@@ -2038,14 +2055,32 @@ def p_loc_symbol(p):
     'loc : SYMBOL'
     p[0] = p[1]
 
-def p_actseq_action(p):
-    'actseq : action'
+def p_actseqrev_simpleact(p):
+    'actseqrev : simpleact'
     p[0] = [p[1]]
 
-def p_actseq_actseq_semi_action(p):
-    'actseq : actseq SEMI action'
+def p_actseqrev_complexact(p):
+    'actseqrev : complexact'
+    p[0] = [p[1]]
+
+def p_actseqrev_simpact_semi_actseqrev(p):
+    'actseqrev : simpleact SEMI actseqrev'
+    p[0] = p[3]
+    p[0].append(p[1])
+
+def p_actseqrev_simpact_semi(p):
+    'actseqrev : simpleact SEMI'
+    p[0] = [p[1]]
+
+def p_actseqrev_complexact_optsemi_actseqrev(p):
+    'actseqrev : complexact optsemi actseqrev'
+    p[0] = p[3]
+    p[0].append(p[1])
+
+def p_actseq_actseqrev(p):
+    'actseq : actseqrev'
     p[0] = p[1]
-    p[0].append(p[3])
+    p[1].reverse()
 
 def lower_var_stmts(stmts):
     for idx,stmt in enumerate(stmts):
@@ -2095,74 +2130,82 @@ def p_sequence_lcb_actseq_semi_rcb(p):
     p[0].lineno = get_lineno(p,1)
 
 def p_action_sequence(p):
-    'action : sequence'
+    'complexact : sequence'
+    p[0] = p[1]
+
+def p_action_simpleact(p):
+    'action : simpleact'
+    p[0] = p[1]
+    
+def p_action_complexact(p):
+    'action : complexact'
     p[0] = p[1]
 
 def p_action_assume(p):
-    'action : ASSUME fmla'
+    'simpleact : ASSUME fmla'
     p[0] = AssumeAction(check_non_temporal(p[2]))
     p[0].lineno = get_lineno(p,1)
 
 
 if iu.get_numeric_version() <= [1,6]:
     def p_action_assert(p):
-        'action : ASSERT fmla'
+        'simpleact : ASSERT fmla'
         p[0] = AssertAction(check_non_temporal(p[2]))
         p[0].lineno = get_lineno(p,1)
 
     def p_action_ensures(p):
-        'action : ENSURES fmla'
+        'simpleact : ENSURES fmla'
         p[0] = EnsuresAction(check_non_temporal(p[2]))
         p[0].lineno = get_lineno(p,1)
 else:
     def p_action_assert(p):
-         'action : ASSERT fmla'
+         'simpleact : ASSERT fmla'
          p[0] = AssertAction(check_non_temporal(p[2]))
          p[0].lineno = get_lineno(p,1)
 
     def p_action_assert_proof_proofstep(p):
-         'action : ASSERT fmla PROOF proofstep'
+         'simpleact : ASSERT fmla PROOF proofstep'
          p[0] = AssertAction(check_non_temporal(p[2]),p[4])
          p[0].lineno = get_lineno(p,1)
 
     def p_action_ensure(p):
-         'action : ENSURE fmla'
+         'simpleact : ENSURE fmla'
          p[0] = EnsuresAction(check_non_temporal(p[2]))
          p[0].lineno = get_lineno(p,1)
 
     def p_action_ensure_proof_proofstep(p):
-         'action : ENSURE fmla PROOF proofstep'
+         'simpleact : ENSURE fmla PROOF proofstep'
          p[0] = EnsuresAction(check_non_temporal(p[2]),p[4])
          p[0].lineno = get_lineno(p,1)
 
     def p_action_require(p):
-         'action : REQUIRE fmla'
+         'simpleact : REQUIRE fmla'
          p[0] = RequiresAction(check_non_temporal(p[2]))
          p[0].lineno = get_lineno(p,1)
 
     def p_action_require_proof_proofstep(p):
-         'action : REQUIRE fmla PROOF proofstep'
+         'simpleact : REQUIRE fmla PROOF proofstep'
          p[0] = RequiresAction(check_non_temporal(p[2]),p[4])
          p[0].lineno = get_lineno(p,1)
 
     # def p_action_ensure_optproof(p):
-    #     'action : ENSURE fmla optproof'
+    #     'simpleact : ENSURE fmla optproof'
     #     p[0] = EnsuresAction(*([check_non_temporal(p[2])] + ([p[3]] if p[3] is not None else [])))
     #     p[0].lineno = get_lineno(p,1)
 
     # def p_action_require_optproof(p):
-    #     'action : REQUIRE fmla optproof'
+    #     'simpleact : REQUIRE fmla optproof'
     #     p[0] = RequiresAction(*([check_non_temporal(p[2])] + ([p[3]] if p[3] is not None else [])))
     #     p[0].lineno = get_lineno(p,1)
     
 
 def p_action_set_lit(p):
-    'action : SET lit'
+    'simpleact : SET lit'
     p[0] = SetAction(p[2])
     p[0].lineno = get_lineno(p,1)
 
 def p_action_term_assign_fmla(p):
-    'action : term ASSIGN fmla'
+    'simpleact : term ASSIGN fmla'
     p[0] = AssignAction(p[1],check_non_temporal(p[3]))
     p[0].lineno = get_lineno(p,2)
 
@@ -2172,25 +2215,30 @@ def p_termtuple_lp_term_comma_terms_rp(p):
     p[0].lineno = get_lineno(p,1)
 
 def p_action_termtuple_assign_fmla(p):
-    'action : termtuple ASSIGN callatom'
+    'simpleact : termtuple ASSIGN callatom'
     p[0] = CallAction(*([p[3]]+list(p[1].args)))
     p[0].lineno = get_lineno(p,2)
 
 def p_action_term_assign_times(p):
-    'action : term ASSIGN TIMES'
+    'simpleact : term ASSIGN TIMES'
     p[0] = HavocAction(p[1])
     p[0].lineno = get_lineno(p,2)
 
-
+def p_action_term(p):
+    'simpleact : term'
+    p[0] = CallAction(p[1])
+    p[0].lineno = p[1].lineno
+       
+    
 if iu.get_numeric_version() <= [1,4]:
 
     def p_action_if_fmla_lcb_action_rcb(p):
-        'action : IF fmla sequence'
+        'complexact : IF fmla sequence'
         p[0] = IfAction(check_non_temporal(p[2]),p[3])
         p[0].lineno = get_lineno(p,1)
 
     def p_action_if_fmla_lcb_action_rcb_else_LCB_action_RCB(p):
-        'action : IF fmla sequence ELSE action'
+        'complexact : IF fmla sequence ELSE action'
         p[0] = IfAction(check_non_temporal(p[2]),p[3],p[5])
         p[0].lineno = get_lineno(p,1)
 
@@ -2242,13 +2290,13 @@ else:
         return part
 
     def p_action_if_somefmla_lcb_action_rcb(p):
-        'action : IF somefmla sequence'
+        'complexact : IF somefmla sequence'
         p[2] = check_non_temporal(p[2])
         p[0] = IfAction(p[2],fix_if_part(p[2],p[3]))
         p[0].lineno = get_lineno(p,1)
 
     def p_action_if_somefmla_lcb_action_rcb_else_LCB_action_RCB(p):
-        'action : IF somefmla sequence ELSE action'
+        'complexact : IF somefmla sequence ELSE action'
         p[2] = check_non_temporal(p[2])
         p[0] = IfAction(p[2],fix_if_part(p[2],p[3]),p[5])
         p[0].lineno = get_lineno(p,1)
@@ -2276,40 +2324,40 @@ else:
         p[0] = []
 
     def p_action_while_somefmla_invariants_decreases_lcb_action_rcb(p):
-        'action : WHILE somefmla invariants decreases sequence'
+        'complexact : WHILE somefmla invariants decreases sequence'
         p[0] = WhileAction(*([check_non_temporal(p[2]), fix_if_part(p[2],p[5])] + p[3] + p[4]))
         p[0].lineno = get_lineno(p,1)
 
 def p_action_if_times_lcb_action_rcb_else_LCB_action_RCB(p):
-    'action : IF TIMES sequence ELSE action'
+    'complexact : IF TIMES sequence ELSE action'
     p[0] = ChoiceAction(p[3],p[5])
     p[0].lineno = get_lineno(p,1)
 
 
 if iu.get_numeric_version() <= [1,2]:
     def p_action_field_assign_term(p):
-        'action : term DOT SYMBOL ASSIGN term'
+        'simpleact : term DOT SYMBOL ASSIGN term'
         p[0] = AssignFieldAction(p[1],p[3],p[5])
         p[0].lineno = get_lineno(p,4)
 
 
     def p_action_field_assign_null(p):
-        'action : term DOT SYMBOL ASSIGN NULL'
+        'simpleact : term DOT SYMBOL ASSIGN NULL'
         p[0] = NullFieldAction(p[1],p[3])
         p[0].lineno = get_lineno(p,4)
 
     def p_action_field_assign_field(p):
-        'action : term DOT SYMBOL ASSIGN term DOT SYMBOL'
+        'simpleact : term DOT SYMBOL ASSIGN term DOT SYMBOL'
         p[0] = CopyFieldAction(p[1],p[3],p[5],p[7])
         p[0].lineno = get_lineno(p,4)
 
     def p_action_field_assign_false(p):
-        'action : term DOT SYMBOL ASSIGN FALSE'
+        'simpleact : term DOT SYMBOL ASSIGN FALSE'
         p[0] = NullFieldAction(p[1],p[3])
         p[0].lineno = get_lineno(p,4)
 
 def p_action_instantiate_atom(p):
-    'action : INSTANTIATE callatom'
+    'simpleact : INSTANTIATE callatom'
 #    p[0] = InstantiateAction(app_to_atom(p[2]))
     p[0] = InstantiateAction(p[2])
     p[0].lineno = get_lineno(p,1)
@@ -2350,17 +2398,17 @@ def p_callatoms_callatoms_callatom(p):
     p[0].append(p[3])
 
 def p_action_call_optreturns_callatom(p):
-    'action : CALL optactualreturns callatom'
+    'simpleact : CALL optactualreturns callatom'
     p[0] = CallAction(*([p[3]] + p[2]))
     p[0].lineno = get_lineno(p,1)
 
 def p_action_call_callatom(p):
-    'action : CALL callatom'
+    'simpleact : CALL callatom'
     p[0] = CallAction(p[2])
     p[0].lineno = get_lineno(p,1)
 
 # def p_action_call_callatom_assign_callatom(p):
-#     'action : CALL callatom ASSIGN callatom'
+#     'simpleact : CALL callatom ASSIGN callatom'
 #     p[0] = CallAction(p[4],p[2])
 #     p[0].lineno = get_lineno(p,1)
 
@@ -2390,7 +2438,7 @@ def p_lparams_lparams_comma_lparam(p):
 
 
 def p_action_local_params_lcb_action_rcb(p):
-    'action : LOCAL lparams sequence'
+    'complexact : LOCAL lparams sequence'
     # we rename the locals to avoid name capture
     lsyms = [s.prefix('loc:') for s in p[2]]
     subst = dict((x.rep,y.rep) for x,y in zip(p[2],lsyms))
@@ -2420,13 +2468,13 @@ if not (iu.get_numeric_version() <= [1,5]):
         p[0] = check_non_temporal(p[2])
 
     def p_action_var_opttypedsym_assign_fmla(p):
-        'action : VAR opttypedsym optinit'
+        'simpleact : VAR opttypedsym optinit'
         p[0] = VarAction(p[2],p[3]) if p[3] is not None else VarAction(p[2])
         p[0].lineno = get_lineno(p,1)
 
 if not (iu.get_numeric_version() <= [1,6]):
     def p_action_thunk_symbol_optargs_colon_atype_assign_sequence(p):
-        'action : THUNK LABEL SYMBOL optargs COLON atype ASSIGN sequence'
+        'complexact : THUNK LABEL SYMBOL optargs COLON atype ASSIGN sequence'
         action = Atom(p[3],p[4])
         action.lineno = get_lineno(p,3)
         p[0] = ThunkAction(Atom(p[2][1:-1],[]),action,Atom(p[6]),p[8])
@@ -2447,7 +2495,7 @@ def p_eqns_eqns_comma_eqn(p):
     p[0].append(p[3])
 
 def p_action_let_eqns_lcb_action_rcb(p):
-    'action : LET eqns sequence'
+    'complexact : LET eqns sequence'
     p[0] = LetAction(*(p[2]+[p[3]]))
 
 def p_symbols(p):

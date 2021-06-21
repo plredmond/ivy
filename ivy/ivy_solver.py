@@ -236,8 +236,21 @@ def symbol_to_z3(s):
 ivy_logic.UninterpretedSort.to_z3 = uninterpretedsort
 ivy_logic.FunctionSort.to_z3 = functionsort
 ivy_logic.EnumeratedSort.to_z3 = enumeratedsort
+ivy_logic.RangeSort.to_z3 = lambda self: z3.IntSort()
 ivy_logic.BooleanSort.to_z3 = lambda self: z3.BoolSort()
 ivy_logic.Symbol.to_z3 = symbol_to_z3
+
+
+def range_sort_bounds_to_z3(itp):
+    global handle_range_sorts
+    handle_range_sorts = False
+    lb = term_to_z3(itp.lb)
+    ub = term_to_z3(itp.ub)
+    handle_range_sorts = True
+    if not (z3.is_int_value(lb) and z3.is_int_value(lb)):
+        print "error: bounds for range sort {} are not interpreted as int"
+        exit(1)
+    return lb,ub
 
 
 def lookup_native(thing,table,kind):
@@ -248,14 +261,25 @@ def lookup_native(thing,table,kind):
         if thing.name in iu.polymorphic_symbols:
             sort = thing.sort.domain[0].name
             if sort in ivy_logic.sig.interp and not isinstance(ivy_logic.sig.interp[sort],ivy_logic.EnumeratedSort):
-                if thing.name == '-' and ivy_logic.sig.interp[sort] == 'nat':
+                itp = ivy_logic.sig.interp[sort]
+                if thing.name == '-' and itp == 'nat':
                     return lambda x,y: z3.If(x < y,z3.IntVal(0),x-y)
+                if handle_range_sorts and isinstance(itp,ivy_logic.RangeSort):
+                    lb,ub = range_sort_bounds_to_z3(itp)
+                    if thing.name == '+':
+                        return lambda x,y: z3.If(x+y > ub, ub, z3.If(x+y < lb, lb, x+y))
+                    if thing.name == '-':
+                        return lambda x,y: z3.If(x-y > ub, ub, z3.If(x-y < lb, lb, x-y))
+                    if thing.name == '*':
+                        return lambda x,y: z3.If(x*y > ub, ub, z3.If(x*y < lb, lb, x*y))
+                    if thing.name == '/':
+                        return lambda x,y: z3.If(x/y > ub, ub, z3.If(x/y < lb, lb, x/y))
                 z3val = table(thing.name)
                 if z3val == None:
                     raise iu.IvyError(None,'{} is not a supported Z3 {}'.format(name,kind))
                 return z3val
         return None
-    if isinstance(z3name,ivy_logic.EnumeratedSort):
+    if isinstance(z3name,(ivy_logic.EnumeratedSort,ivy_logic.RangeSort)):
         return z3name.to_z3()
     z3val = table(z3name)
     if z3val == None:
@@ -319,18 +343,27 @@ def apply_z3_func(pred,tup):
     fact = z3_to_expr_ref(z3.Z3_mk_app(pred.ctx_ref(), pred.ast, sz, _args), pred.ctx)
     return fact
 
+handle_range_sorts = True
+
 def numeral_to_z3(num):
     # TODO: allow other numeric types
     z3sort = lookup_native(num.sort,sorts,"sort")
     if z3sort == None:
         return z3.Const(num.name+':'+num.sort.name,num.sort.to_z3()) # uninterpreted sort
-    try:
-        name = num.name[1:-1] if num.name.startswith('"') else num.name
-        if isinstance(z3sort,z3.SeqSortRef) and z3sort.is_string():
-            return z3.StringVal(name)
-        return z3sort.cast(str(int(name,0))) # allow 0x,0b, etc
-    except:
-        raise iu.IvyError(None,'Cannot cast "{}" to native sort {}'.format(num,z3sort))
+#    try:
+    name = num.name[1:-1] if num.name.startswith('"') else num.name
+    if isinstance(z3sort,z3.SeqSortRef) and z3sort.is_string():
+        return z3.StringVal(name)
+    val = z3sort.cast(str(int(name,0))) # allow 0x,0b, etc
+    sort = num.sort.name
+    if handle_range_sorts and sort in ivy_logic.sig.interp:
+        itp = ivy_logic.sig.interp[sort]
+        if isinstance(itp,ivy_logic.RangeSort):
+            lb,ub = range_sort_bounds_to_z3(itp)
+            val = z3.If(val < lb, lb, z3.If(ub < val, ub, val)) 
+    return val
+#    except:
+#        raise iu.IvyError(None,'Cannot cast "{}" to native sort {}'.format(num,z3sort))
 
 # Enumerated sorts can be interpreted as numeric types. However, we have to
 # check that the constants actually fit in the type.
@@ -434,24 +467,28 @@ def literal_to_z3(lit):
     else:
         return z3_atom
 
-def quant_constraints(vs):
-    natvars = [v for v in vs if ivy_logic.sig.interp.get(v.sort.name,None) == 'nat']
-    if len(natvars) == 0:
-        return []
-    return [ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([v.sort,v.sort]))(v,ivy_logic.Symbol('0',v.sort)))
-            for v in natvars]
-
-
-# this adds bounds for nat
+def quant_constraints(vs,z3_vs):
+    cnstrs = []
+    for (v,z3_v) in zip(vs,z3_vs):
+        itp = ivy_logic.sig.interp.get(v.sort.name,None)
+        if itp == 'nat':
+            cnstrs.append(z3.IntVal(0) <= z3_v)
+        elif handle_range_sorts and isinstance(itp,ivy_logic.RangeSort):
+            lb,ub = range_sort_bounds_to_z3(itp)
+            cnstrs.append(lb <= z3_v)
+            cnstrs.append(z3_v <= ub)
+    return cnstrs
+    
+# this adds bounds for nat and range types
 
 def forall(vs,z3_vs,z3_body):
-    cnstrs = [z3.IntVal(0) <= z3_v for (v,z3_v) in zip(vs,z3_vs) if ivy_logic.sig.interp.get(v.sort.name,None) == 'nat']
+    cnstrs = quant_constraints(vs,z3_vs)
     if len(cnstrs) > 0:
         z3_body = z3.Implies(z3.And(*cnstrs),z3_body)
     return z3.ForAll(z3_vs, z3_body)
 
 def exists(vs,z3_vs,z3_body):
-    cnstrs = [z3.IntVal(0) <= z3_v for (v,z3_v) in zip(vs,z3_vs) if ivy_logic.sig.interp.get(v.sort.name,None) == 'nat']
+    cnstrs = quant_constraints(vs,z3_vs)
     if len(cnstrs) > 0:
         z3_body = z3.And(*(cnstrs + [z3_body]))
     return z3.Exists(z3_vs, z3_body)
@@ -483,6 +520,18 @@ def type_constraints(syms):
         fmla = ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([t.sort,t.sort]))(t,ivy_logic.Symbol('0',t.sort)))
         z3_fmla = formula_to_z3_closed(fmla)
         res.append(z3_fmla)
+    for sym in syms:
+        itp = ivy_logic.sig.interp.get(sym.sort.rng.name,None)
+        if isinstance(itp,ivy_logic.RangeSort) and not ivy_logic.is_interpreted_symbol(sym):
+            t = (sym if not ivy_logic.is_function_sort(sym.sort) else
+                 sym(*[ivy_logic.Variable('X'+str(n),s) for n,s in enumerate(sym.sort.dom)]))
+            sort = t.sort
+            fmla = ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([t.sort,itp.lb.sort]))(t,itp.lb))
+            z3_fmla = formula_to_z3_closed(fmla)
+            res.append(z3_fmla)
+            fmla = ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([itp.lb.sort,t.sort]))(itp.ub,t))
+            z3_fmla = formula_to_z3_closed(fmla)
+            res.append(z3_fmla)
     return res
                              
 

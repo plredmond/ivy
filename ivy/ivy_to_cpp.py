@@ -558,7 +558,7 @@ def emit_cpp_sorts(header):
             sort_to_cpptype[il.sig.sorts[name]] = cpptype
         elif name in il.sig.interp:
             itp = il.sig.interp[name]
-            if not (isinstance(itp,il.EnumeratedSort) or itp.startswith('{') or itp.startswith('bv[') or itp in ['int','nat','strlit']):
+            if not (isinstance(itp,il.EnumeratedSort) or isinstance(itp,il.RangeSort) or itp.startswith('{') or itp.startswith('bv[') or itp in ['int','nat','strlit']):
                 cpptype = ivy_cpp_types.get_cpptype_constructor(itp)(varname(name))
                 cpptypes.append(cpptype)
                 sort_to_cpptype[il.sig.sorts[name]] = cpptype
@@ -572,7 +572,7 @@ def emit_sorts(header):
             continue
         if name in il.sig.interp:
             sortname = il.sig.interp[name]
-            if isinstance(sortname,il.EnumeratedSort):
+            if isinstance(sortname,il.EnumeratedSort) or isinstance(sortname,il.RangeSort):
                 sort = sortname
         if not isinstance(sort,il.EnumeratedSort):
             if name in il.sig.interp:
@@ -583,7 +583,7 @@ def emit_sorts(header):
                     indent(header)
                     header.append('mk_bv("{}",{});\n'.format(name,width))
                     continue
-                if sortname in ['int','nat']:
+                if sortname in ['int','nat'] or isinstance(sort,il.RangeSort) :
                     indent(header)
                     header.append('mk_int("{}");\n'.format(name))
                     continue
@@ -3324,6 +3324,13 @@ def emit_constant(self,header,code):
         code.append(funname(self.name)+'()')
         return
     if isinstance(self,il.Symbol) and self.is_numeral():
+        itp = il.sig.interp.get(self.sort.name,None)
+        if isinstance(itp,il.RangeSort):
+            lb = varname(itp.lb.name)
+            ub = varname(itp.ub.name)
+            x = self.name
+            code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
+            return
         if is_native_sym(self):
             code.append('__lit<'+varname(self.sort)+'>(' + self.name + ')')
             return
@@ -3405,10 +3412,11 @@ def emit_bv_op(self,header,code):
     code.append(') & {})'.format((1 << sparms[0])-1))
 
 def is_bv_term(self):
-    return (il.is_first_order_sort(self.sort)
-            and (self.sort.name in il.sig.interp
-                 and il.sig.interp[self.sort.name].startswith('bv[')
-                 or self.rep.name.startswith('bfe[') and ctype(self.args[0].sort) in int_ctypes))
+    if not il.is_first_order_sort(self.sort):
+        return False
+    itp = il.sig.interp.get(self.sort.name,None)
+    return (isinstance(itp,str) and itp.startswith('bv[')
+            or self.rep.name.startswith('bfe[') and ctype(self.args[0].sort) in int_ctypes)
 
 def capture_emit(a,header,code,capture_args):
     if capture_args != None:
@@ -3435,12 +3443,20 @@ def emit_app(self,header,code,capture_args=None):
         if is_bv_term(self):
             emit_bv_op(self,header,code)
             return
-        if self.func.name == '-' and il.sig.interp.get(self.func.sort.rng.name,None) == 'nat':
+        itp = il.sig.interp.get(self.func.sort.rng.name,None)
+        if self.func.name == '-' and itp == 'nat':
             x = new_temp(header,self.func.sort.rng)
             code_line(header,x + ' = ' + code_eval(header,self.args[0]))
             y = new_temp(header,self.func.sort.rng)
             code_line(header,y + ' = ' + code_eval(header,self.args[1]))
             code.append('( {} < {} ? 0 : {} - {})'.format(x,y,x,y))
+            return
+        if isinstance(itp,il.RangeSort):
+            x = new_temp(header,self.func.sort.rng)
+            code_line(header,x + ' = ' + code_eval(header,self.args[0]) + ' {} '.format(self.func.name) + code_eval(header,self.args[1]))
+            lb = code_eval(header,itp.lb)
+            ub = code_eval(header,itp.ub)
+            code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
             return
         assert len(self.args) == 2 # handle only binary ops for now
         code.append('(')
@@ -3580,6 +3596,10 @@ def get_bounds(header,v0,variables,body,exists,varname=None):
     if sort_card(v0.sort) != None:
         his.append(csortcard(v0.sort))
     varname = varname if varname != None else v0
+    itp = il.sig.interp.get(self.sort.name,None)
+    if isinstance(itp,il.RangeSort):
+        los.append(itp.lb)
+        his.append(itp.ub)
     if not los:
         raise iu.IvyError(None,'cannot find a lower bound for {}'.format(varname))
     if not his:
@@ -5407,6 +5427,13 @@ def main_int(is_ivyc):
                                     desc['type'] = str(param.sort)
                                     if default is not None:
                                         desc['default'] = str(default)
+                                    itp = il.sig.interp.get(param.sort,None)
+                                    def bound_val(b):
+                                        if b.is_numeral():
+                                            return int(b.name)
+                                        return b.name
+                                    if isinstance(itp,il.RangeSort):
+                                        desc['range'] = [bound_val(itp.lb),bound_val(itp.ub)]
                                     res.append(desc)
                                 return res
                             descriptor = {}

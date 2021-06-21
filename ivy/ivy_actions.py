@@ -257,7 +257,7 @@ class Action(AST):
         for a in self.iter_subactions():
             if isinstance(a,LocalAction):
                 for c in a.args[:-1]:
-                    tterm_type_names(c,names)
+                    ivy_ast.tterm_type_names(c,names)
 
 class AssumeAction(Action):
     def __init__(self,*args):

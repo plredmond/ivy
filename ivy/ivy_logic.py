@@ -158,6 +158,7 @@ Symbol.clone = lambda self,args : self
 Symbol.resort = lambda self,sort : Symbol(self.name,sort)
 
 BooleanSort = lg.BooleanSort
+BooleanSort.is_finite = lambda self: True
 
 class AST(object):
     """
@@ -756,14 +757,17 @@ ConstantSort.rep = property(lambda self: self.name)
 UninterpretedSort = ConstantSort
 UninterpretedSort.is_relational = lambda self: False
 UninterpretedSort.rename = lambda self,rn: UninterpretedSort(rn(self.name))
+UninterpretedSort.is_finite = lambda self: False
 
 EnumeratedSort = lg.EnumeratedSort
-RangeSort = lg.RangeSort
-
 EnumeratedSort.defines = lambda self: self.extension
 EnumeratedSort.is_relational = lambda self: False
 EnumeratedSort.dom = property(lambda self: [])
 EnumeratedSort.rng = property(lambda self: self)
+EnumeratedSort.is_finite = lambda self: True
+
+RangeSort = lg.RangeSort
+RangeSort.is_finite = lambda self: True
 
 # class EnumeratedSort(object):
 #     def __init__(self,name,extension):
@@ -795,10 +799,12 @@ FunctionSort.rng = FunctionSort.range
 FunctionSort.dom = FunctionSort.domain
 FunctionSort.defines = lambda self: []
 FunctionSort.is_relational = lambda self: self.rng == lg.Boolean
+FunctionSort.is_finite = lambda self: False
 
 lg.BooleanSort.is_relational = lambda self: True
 lg.BooleanSort.rng = property(lambda self: self)
 lg.BooleanSort.dom = property(lambda self: [])
+FunctionSort.is_finite = lambda self: True
 
 
 def is_enumerated_sort(s):
@@ -1037,6 +1043,14 @@ polymorphic_symbols_list = [
     ('l2s_d', [alpha, lg.Boolean]),
     ('l2s_a', [alpha, lg.Boolean]),
 ]
+
+uninterpreted_polymorphic_symbols = set([
+'l2s_waiting',
+'l2s_frozen',
+'l2s_saved',
+'l2s_d',
+'l2s_a',
+])    
 
 # Tricky: since the bfe operator is parameterized, we add instances of it to
 # the polymorphic_symbols table on demand.
@@ -1443,7 +1457,7 @@ def is_numeral(term):
 def is_interpreted_symbol(s):
 #    if symbol_is_polymorphic(s) and len(s.sort.dom) == 0:
 #        print s
-    return is_numeral(s) and is_interpreted_sort(s.sort) or symbol_is_polymorphic(s) and len(s.sort.dom) > 0 and is_interpreted_sort(s.sort.dom[0])
+    return is_numeral(s) and is_interpreted_sort(s.sort) or symbol_is_polymorphic(s) and len(s.sort.dom) > 0 and is_interpreted_sort(s.sort.dom[0]) and s.name not in uninterpreted_polymorphic_symbols
 
 def is_deterministic_fmla(f):
     if isinstance(f,Some) and len(f.args) < 4:
@@ -1582,8 +1596,8 @@ def rename_vars_no_clash(fmlas1,fmlas2):
 
 class VariableUniqifier(object):
     """ An object that alpha-converts formulas so that all variables are unique. """
-    def __init__(self):
-        self.rn = iu.UniqueRenamer()
+    def __init__(self,used=[]):
+        self.rn = iu.UniqueRenamer(used=used)
         self.invmap = dict()
     def __call__(self,fmla):
         vmap = dict()

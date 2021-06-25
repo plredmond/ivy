@@ -123,9 +123,14 @@ def stack_action_lookup(name,params=0):
             return ivy.actions[name],params
     return None,0
 
-def inst_mod(ivy,module,pref,subst,vsubst):
+def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
     save = ivy.attributes
     ivy.attributes = ()
+    def spaa(decl,subst,pref):
+        if modname is not None and pref is not None and isinstance(decl,ModuleDecl):
+            subst = subst.copy()
+            subst[modname] = pref.rep
+        return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=module.static)
     for decl in module.decls:
         if isinstance(decl,AttributeDecl):
             if vsubst:
@@ -140,10 +145,10 @@ def inst_mod(ivy,module,pref,subst,vsubst):
             map1 = distinct_variable_renaming(used_variables_ast(pref),used_variables_ast(decl))
             vpref = substitute_ast(pref,map1)
             vvsubst = dict((x,map1[y.rep]) for x,y in vsubst.iteritems())
-            idecl = subst_prefix_atoms_ast(decl,subst,vpref,module.defined,static=module.static)
+            idecl = spaa(decl,subst,vpref)
             idecl = substitute_constants_ast2(idecl,vvsubst)
         else:
-            idecl = subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=module.static)
+            idecl = spaa(decl,subst,pref)
         if isinstance(idecl,ActionDecl):
             for foo in idecl.args:
                 if not hasattr(foo.args[1],'lineno'):
@@ -173,7 +178,7 @@ def do_insts(ivy,insts):
                 if v.rep not in pvars:
                     raise iu.IvyError(instantiation,"variable {} is unbound".format(v))
             module = defn.args[1]
-            inst_mod(ivy,module,pref,subst,vsubst)
+            inst_mod(ivy,module,pref,subst,vsubst,modname=inst.relname)
             if pref is None:
                 ivy.objects.update(module.objects)
         else:
@@ -949,10 +954,11 @@ else:
         p[0].lineno = get_lineno(p,1)
 
     def p_proofstep_tactic(p):
-        'proofstep : TACTIC SYMBOL opttacticwith'
+        'proofstep : TACTIC SYMBOL opttacticwith optproofgroup'
         a = Atom(p[2])
         a.lineno = get_lineno(p,2)
-        p[0] = TacticTactic(a,p[3])
+        proof = p[4] if p[4] else NoneAST()
+        p[0] = TacticTactic(a,p[3],proof)
         p[0].lineno = get_lineno(p,1)
     
     def p_proofstep_property(p):

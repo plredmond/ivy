@@ -116,7 +116,7 @@ def main():
             print "wrong number of parameters in instance list for process {}".format(pname)
             exit(1)
         for param in process['params']:
-            if param['type'].endswith('udp.endpoint'):
+            if param['type'].endswith('udp.endpoint') or param['type'].endswith('tcp.endpoint') :
                 if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':
                     ids = []
                     for d in dim:

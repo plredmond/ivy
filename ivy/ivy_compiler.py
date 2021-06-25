@@ -1678,11 +1678,12 @@ def check_definitions(mod):
         mp = dict((lf.formula.defines(),lf.formula.rhs()) for lf in mod.definitions)
         if not opt_mutax.get():
             for lf in mod.labeled_axioms:
-                deps = set()
-                get_symbol_dependencies(mp,deps,lf.formula)
-                for s in deps:
-                    if s in side_effects:
-                        raise IvyError(side_effects[s],'immutable symbol assigned. \n{} info: symbol is used in axiom here'.format(lf.lineno))
+                if not lf.temporal:
+                    deps = set()
+                    get_symbol_dependencies(mp,deps,lf.formula)
+                    for s in deps:
+                        if s in side_effects:
+                            raise IvyError(side_effects[s],'immutable symbol assigned. \n{} info: symbol is used in axiom here'.format(lf.lineno))
 
         for lf in mod.definitions:
             s = lf.formula.lhs().rep
@@ -1832,30 +1833,33 @@ def create_constructor_schemata(mod):
                 raise iu.IvyError(cons,"Cannot define constructor {} for type {} because {} is not a structure type".format(cons,sortname,sortname))
     
         
+def apply_assert_proof(prover,self,pf):
+    cond = self.args[0]
+    goal = ivy_ast.LabeledFormula(None,cond)
+    goal.lineno = self.lineno
+    subgoals = prover.get_subgoals(goal,pf)
+    subgoals = map(theorem_to_property,subgoals)
+    assm = AssumeAction(ivy_logic.close_formula(cond))
+    assm.lineno = self.lineno
+    sgas = [ia.SubgoalAction(sg.formula) for sg in subgoals]
+    for sga in sgas:
+        sga.kind = type(self)
+    asrt = Sequence(*(sgas + [assm]))
+    asrt.lineno = self.lineno
+    for x,y in zip(asrt.args,subgoals):
+        if hasattr(y,'lineno'):
+            x.lineno = y.lineno
+    return asrt
+
 def apply_assert_proofs(mod,prover):
     def recur(self):
         if not isinstance(self,Action):
             return self
         if isinstance(self,AssertAction):
             if len(self.args) > 1:
-                cond = self.args[0]
-                pf = self.args[1]
-                goal = ivy_ast.LabeledFormula(None,cond)
-                goal.lineno = self.lineno
-                subgoals = prover.get_subgoals(goal,pf)
-                subgoals = map(theorem_to_property,subgoals)
-                assm = AssumeAction(ivy_logic.close_formula(cond))
-                assm.lineno = self.lineno
-                sgas = [ia.SubgoalAction(sg.formula) for sg in subgoals]
-                for sga in sgas:
-                    sga.kind = type(self)
-                asrt = Sequence(*(sgas + [assm]))
-                asrt.lineno = self.lineno
-                for x,y in zip(asrt.args,subgoals):
-                    if hasattr(y,'lineno'):
-                        x.lineno = y.lineno
-                return asrt
+                return apply_assert_proof(prover,self,self.args[1])
             return self
+
         if isinstance(self,LocalAction):
             with ivy_logic.WithSymbols(self.args[0:-1]):
                 return self.clone(map(recur,self.args))
@@ -2039,32 +2043,32 @@ def create_conj_actions(mod):
 # TODO: this does not handle temporal axioms.
 
 def handle_temporals(mod):
-    imap = iso.get_isolate_map(mod,verified=True,present=False)
-    new_props = []
-    for prop in mod.labeled_props:
-        isonames = imap[prop.name]
-        if prop.temporal:
-            assert len(isonames) > 0  # should at least be verified in isolate 'this'!
-            if len(isonames) > 1:
-                raise IvyError(prop,'Temporal property belongs to more than one isolate: {}'.format(','.join(str(x) for x in isonames)))
-            new_props.append(prop.clone([prop.label,ivy_logic.label_temporal(prop.formula,isonames[0])]))
-        else:
-            new_props.append(prop)
+    # imap = iso.get_isolate_map(mod,verified=True,present=False)
+    # new_props = []
+    # for prop in mod.labeled_props:
+    #     isonames = imap[prop.name]
+    #     if prop.temporal:
+    #         assert len(isonames) > 0  # should at least be verified in isolate 'this'!
+    #         if len(isonames) > 1:
+    #             raise IvyError(prop,'Temporal property belongs to more than one isolate: {}'.format(','.join(str(x) for x in isonames)))
+    #         new_props.append(prop.clone([prop.label,ivy_logic.label_temporal(prop.formula,isonames[0])]))
+    #     else:
+    #         new_props.append(prop)
             
-    for prop,proof in mod.proofs:
-        if prop.temporal:
-            isonames = imap[prop.name]
-            add_labels_to_proof(proof,isonames)
-    mod.labeled_props = new_props
+    # for prop,proof in mod.proofs:
+    #     if prop.temporal:
+    #         isonames = imap[prop.name]
+    #         add_labels_to_proof(proof,isonames)
+    # mod.labeled_props = new_props
     imap = iso.get_isolate_map(mod,verified=True,present=True)
     for actname,action in mod.actions.iteritems():
         action.labels = imap[actname]
 
 def add_labels_to_proof(proof,labels):
     if isinstance(proof,ivy_ast.ComposeTactics):
-        return proof.clone(map(add_labels_to_proof,proof.args))
+        return proof.clone([add_labels_to_proof(pf,labels) for pf in proof.args])
     if isinstance(proof,ivy_ast.IfTactic):
-        return proof.clone([proof.args[0]] + map(add_labels_to_proof,proof.args[1:]))
+        return proof.clone([proof.args[0]] + [add_labels_to_proof(pf,labels) for pf in proof.args[1:]])
     if isinstance(proof,ivy_ast.TacticTactic):
         proof.labels = list(labels)
     return proof

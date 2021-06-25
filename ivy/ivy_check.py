@@ -112,15 +112,19 @@ def check_temporals():
     pc = ivy_proof.ProofChecker(mod.labeled_axioms+mod.assumed_invariants,mod.definitions,mod.schemata)
     for prop in props:
         if prop.temporal:
-            print '\n    The following temporal property is being proved:\n'
-            print pretty_lf(prop)
-            if prop.temporal:
-                proof = pmap.get(prop.id,None)
-                model = itmp.normal_program_from_module(im.module)
-                subgoal = prop.clone([prop.args[0],itmp.TemporalModels(model,prop.args[1])])
-                subgoals = [subgoal]
-                subgoals = pc.admit_proposition(prop,proof,subgoals)
-                check_subgoals(subgoals)
+            if prop.assumed:
+                pc.admit_axiom(prop)
+            else:
+                print '\n    The following temporal property is being proved:\n'
+                print pretty_lf(prop) + ' ...',
+                sys.stdout.flush()
+                if prop.temporal:
+                    proof = pmap.get(prop.id,None)
+                    model = itmp.normal_program_from_module(im.module)
+                    subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,prop.args[1])])
+                    subgoals = [subgoal]
+                    subgoals = pc.admit_proposition(prop,proof,subgoals)
+                    check_subgoals(subgoals)
             
         # else:
         #     # Non-temporal properties have already been proved, so just
@@ -406,8 +410,9 @@ def check_isolate():
         pc = ivy_proof.ProofChecker(mod.labeled_axioms+mod.assumed_invariants,mod.definitions,mod.schemata)
         model = itmp.normal_program_from_module(im.module)
         prop = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),lg.And())
-        subgoal = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),itmp.TemporalModels(model,lg.And()))
-#        print 'subgoal = {}'.format(subgoal)
+        subgoal = ivy_ast.LabeledFormula(ivy_ast.Atom('safety'),ivy_ast.TemporalModels(model,lg.And()))
+        subgoal.lineno = mod.isolate_proof.lineno 
+        #        print 'subgoal = {}'.format(subgoal)
         subgoals = [subgoal]
         subgoals = pc.admit_proposition(prop,mod.isolate_proof,subgoals)
         check_subgoals(subgoals)
@@ -596,12 +601,12 @@ def check_isolate():
 # This is a little bit backward. When faced with a subgoal from the prover,
 # we check it by constructing fake isolate.
                 
-def check_subgoals(goals):
+def check_subgoals(goals,method=None):
     mod = im.module
     for goal in goals:
         # print 'goal: {}'.format(goal)
         conc = ivy_proof.goal_conc(goal)
-        if isinstance(conc,itmp.TemporalModels):
+        if isinstance(conc,ivy_ast.TemporalModels):
             model = conc.model
             fmla = conc.fmla
             if not lg.is_true(fmla):
@@ -620,14 +625,14 @@ def check_subgoals(goals):
             mod.labeled_axioms = list(mod.labeled_axioms)
             mod.assumed_invars = model.asms
             for prem in ivy_proof.goal_prems(goal):
-                if prem.temporal:
+                if hasattr(prem,'temporal') and prem.temporal:
                     mod.labeled_axioms.append(prem)
             # ivy_printer.print_module(mod)
         else:
-            goal = ivy_compiler.theorem_to_property(goal)
+            pgoal = ivy_compiler.theorem_to_property(goal)
             mod = im.module.copy()
             # mod.labeled_axioms.extend(proved)
-            mod.labeled_props = [goal]
+            mod.labeled_props = [pgoal]
             mod.concept_spaces = []
             mod.labeled_conjs = []
             mod.public_actions = set()
@@ -636,9 +641,35 @@ def check_subgoals(goals):
             mod.isolate_proof = None
             mod.isolate_info = None
         with mod:
-            check_isolate()
+            vocab = ivy_proof.goal_vocab(goal)
+            with lg.WithSymbols(vocab.symbols):
+                with lg.WithSorts(vocab.sorts):
+                    if method is not None:
+                        with im.module.theory_context():
+                            foo = method()
+                            if foo:
+                                global failures
+                                failures += 1
+                                print "FAIL\n"
+                                if hasattr(goal,"trace_hook"):
+                                    foo = goal.trace_hook(foo)
+                                if opt_trace.get():
+                                    print str(foo)
+                                    exit(0)
+                                if diagnose.get():
+                                    gui_art(foo)
+                            else:
+                                print "PASS\n"
+                    else:
+                        check_isolate()
                 
+def mc_tactic(prover,goals,proof):
+    check_subgoals(goals[0:1],method=ivy_mc.check_isolate)
+    return goals[1:]
 
+ivy_proof.register_tactic('mc',mc_tactic)
+
+                    
 def all_assert_linenos():
     mod = im.module
     all = []
@@ -677,7 +708,7 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
     im.module.labeled_axioms.extend(lf for lf in im.module.labeled_props if lf.assumed)
     im.module.labeled_props = [lf for lf in im.module.labeled_props if not lf.assumed]
     if im.module.labeled_props:
-        raise IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
+        raise iu.IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
     if not check_separately(isolate):
         with im.module.theory_context():
             meth()

@@ -520,6 +520,8 @@ def type_constraints(syms):
         fmla = ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([t.sort,t.sort]))(t,ivy_logic.Symbol('0',t.sort)))
         z3_fmla = formula_to_z3_closed(fmla)
         res.append(z3_fmla)
+    global handle_range_sorts
+    handle_range_sorts = False
     for sym in syms:
         itp = ivy_logic.sig.interp.get(sym.sort.rng.name,None)
         if isinstance(itp,ivy_logic.RangeSort) and not ivy_logic.is_interpreted_symbol(sym):
@@ -532,6 +534,7 @@ def type_constraints(syms):
             fmla = ivy_logic.Not(ivy_logic.Symbol('<',ivy_logic.RelationSort([itp.lb.sort,t.sort]))(itp.ub,t))
             z3_fmla = formula_to_z3_closed(fmla)
             res.append(z3_fmla)
+    handle_range_sorts = True
     return res
                              
 
@@ -1085,15 +1088,15 @@ def model_if_none(clauses1,implied,model):
 
 
 def decide(s,atoms=None):
-#    print "solving{"
-#    f = open("ivy.smt2","w")
-#    f.write(s.to_smt2())
-#    f.close()
+    # print "solving{"
+    # f = open("ivy.smt2","w")
+    # f.write(s.to_smt2())
+    # f.close()
     res = s.check() if atoms == None else s.check(atoms)
     if res == z3.unknown:
         print s.to_smt2()
         raise iu.IvyError(None,"Solver produced inconclusive result")
-#    print "}"
+    # print "}"
     return res
 
 def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_cond=None, shrink=True):
@@ -1155,16 +1158,21 @@ def get_small_model(clauses, sorts_to_minimize, relations_to_minimize, final_con
                 if fc.assume():
                     if opt_show_vcs.get():
                         print '\nassume: {}'.format(fc.cond())
+                        sys.stdout.flush()
                     s.add(clauses_to_z3(fc.cond()))
                     assumes.append(fc.cond())
                 else:
+                    sys.stdout.flush()
                     if opt_incremental.get():
                         s.push()
+                    sys.stdout.flush()
                     foo = fc.cond()
+                    sys.stdout.flush()
                     if opt_show_vcs.get():
                         print '\nassert: {}'.format(foo)
+                        sys.stdout.flush()
                     the_fmla = clauses_to_z3(foo)
-#                    iu.dbg('the_fmla')
+                    # iu.dbg('the_fmla')
                     s.add(the_fmla)
                     res = decide(s)
                     if res != z3.unsat:

@@ -3596,7 +3596,7 @@ def get_bounds(header,v0,variables,body,exists,varname=None):
     if sort_card(v0.sort) != None:
         his.append(csortcard(v0.sort))
     varname = varname if varname != None else v0
-    itp = il.sig.interp.get(self.sort.name,None)
+    itp = il.sig.interp.get(v0.sort.name,None)
     if isinstance(itp,il.RangeSort):
         los.append(itp.lb)
         his.append(itp.ub)
@@ -3674,7 +3674,7 @@ def emit_quant(variables,body,header,code,exists=False):
         lo,hi = get_bounds(header,v0,variables,body,exists)
         ct = ctype(v0.sort)
         ct = 'int' if ct == 'bool' else ct if ct in int_ctypes else 'int'
-        header.append('for (' + ct + ' ' + idx + ' = ' + lo + '; ' + idx + ' < ' + hi + '; ' + idx + '++) {\n')
+        header.append('for (' + ct + ' ' + idx + ' = ' + varname(lo) + '; ' + idx + ' < ' + varname(hi) + '; ' + idx + '++) {\n')
     indent_level += 1
     subcode = []
     emit_quant(variables,body,header,subcode,exists)

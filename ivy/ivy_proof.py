@@ -62,6 +62,11 @@ class ProofChecker(object):
             vocab = goal_vocab(goal)
             self.stale.update(vocab.symbols)
 
+    def admit_axiom(self,ax):
+        self.axioms.append(normalize_goal(ax))
+        if ax.label is not None:
+            self.schemata[ax.name] = ax
+
     def admit_definition(self,defn,proof=None):
         """ Admits a definition if it is non-recursive or match a definition schema. 
             If a proof is given it is used to match the definition to a schema, else
@@ -206,7 +211,10 @@ class ProofChecker(object):
         return decls[1:] + decls[0:1]
 
     def let_tactic(self,decls,proof):
-        cond = il.And(*[il.Equals(x,y) for x,y in proof.args])
+        goal = decls[0]
+        vocab = goal_vocab(goal)
+        defs = [compile_expr_vocab(ia.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.args]
+        cond = il.And(*[il.Equals(a.args[0],a.args[1]) for a in defs])
         subgoal = ia.LabeledFormula(decls[0].label,il.Implies(cond,decls[0].formula))
         if not hasattr(decls[0],'lineno'):
             print 'has no line number: {}'.format(decls[0])
@@ -406,7 +414,9 @@ class ProofChecker(object):
 
         Returns a match or None
         """
-        
+
+        if isinstance(goal_conc(decl),ia.TemporalModels):
+            raise NoMatch(proof,"goal does not match the given schema")
         prob, pmatch = self.setup_matching(decl,proof)
         apply_match_to_problem(pmatch,prob,apply_match_alt)
         if isinstance(prob.pat,ia.Tuple):
@@ -706,6 +716,17 @@ def compile_expr_vocab(expr,vocab):
                     return expr
 
 
+# Compile an expression using a vocabulary. The expression could be a formula or a type.
+
+def compile_expr_vocab_ext(expr,vocab):
+    with il.WithSymbols(vocab.symbols):
+        with il.WithSorts(vocab.sorts):
+            if isinstance(expr,ia.Atom) and expr.rep in il.sig.sorts:
+                return il.sig.sorts[expr.rep]
+            with il.top_sort_as_default():
+                with ia.ASTContext(expr):
+                    expr = expr.compile()
+                    return expr
 
 
 def remove_vars_match(mat,fmla):
@@ -1323,7 +1344,7 @@ def skolemize_goal(goal):
 def skolemize_fmla(fmla,pos,renamer,skfuns):
     univs = []
     outer = []
-    var_uniq = il.VariableUniqifier()
+    var_uniq = il.VariableUniqifier(used=renamer.used) # don't capture any free symbols!
     def rec( fmla,pos):
         if isinstance(fmla,il.Not):
             return fmla.clone([rec(fmla.args[0],not pos)])
@@ -1357,11 +1378,16 @@ def skolemize_fmla(fmla,pos,renamer,skfuns):
             for v in fmla.variables:
                 outer.pop()
             return res
+        if isinstance(fmla,ia.TemporalModels):
+            return fmla.clone([rec(fmla.args[0],pos)])
         return fmla
     body = rec(fmla,pos)
     if univs:
         quant = il.Exists if pos else il.ForAll
-        body = quant(univs,body)
+        if isinstance(body,ia.TemporalModels):
+            body = body.clone([quant(univs,body.args[0])])
+        else:
+            body = quant(univs,body)
     return body
 
 def compile_witness_list(proof,goal):
@@ -1370,6 +1396,11 @@ def compile_witness_list(proof,goal):
     the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
     return [compile_expr_vocab(d,the_goal_vocab) for d in proof.args]
     
+def compile_with_goal_vocab(expr,goal):
+#    the_goal_vocab = goal_vocab(goal,get_bound_vars=True)
+    the_goal_vocab = goal_vocab(goal)
+#    the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
+    return compile_expr_vocab_ext(expr,the_goal_vocab)
 
 def match_from_defn(defn):
     vs = set()

@@ -258,7 +258,6 @@ class Ivy(object):
             if conflict:
                 if allow_redef:
                     return
-                assert False
                 report_error(Redefining(name,lineno,olineno))
         self.defined[name].append((lineno,cls))
 
@@ -1567,7 +1566,12 @@ else:
         adef.lineno = get_lineno(p,4)
     if isinstance(adef,CrashAction):
         adef = adef.clone([Atom(This(),p[5])])
-    decl = ActionDecl(ActionDef(Atom(p[4],[]),adef,formals=p[5],returns=p[6]))
+    the_atom = Atom(p[4],[])
+    the_atom.lineno = adef.lineno
+    actdef = ActionDef(the_atom,adef,formals=p[5],returns=p[6])
+    actdef.lineno = adef.lineno
+    decl = ActionDecl(actdef)
+    decl.lineno = adef.lineno
     p[0].declare(decl)
     for foo in decl.args:
         if not hasattr(foo.args[1],'lineno'):

@@ -148,11 +148,13 @@ types_with_string_conv = [
     "RequestPayer",
     "ServerSideEncryption",
     "StorageClass",
+    "ObjectStorageClass",
     "RequestCharged",
     "ReplicationStatus",
     "ObjectLockMode",
     "ObjectLockLegalHoldStatus",
     "ObjectCannedACL",
+    "EncodingType",
 ]
 
 
@@ -214,7 +216,7 @@ def main():
 #    out.write('interpret byte->bv[8]\n')
 #    out.write('instance blob : vector(byte)\n')
     out.write('type blob\n')
-    out.write('interpret blob -> strbv[3]\n')
+#    out.write('interpret blob -> strbv[3]\n')
     out.write('attribute libspec="aws-cpp-sdk-s3,aws-cpp-sdk-core,aws-crt-cpp,aws-c-common"\n')
     if not isinstance(spec,dict):
         format_error(inpname,'top-level not a dictionary')
@@ -297,6 +299,10 @@ def main():
 #            emit_type(name,ty)
 #            ty = name
     
+    def get_member_type(df):
+        if "type" in df:
+            return df["member"]
+        return get_member_type(defs[df["shape"]])
 
     def to_aws(arg,df):
         ty = get_ref_or_type("","",df)
@@ -314,7 +320,25 @@ def main():
             return 'map_to_aws({})'.format(arg)
         return arg
 
-    def from_aws(lhs,arg,df):
+    def from_aws(lhs,arg,df,indent=0):
+        if "shape" in df:
+            output_shape = df["shape"]
+            if output_shape in defs:
+                if "members" in defs[output_shape]:
+                    output_fields = defs[output_shape]["members"]
+                    output_req = defs[output_shape].get("required",None)
+                    lines = []
+                    for name,df in output_fields.iteritems():
+                        out_fld = '{}.{}_'.format(lhs,iname(name))
+                        res_fld = "{}.Get{}()".format(arg,name)
+                        if output_req is None or name in output_req:
+                            lines.append(from_aws(out_fld,res_fld,df,indent))
+                        else:
+                            lines.append(indent * "    " + "if (result.{}HasBeenSet()) {{\n".format(name))
+                            lines.append(indent * "    " + "    out_fld.resize(1);\n")
+                            lines.append(from_aws(out_fld+"[0]",res_fld,df,indent+1))
+                            lines.append(indent * "    " + "}\n")
+                    return ''.join(lines)
         ty = get_ref_or_type("","",df)
         if ty == "string":
             sh = df["shape"]
@@ -326,10 +350,12 @@ def main():
         elif ty == "blob":
 #            return '{}.insert({}.end(), std::istream_iterator<char>({}),std::istream_iterator<char>{{}}); for(int i = 0; i < {}.size(); i++) {}[i] &= 0xff;\n'.format(lhs,lhs,arg,lhs,lhs)
             return '{{ char c; while ({}.get(c)) {}.push_back(((int)c)&0xff);}}'.format(arg,lhs)
-        elif ty.startswith('unordered_map') or ty.startswith('vector'):
+        elif ty.startswith('unordered_map'): 
 #            return 'for (auto it = {}.begin(), en = {}.end(); it != en; ++it) {{ {}[it->first.c_str()] = it->second.c_str(); }} \n'.format(arg,arg,lhs)
-            return 'for (auto it = {}.begin(), en = {}.end(); it != en; ++it) {{ {}.resize({}.size()+1); {}.back().first = it->first.c_str(); {}.back().second = it->second.c_str(); }} \n'.format(arg,arg,lhs,lhs,lhs,lhs)
-        return lhs + ' = ' + arg + ';\n'
+            return indent * "    " + 'for (auto it = {}.begin(), en = {}.end(); it != en; ++it) {{ {}.resize({}.size()+1); {}.back().first = it->first.c_str(); {}.back().second = it->second.c_str(); }} \n'.format(arg,arg,lhs,lhs,lhs,lhs)
+        elif ty.startswith('vector'):
+            return indent * "    " + 'for (auto it = {}.begin(), en = {}.end(); it != en; ++it) {{ {}.resize({}.size()+1);\n{}{}}} \n'.format(arg,arg,lhs,lhs,from_aws('{}.back()'.format(lhs), '(*it)', get_member_type(df), indent+1),indent * "    ") 
+        return indent * "    " + lhs + ' = ' + arg + ';\n'
 
     sorted_defs = []
     stack = set()
@@ -580,11 +606,11 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
                 out_fld = 'res.{}_'.format(iname(name))
                 res_fld = "result.Get{}()".format(name)
                 if output_req is None or name in output_req:
-                    out.write("        {}".format(from_aws(out_fld,res_fld,df)))
+                    out.write("{}".format(from_aws(out_fld,res_fld,df,2)))
                 else:
                     out.write("        if (result.{}HasBeenSet()) {{\n".format(name))
                     out.write("            out_fld.resize(1);\n")
-                    out.write("            {}".format(from_aws(out_fld+"[0]",res_fld,df)))
+                    out.write("{}".format(from_aws(out_fld+"[0]",res_fld,df,3)))
                     out.write("        }\n")
             out.write("        rdr->output = res;\n")
         out.write("        char buf[1] = {1};\n")

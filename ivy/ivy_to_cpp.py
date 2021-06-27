@@ -171,6 +171,12 @@ def mk_nondet_sym(code,sym,name,unique_id):
     else:
         assign_symbol_value(code,[varname(sym)],fun,sym,same=True)
 
+def assign_zero_symbol(code,sym):
+    fun = lambda v: (('('+ctype(v.sort)+')0')
+                     if not (is_native_sym(v) or ctype(v.sort) == '__strlit' or v.sort in sort_to_cpptype) else None)
+    assign_symbol_value(code,[varname(sym)],fun,sym,same=True)
+    
+
 def field_eq(s,t,field):
     vs = [il.Variable('X{}'.format(idx),sort) for idx,sort in enumerate(field.sort.dom[1:])]
     if not vs:
@@ -2871,18 +2877,16 @@ class z3_thunk : public thunk<D,R> {
                     impl.append('template <>\n')
                     open_scope(impl,line=cfsname + ' _arg<' + cfsname + '>(std::vector<ivy_value> &args, unsigned idx, long long bound)')
                     code_line(impl,cfsname + ' res')
+                    assign_zero_symbol(impl,il.Symbol('res',sort))
                     code_line(impl,'ivy_value &arg = args[idx]')
-                    code_line(impl,'if (arg.atom.size() || arg.fields.size() != {}) throw out_of_bounds("wrong number of fields",args[idx].pos)'.format(len(destrs)))
+                    # code_line(impl,'if (arg.atom.size() || arg.fields.size() != {}) throw out_of_bounds("wrong number of fields",args[idx].pos)'.format(len(destrs)))
                     code_line(impl,'std::vector<ivy_value> tmp_args(1)')
+                    open_scope(impl,line = 'for (unsigned i = 0; i < arg.fields.size(); i++)')
+                    open_scope(impl,line='if (arg.fields[{}].is_member())'.format('i'))
+                    code_line(impl,'tmp_args[0] = arg.fields[{}].fields[0]'.format('i'))
                     for idx,sym in enumerate(destrs):
-                        open_scope(impl,line='if (arg.fields[{}].is_member())'.format(idx))
-                        code_line(impl,'tmp_args[0] = arg.fields[{}].fields[0]'.format(idx))
                         fname = memname(sym)
-                        code_line(impl,'if (arg.fields[{}].atom != "{}") throw out_of_bounds("unexpected field: " + arg.fields[{}].atom,arg.fields[{}].pos)'.format(idx,fname,idx,idx))
-                        close_scope(impl)
-                        open_scope(impl,line='else')
-                        code_line(impl,'tmp_args[0] = arg.fields[{}]'.format(idx))
-                        close_scope(impl)
+                        open_scope(impl,line = '{}if (arg.fields[{}].atom == "{}")'.format('else ' if idx > 0 else '','i',fname))
                         vs = variables(sym.sort.dom[1:])
                         for v in vs:
                             open_scope(impl)
@@ -2893,7 +2897,7 @@ class z3_thunk : public thunk<D,R> {
                             code_line(impl,'tmp_args[0] = tmp.fields[{}]'.format(varname(v)))
                         open_scope(impl,line='try')
                         code_line(impl,'res.'+fname+''.join('[{}]'.format(varname(v)) for v in vs) + ' = _arg<'+ctype(sym.sort.rng,classname=classname)
-                                  +'>(tmp_args,0,{});\n'.format(csortcard(sym.sort.rng)))
+                                  +'>(tmp_args,0,{})'.format(csortcard(sym.sort.rng)))
                         close_scope(impl)
                         open_scope(impl,line='catch(const out_of_bounds &err)')
                         code_line(impl,'throw out_of_bounds("in field {}: " + err.txt,err.pos)'.format(fname))
@@ -2901,6 +2905,11 @@ class z3_thunk : public thunk<D,R> {
                         for v in vs:
                             close_loop(impl,[v])
                             close_scope(impl)
+                        close_scope(impl)
+                    code_line(impl,'{} throw out_of_bounds("unexpected field: " + arg.fields[{}].atom,arg.fields[{}].pos)'.format('else ' if len(destrs) > 0 else '','i','i'))
+                    close_scope(impl)
+                    code_line(impl,'else throw out_of_bounds("expected struct",args[idx].pos)')
+                    close_scope(impl)
                     code_line(impl,'return res')
                     close_scope(impl)
 

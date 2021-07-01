@@ -49,6 +49,8 @@ class Symbol(AST):
         if isinstance(thing,This):
             return thing
         return Symbol(thing,self.sort)
+    def unparse(self):
+        return self.rep
     def apply(self,fun,root):
         return Symbol(fun(self.rep),self.sort) if root else self
     
@@ -225,6 +227,8 @@ class This(AST):
     @property
     def relname(self):
         return 'this'
+    def unparse(self):
+        return self
     pass
 
 class Atom(Formula):
@@ -1425,8 +1429,8 @@ def apps_to_atoms(apps):
 
 
 class Dot(AST):
-    def __str__(self):
-        return str(self.args[0]) + ivy_compose_character + str(self.args[1])
+    def unparse(self):
+        return self.args[0].unparse() + ivy_compose_character + self.args[1].unparse()
     def subst(self,subst,root):
         lhs,rhs = self.args[0].subst(subst,root),self.args[1].subst(subst,False)
         return rhs if isinstance(lhs,This) else Dot(lhs,rhs)
@@ -1435,8 +1439,11 @@ class Dot(AST):
     
     
 class Bracket(AST):
-    def __str__(self):
-        return str(self.args[0]) + '[' + str(self.args[1]) + ']'
+    def unparse(self):
+        lhs = self.args[0].unparse()
+        if isinstance(lhs,This):
+            lhs = 'this'
+        return lhs + '[' + self.args[1].unparse() + ']'
     def subst(self,subst,root):
         return Bracket(self.args[0].subst(subst,root),self.args[1].subst(subst,True))
     def apply(self,fun,root):
@@ -1517,7 +1524,9 @@ def subst_subscripts(s,subst):
     if isinstance(s,This) or s.startswith('"') :
         return s
     ast = parse_name(s)
-    return str(ast.subst(subst,True))
+    res = ast.subst(subst,True).unparse()
+    assert not isinstance(res,Dot), s
+    return res
         
 
 def my_base_name(x):
@@ -1559,7 +1568,7 @@ class AstRewriteSubstPrefix(object):
         return iu.compose_names(self.pref.rep,name)
     def rewrite_atom(self,atom,always=False):
         if not(isinstance(atom.rep,This) or atom.rep.startswith('"')):
-            atom = atom.rename(str(parse_name(atom.rep).apply(lambda x: self.prefix_str(x,always),False)))
+            atom = atom.rename(parse_name(atom.rep).apply(lambda x: self.prefix_str(x,always),False).unparse())
             # g = name_parser.findall(atom.rep)
             # if len(g) > 1:
             #     n = g[0] + ''.join(('[' + self.prefix_str(x[1:-1],always) + ']' if x.startswith('[') else x) for x in g[1:])

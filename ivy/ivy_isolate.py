@@ -776,7 +776,7 @@ def check_with_parameters(mod,isolate_name):
             and name not in ivy_logic.sig.symbols
             and name not in propnames
             and name not in objs):
-            raise iu.IvyError(None,"{} is not an object, action, sort, definition, interpreted function or property".format(name))
+            raise iu.IvyError(isolate,"{} is not an object, action, sort, definition, interpreted function or property".format(name))
 
 
 def get_isolate_info(mod,isolate,kind,extra_with=[]):

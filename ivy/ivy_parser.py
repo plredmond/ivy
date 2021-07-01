@@ -1720,7 +1720,8 @@ if not (iu.get_numeric_version() <= [1,1]):
         ty = TrustedIsolateDef if p[2] else IsolateDef
         d = IsolateDecl(ty(*([Atom(p[4],p[5])] + p[7])))
         d.args[0].with_args = 0
-        d.lineno = get_lineno(p,2)
+        d.args[0].lineno = get_lineno(p,3)
+        d.lineno = get_lineno(p,3)
         p[0] = p[1]
         p[0].declare(d)
     def p_top_opttrusted_isolate_callatom_eq_callatoms_with_callatoms(p):
@@ -1728,7 +1729,8 @@ if not (iu.get_numeric_version() <= [1,1]):
         ty = TrustedIsolateDef if p[2] else IsolateDef
         d = IsolateDecl(ty(*([Atom(p[4],p[5])] + p[7] + p[9])))
         d.args[0].with_args = len(p[9])
-        d.lineno = get_lineno(p,2)
+        d.args[0].lineno = get_lineno(p,3)
+        d.lineno = get_lineno(p,3)
         p[0] = p[1]
         p[0].declare(d)
     def p_optwith(p):
@@ -1744,6 +1746,7 @@ if not (iu.get_numeric_version() <= [1,1]):
         ty = TrustedIsolateDef if p[2] else IsolateDef
         d = IsolateObjectDecl(ty(*([Atom(p[4],p[5]),Atom(p[4],p[5])]+p[10])))
         d.args[0].with_args = len(p[10])
+        d.args[0].lineno = get_lineno(p,3)
         d.lineno = get_lineno(p,3)
         p[0].declare(d)
     def p_top_opttrusted_extract_callatom_eq_lcb_top_rcb_optwith(p):
@@ -1753,12 +1756,14 @@ if not (iu.get_numeric_version() <= [1,1]):
         ty = ExtractDef
         d = IsolateObjectDecl(ty(*([Atom(p[3],p[4]),Atom(p[3],p[4])]+p[9])))
         d.args[0].with_args = len(p[9])+1
+        d.args[0].lineno = get_lineno(p,2)
         d.lineno = get_lineno(p,2)
         p[0].declare(d)
     def p_top_extract_callatom_eq_callatoms(p):
         'top : top EXTRACT SYMBOL optargs EQ callatoms'
         d = IsolateDecl(ExtractDef(*([Atom(p[3],p[4])] + p[6])))
         d.args[0].with_args = len(p[6])
+        d.args[0].lineno = get_lineno(p,2)
         d.lineno = get_lineno(p,2)
         p[0] = p[1]
         p[0].declare(d)

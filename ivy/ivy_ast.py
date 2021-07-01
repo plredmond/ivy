@@ -843,6 +843,9 @@ class TacticTactic(Tactic):
     @property
     def tactic_decls(self):
         return self.args[1].args
+    @property
+    def tactic_proof(self):
+        return self.args[2] if len(self.args) > 2 and not isinstance(self.args[2],NoneAST) else None
     def __str__(self):
         res = 'tactic ' + str(self.args[0]) + str(self.args[1])
 
@@ -877,6 +880,9 @@ class Instantiation(AST):
         return ' : '.join(repr(x) for x in self.args) if self.args[0] else repr(self.args[1])
 
 class InstantiateDecl(Decl):
+    def __init__(self,*args):
+        Decl.__init__(self,*args)
+        assert all(hasattr(x,'lineno') for x in self.args)
     def name(self):
         return 'instantiate'
 
@@ -973,6 +979,13 @@ class ActionDecl(Decl):
         for a in self.args:
             res.extend(a.iter_internal_defines())
         return res
+    def get_type_names(self,names):
+        for c in self.args:
+            for tt in c.formal_params:
+                tterm_type_names(tt,names)
+            for tt in c.formal_returns:
+                tterm_type_names(tt,names)
+            c.args[1].get_type_names(names)
 
 class StateDecl(Decl):
     def name(self):
@@ -1016,7 +1029,15 @@ class AssertDecl(Decl):
 class InterpretDecl(LabeledDecl):
     def name(self):
         return 'interpret'
-
+    def defines(self):
+        res = []
+        rhs = self.args[0].formula.args[1]
+        if isinstance(rhs,Range):
+            for arg in rhs.args:
+                if not arg.rep.isdigit():
+                    res.append((arg.rep,self.lineno))
+        return res
+    
 class MixinDecl(Decl):    
     def name(self):
         return 'mixin'
@@ -1128,6 +1149,9 @@ class AliasDecl(Decl):
         return 'alias'
     def defines(self):
         return [(c.defines(),lineno(c)) for c in self.args]
+    def get_type_names(self,names):
+        for c in self.args:
+            names.add(c.args[1].rep)
     
 
 class DelegateDecl(Decl):    
@@ -1363,6 +1387,11 @@ class ScenarioDef(AST):
                 res.append((mixer,tr.args[2].args[0].lineno))
         res.extend(self.places())
         return res
+
+
+class DebugItem(AST):
+    def __str__(self):
+        return str(self.args[0]) + '=' + str(self.args[1])
     
 # predefined things
 
@@ -1617,6 +1646,8 @@ def ast_rewrite(x,rewrite):
         x = x.clone(ast_rewrite(x.args,rewrite))
         rewrite.local = old_local
         return x
+    if isinstance(x,DebugItem):
+        return x.clone([x.args[0],ast_rewrite(x.args[1],rewrite)])
     if hasattr(x,'args'):
         return x.clone(ast_rewrite(x.args,rewrite)) # yikes!
     print "wtf: {} {}".format(x,type(x))
@@ -1650,6 +1681,24 @@ def substitute_ast(ast,subs):
         res = ast.clone([substitute_ast(x,subs) for x in ast.args])
         copy_attributes_ast(ast,res)
         return res
+
+def set_variable_sorts(ast,subs):
+    """
+    Add sorts to unsorted free variables in ast. Here, subs maps
+    variable names to sort names.
+    """
+    if isinstance(ast, Variable):
+        if ast.rep in subs and (not hasattr(ast,'sort') or ast.sort == 'S'):
+            return ast.resort(subs[ast.rep])
+        return ast
+    if isinstance(ast, (Quantifier,NamedBinder)):
+        subs = subs.copy()
+        for v in ast.bounds:
+            if v.rep in subs:
+                del subs[v.rep]
+    res = ast.clone([set_variable_sorts(x,subs) for x in ast.args])
+    copy_attributes_ast(ast,res)
+    return res
 
 def substitute_constants_ast(ast,subs):
     """
@@ -1750,19 +1799,24 @@ def is_false(ast):
 
 class Range(AST):
     def __init__(self,lo,hi):
-        self.args = []
-        self.lo, self.hi = lo,hi
+        self.args = [lo,hi]
     def __str__(self):
         return '{' + str(self.lo) + '..' + str(self.hi) + '}'
-    def clone(self,args):
-        return Range(self.lo,self.hi)
+    def __repr__(self):
+        return '{' + str(self.lo) + '..' + str(self.hi) + '}'
     @property
     def rep(self):
         return self
     @property
     def card(self):
         return int(self.hi) - int(self.lo) + 1
-
+    @property
+    def lo(self):
+        return self.args[0]
+    @property
+    def hi(self):
+        return self.args[1]
+    
 class ASTContext(object):
     """ ast compiling context, handles line numbers """
     def __init__(self,ast):
@@ -1791,3 +1845,22 @@ class Labeler(object):
 class KeyArg(App):
     def __repr__(self):
         return '^' + App.__repr__(self)
+
+class TemporalModels(AST):    
+    """ A predicate of the form M |= phi where M is a NormalProgram
+    and phi is a temporal formula """
+    def __init__(self,model,fmla):
+        self.model,self.fmla = model,fmla
+    @property
+    def args(self):
+        """ The fmla is the only subterm """
+        return [self.fmla]
+    def clone(self,args):
+        """ clone just copies this node """
+        res = TemporalModels(self.model,args[0])
+        copy_attrs(self,res)
+        return res
+    def __str__(self):
+        return str(self.model) + ' |= ' + str(self.fmla)
+
+    

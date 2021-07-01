@@ -197,6 +197,9 @@ Or, if you only want to use Ivy on the command line, test it like this:
 <a name="macnotes"></a> Installation from source on MacOS High Sierra and Mojave
 ================================================================================
 
+Install using MacPorts
+----------------------
+
 These instructions have been tested for macOS 10.12 Sierra up to macOS
 10.15 Catalina.
 
@@ -269,6 +272,56 @@ These instructions have been tested for macOS 10.12 Sierra up to macOS
         $ ivy_check diagnose=true client_server_example_new.ivy
 
     This should fire up a GUI.
+
+Install using HomeBrew
+----------------------
+
+These instruaction have been tested on MacOS 10.15 Catalina and
+install only command-line Ivy.  They work around some broken packages
+in the Python 2.7 repository.
+
+1. Install HomeBrew
+
+        $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+2. Install dependencies
+
+        $ brew install cmake
+        $ sudo easy_install pip==20.2.3
+        $ sudo pip install --ignore-installed --force-reinstall pyparsing==2.1.4
+
+3. Install Ivy:
+
+        $ git clone --recurse-submodules https://github.com/Microsoft/ivy.git
+        $ cd ivy
+
+    Build the submodules like this (it takes a while):
+
+        $ python build_submodules.py
+
+    Install into your local Python like this
+
+        $ sudo python setup.py install
+
+    If you want to run from the source tree for development purposes, do
+    this instead:
+
+        $ export PYTHONPATH=~/lib/python2.7/site-packages:$PYTHONPATH
+        $ python setup.py develop --prefix=~
+
+    This installs Ivy into your home directory, so you don't need sudo.
+    Also put the first command in your .profile script, so Python will
+    find Ivy in the future.
+
+    See the [python documentation](https://docs.python.org/2/install/) for
+    general instructions on installing python packages.
+
+
+4. running a test
+
+        $ cd doc/examples
+        $ ivy_check diagnose=true client_server_example.ivy
+
 
 <a name="binary"></a> Binary releases
 --------------------

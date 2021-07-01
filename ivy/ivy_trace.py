@@ -34,7 +34,9 @@ class TraceBase(art.AnalysisGraph):
         self.last_action = None
         self.sub = None
         self.returned = None
-
+        self.hidden_symbols = lambda sym: False
+        self.is_full_trace = False
+        
     def is_skolem(self,sym):
         res = itr.is_skolem(sym) and not (sym.name.startswith('__') and sym.name[2:3].isupper())
         # if not res and self.top_level:
@@ -63,24 +65,31 @@ class TraceBase(art.AnalysisGraph):
     def label_from_action(self,action):
         if hasattr(action,'label'):
             return action.label + '\n'
-        lineno = str(action.lineno) if hasattr(action,'lineno') else ''
-        return lineno + iu.pretty(str(action),max_lines=4)
+#        lineno = str(action.lineno) if hasattr(action,'lineno') else ''
+        return iu.pretty(str(action),max_lines=4)
 
-    def to_lines(self,lines,hash,indent):
+    def to_lines(self,lines,hash,indent,hidden):
         for state in self.states:
             if hasattr(state,'expr') and state.expr is not None:
                 expr = state.expr
-                newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(expr.rep).split('\n')]
+                action = expr.rep
+                if not hasattr(action,'label') and hasattr(action,'lineno'):
+                    lines.append(str(action.lineno) + '\n')
+                newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(action).split('\n')]
                 lines.extend(newlines)
                 if hasattr(expr,'subgraph'):
                     lines.append(indent * '    ' + '{\n')
-                    expr.subgraph.to_lines(lines,hash,indent+1)
+                    expr.subgraph.to_lines(lines,hash,indent+1,hidden)
                     lines.append(indent * '    ' + '}\n')
                 lines.append('\n')
             foo = False
+            if hasattr(state,"loop_start") and state.loop_start:
+                lines.append('\n--- the following repeats infinitely ---\n\n')
             for c in state.clauses.fmlas:
+                if hidden(c.args[0].rep):
+                    continue
                 s1,s2 = map(str,c.args)
-                if not(s1 in hash and hash[s1] == s2):
+                if not(s1 in hash and hash[s1] == s2): # or state is self.states[0]:
                     hash[s1] = s2
                     if not foo:
                         lines.append(indent * '    ' + '[\n')
@@ -92,7 +101,7 @@ class TraceBase(art.AnalysisGraph):
     def __str__(self):
         lines = []
         hash = dict()
-        self.to_lines(lines,hash,0)
+        self.to_lines(lines,hash,0,self.hidden_symbols)
         return ''.join(lines)
 
                 
@@ -105,8 +114,9 @@ class TraceBase(art.AnalysisGraph):
             self.sub = self.clone()
             self.sub.handle(action,env)
         else:
-            self.new_state(env)
-            self.last_action = action
+            if not (hasattr(action,"lineno") and action.lineno.filename == "nowhere"):
+                self.new_state(env)
+                self.last_action = action
 
     def do_return(self,action,env):
         if self.sub is not None:

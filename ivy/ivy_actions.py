@@ -253,7 +253,11 @@ class Action(AST):
     def set_lineno(self,lineno):
         self.lineno = lineno
         return self
-        
+    def get_type_names(self,names):
+        for a in self.iter_subactions():
+            if isinstance(a,LocalAction):
+                for c in a.args[:-1]:
+                    ivy_ast.tterm_type_names(c,names)
 
 class AssumeAction(Action):
     def __init__(self,*args):
@@ -1027,6 +1031,15 @@ class ThunkAction(Action):
         lineno = self.lineno if hasattr(self,'lineno') else None
         yield (self.args[0].rep,lineno)
         yield (iu.compose_names(self.args[0].rep,'run'),lineno)
+
+class DebugAction(Action):
+    def name(self):
+        return 'debug'
+    def __str__(self):
+        return ('debug ' + str(self.args[0])
+                + ((' with ' + ','.join(map(str,self.args[1:]))) if len(self.args)>1 else ''))
+    def int_update(self,domain,pvars):
+        return ([], true_clauses(), false_clauses())
 
 class NativeAction(Action):
     """ Quote native code in an action """

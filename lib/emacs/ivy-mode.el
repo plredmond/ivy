@@ -133,6 +133,8 @@
     "theorem"
     "apply"
     "named"
+    "global"
+    "process"
 ))
 
 (defconst ivy-types '("bool" "int" "bv"))

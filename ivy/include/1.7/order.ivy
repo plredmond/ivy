@@ -25,6 +25,8 @@ module unbounded_sequence = {
 
     relation succ(X:t,Y:t)
 
+    function max(X:t,Y:t) = Y if X <= Y else X
+
     object spec = {
 
 	property succ(X,Z) -> (X < Z & ~(X < Y & Y < Z))

@@ -87,12 +87,13 @@ static void cleanup() {
     def emit_templates(self):
        add_impl(
 """
+#ifdef Z3PP_H_
+
 hash_space::hash_map<BASECLASS,int> CLASSNAME::x_to_bv_hash;
 hash_space::hash_map<int,BASECLASS> CLASSNAME::bv_to_x_hash;
 std::vector<BASECLASS> CLASSNAME::nonces;
 int CLASSNAME::next_bv = 0;
 
-#ifdef Z3PP_H_
 template <>
 void __from_solver<CLASSNAME>( gen &g, const  z3::expr &v, CLASSNAME &res) {
     res = CLASSNAME::bv_to_x(g.eval(v));
@@ -159,9 +160,11 @@ void __deser<CLASSNAME>(ivy_deser &inp, CLASSNAME &res) {
     inp.get(tmp);
     res = tmp;
 }
+#ifdef Z3PP_H_
 BASECLASS CLASSNAME::random_x(){
     return __random_string<CLASSNAME>();
 }
+#endif
 """.replace('BITS',str(self.bits)).replace('CLASSNAME',self.short_name()).replace('BASECLASS',self.baseclass))
 
     def card(self):

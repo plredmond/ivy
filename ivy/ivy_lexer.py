@@ -102,6 +102,7 @@ reserved = all_reserved = {
    'rely' : 'RELY',
    'mixord' : 'MIXORD',
    'extract' : 'EXTRACT',
+   'process' : 'EXTRACT',
    'destructor' : 'DESTRUCTOR',
    'some' : 'SOME',
    'maximizing' : 'MAXIMIZING',
@@ -131,6 +132,7 @@ reserved = all_reserved = {
    'decreases' : 'DECREASES',
    'specification' : 'SPECIFICATION',
    'implementation' : 'IMPLEMENTATION',
+   'global' : 'GLOBAL',
    'ensure' : 'ENSURE',
    'require' : 'REQUIRE',
    'around' : 'AROUND',
@@ -149,6 +151,7 @@ reserved = all_reserved = {
    'tactic' : 'TACTIC',
     'unfold' : 'UNFOLD',
     'forget' : 'FORGET',
+    'debug' : 'DEBUG',
 }
 
 tokens += tuple(all_reserved.values())
@@ -254,7 +257,7 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,6]:
-            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget']:
+            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','debug']:
                 if s in reserved:
                     del reserved[s]
         else:

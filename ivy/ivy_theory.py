@@ -103,7 +103,9 @@ class Theory(object):
         self.name = name
     def __str__(self):
         return self.name
-
+    def is_finite(self):
+        return False
+    
 class IntegerTheory(Theory):
     num_params = 0
     @property
@@ -118,6 +120,8 @@ class BitVectorTheory(Theory):
     @property
     def schemata():
         return theories()['int']
+    def is_finite(self):
+        return True
     
 
 theory_classes = {

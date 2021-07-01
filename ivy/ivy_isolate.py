@@ -202,6 +202,8 @@ def vstartswith_eq_some(s,prefixes,mod):
 
 def strip_map_lookup(name,strip_map,with_dot=False):
     name = canon_act(name)
+    if iu.compose_names(name,'global_parameter') in im.module.attributes:
+        return []
     for prefix in strip_map:
         if (name+iu.ivy_compose_character).startswith(prefix+iu.ivy_compose_character):
             return strip_map[prefix]
@@ -760,6 +762,11 @@ def check_with_parameters(mod,isolate_name):
         derived = set(ldf.name for ldf in mod.definitions)
         
     propnames = set(x.label.rep for x in (mod.labeled_props+mod.labeled_axioms+mod.labeled_conjs) if x.label is not None)
+    objs = set()
+    for itps in mod.interps.values():
+        for itp in itps:
+            if itp.label:
+                objs.add(itp.label.rep)        
     for name in present:
         if (name != 'this' and name not in mod.hierarchy
             and name not in ivy_logic.sig.sorts
@@ -767,7 +774,8 @@ def check_with_parameters(mod,isolate_name):
             and name not in ivy_logic.sig.interp
             and name not in mod.actions
             and name not in ivy_logic.sig.symbols
-            and name not in propnames):
+            and name not in propnames
+            and name not in objs):
             raise iu.IvyError(None,"{} is not an object, action, sort, definition, interpreted function or property".format(name))
 
 
@@ -1477,11 +1485,13 @@ def apply_present_conjectures(isol,mod):
     conjs = get_isolate_conjs(mod,isol,verified=False)
     mod.assumed_invariants = list(conjs)
     conjs = [c for c in conjs if not c.explicit]
+    post_conjs = get_isolate_post_conjs(mod,isol)
     cg = mod.call_graph()  # TODO: cg should be cached
     myexports = get_isolate_exports(mod,cg,isol)
     for actname in myexports:
         assumes = map(conj_to_assume,conjs)
-        brackets.append((actname,assumes,[]))
+        post_assumes = map(conj_to_assume,post_conjs)
+        brackets.append((actname,assumes,post_assumes))
     posts = defaultdict(list)
     for conj in conjs:
         for actname in mod.conj_actions[conj.label.rep]:
@@ -1494,6 +1504,8 @@ def apply_present_conjectures(isol,mod):
 def create_isolate(iso,mod = None,**kwargs):
 
         mod = mod or im.module
+
+#        ivy_printer.print_module(mod)
 
         # from version 1.7, if no isolate specified on command line and
         # there is only one, use it.
@@ -1904,6 +1916,16 @@ def get_isolate_lfs(mod,iso,lfs,verified=True,present=True):
 
 def get_isolate_conjs(mod,iso,verified=True,present=True):
     return get_isolate_lfs(mod,iso,mod.labeled_conjs,verified,present)
+
+def get_isolate_post_conjs(mod,iso):
+    ver_conjs = get_isolate_conjs(mod,iso,present=False)
+    ver_set = set(lf.label.rep for lf in ver_conjs)
+    post_conjs = []
+    for ver in mod.labeled_conjs:
+        if ver.label.rep in ver_set:
+            break
+        post_conjs.append(ver)
+    return get_isolate_lfs(mod,iso,post_conjs,verified=False)
 
 
 def get_isolate_exports(mod,cg,iso):

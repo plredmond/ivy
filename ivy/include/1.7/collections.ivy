@@ -1452,7 +1452,7 @@ module segment(domain,range,arr) = {
             {
                 seg.elems := seg.elems.append(data.value(idx));
                 idx := idx.next;
-            };
+            }
         }
     }
     

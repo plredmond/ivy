@@ -245,6 +245,12 @@ class WorkingDir(object):
 def Location(filename=None,line=None):
     return LocationTuple([filename,line])
 
+def nowhere():
+    return Location("nowhere",0)
+
+def is_nowhere(lineno):
+    return lineno.filename == "nowhere"
+
 class LocationTuple(tuple):
     @property
     def filename(self):

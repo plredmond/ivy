@@ -566,7 +566,7 @@ def emit_cpp_sorts(header):
             sort_to_cpptype[il.sig.sorts[name]] = cpptype
         elif name in il.sig.interp:
             itp = il.sig.interp[name]
-            if not (isinstance(itp,il.EnumeratedSort) or itp.startswith('{') or itp.startswith('bv[') or itp in ['int','nat','strlit']):
+            if not (isinstance(itp,il.EnumeratedSort) or isinstance(itp,il.RangeSort) or itp.startswith('{') or itp.startswith('bv[') or itp in ['int','nat','strlit']):
                 cpptype = ivy_cpp_types.get_cpptype_constructor(itp)(varname(name))
                 cpptypes.append(cpptype)
                 sort_to_cpptype[il.sig.sorts[name]] = cpptype
@@ -580,7 +580,7 @@ def emit_sorts(header):
             continue
         if name in il.sig.interp:
             sortname = il.sig.interp[name]
-            if isinstance(sortname,il.EnumeratedSort):
+            if isinstance(sortname,il.EnumeratedSort) or isinstance(sortname,il.RangeSort):
                 sort = sortname
         if not isinstance(sort,il.EnumeratedSort):
             if name in il.sig.interp:
@@ -591,7 +591,7 @@ def emit_sorts(header):
                     indent(header)
                     header.append('mk_bv("{}",{});\n'.format(name,width))
                     continue
-                if sortname in ['int','nat']:
+                if sortname in ['int','nat'] or isinstance(sort,il.RangeSort) :
                     indent(header)
                     header.append('mk_int("{}");\n'.format(name))
                     continue
@@ -1074,13 +1074,15 @@ def emit_action_gen(header,impl,name,action,classname):
         return sort_card(sort)
         
 #    action = action.unroll_loops(card)
+    iu.dbg('name')
     if name in im.module.ext_preconds:
         orig_action = action
         action = ia.Sequence(ia.AssumeAction(im.module.ext_preconds[name]),action)
         action.lineno = orig_action.lineno
         action.formal_params = orig_action.formal_params
         action.formal_returns = orig_action.formal_returns
-
+        iu.dbg('action')
+        
     with ia.UnrollContext(card):
         upd = action.update(im.module,None)
     pre = tr.reverse_image(ilu.true_clauses(),ilu.true_clauses(),upd)
@@ -1392,10 +1394,10 @@ def may_alias(x,y):
 
 def emit_param_decls(header,name,params,extra=[],classname=None,ptypes=None):
     header.append(funname(name) + '(')
-    for p in params:
-        if il.is_function_sort(p.sort):
-            raise(iu.IvyError(None,'Cannot compile parameter {} with function sort'.format(p)))
-    header.append(', '.join(extra + [ctype(p.sort,classname=classname,ptype = ptypes[idx] if ptypes else None) + ' ' + varname(p.name) for idx,p in enumerate(params)]))
+#    for p in params:
+#        if il.is_function_sort(p.sort):
+#            raise(iu.IvyError(None,'Cannot compile parameter {} with function sort'.format(p)))
+    header.append(', '.join(extra + [sym_decl(p) if il.is_function_sort(p.sort) else (ctype(p.sort,classname=classname,ptype = ptypes[idx] if ptypes else None) + ' ' + varname(p.name)) for idx,p in enumerate(params)]))
     header.append(')')
 
 def emit_param_decls_with_inouts(header,name,params,classname,ptypes,returns,return_ptypes):
@@ -1653,7 +1655,7 @@ def emit_tick(header,impl,classname):
 
 def csortcard(s):
     card = sort_card(s)
-    return str(card) if card else "0"
+    return str(card) if card and card < 2 ** 64 else "0"
 
 def check_member_names(classname):
     names = map(varname,(list(il.sig.symbols) + list(il.sig.sorts) + list(im.module.actions)))
@@ -3051,7 +3053,8 @@ class z3_thunk : public thunk<D,R> {
                 impl.append("        int test_iters = TEST_ITERS;\n".replace('TEST_ITERS',opt_test_iters.get()))
                 impl.append("        int runs = TEST_RUNS;\n".replace('TEST_RUNS',opt_test_runs.get()))
                 for p,d in zip(im.module.params,im.module.param_defaults):
-                    impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
+#                    impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
+                    impl.append('    {};\n'.format(sym_decl(p.prefix('p__'),classname=classname)))
                     if d is not None:
                         emit_value_parser(impl,p,'"{}"'.format(d.rep.replace('"','\\"')),classname,lineno=d.lineno)
                 impl.append("""
@@ -3142,8 +3145,34 @@ class z3_thunk : public thunk<D,R> {
                     impl.append('    try {\n')
                     impl.append('        int pos = 0;\n')
                     impl.append('        arg_values[{}] = parse_value(args[{}],pos);\n'.format(idx,idx))
-                    impl.append('        p__'+varname(s)+' =  _arg<{}>(arg_values,{},{});\n'
-                                .format(ctype(s.sort,classname=classname),idx,csortcard(s.sort)))
+                    if not il.is_function_sort(s.sort):
+                        impl.append('        p__'+varname(s)+' =  _arg<{}>(arg_values,{},{});\n'
+                                    .format(ctype(s.sort,classname=classname),idx,csortcard(s.sort)))
+                    else:
+                        def make_function_app(s,args):
+                            res = varname(s)
+                            if is_large_type(s.sort) and len(s.sort.dom) > 1:
+                                res +=('[' + ctuple(s.sort.dom,classname=classname) + '(')
+                                first = True
+                                for a in args:
+                                    if not first:
+                                        res += ','
+                                    res += a
+                                    first = False
+                                res += ')]'
+                            else: 
+                                for a in args:
+                                    res += '[{}]'.format(a)
+                            return res
+                        impl.append('        ivy_value &arg = arg_values[{}];\n'.format(idx))
+                        impl.append('        if (arg.atom.size())\n')
+                        impl.append('            throw out_of_bounds({});\n'.format(idx))
+                        impl.append('        for (unsigned i = 0; i < arg.fields.size(); i++) {\n')
+                        impl.append('            if (arg.fields[i].fields.size() != {})\n'.format(1 + len(s.sort.dom))) 
+                        impl.append('                throw out_of_bounds({});\n'.format(idx))
+                        impl.append('            ' + make_function_app(s.prefix('p__'),['_arg<{}>(arg.fields[i].fields,{},0)'.format(ctype(domt,classname=classname),q) for q,domt in enumerate(s.sort.dom)]))
+                        impl.append('= _arg<{}>(arg.fields[i].fields,{},0);\n'.format(ctype(s.sort.rng,classname=classname),len(s.sort.dom)))
+                        impl.append('        }\n')
                     impl.append('    }\n    catch(out_of_bounds &) {\n')
                     impl.append('        std::cerr << "parameter {} out of bounds\\n";\n'.format(varname(s)))
                     impl.append('        __ivy_exit(1);\n    }\n')
@@ -3320,6 +3349,13 @@ def emit_constant(self,header,code):
         code.append(funname(self.name)+'()')
         return
     if isinstance(self,il.Symbol) and self.is_numeral():
+        itp = il.sig.interp.get(self.sort.name,None)
+        if isinstance(itp,il.RangeSort):
+            lb = varname(itp.lb.name)
+            ub = varname(itp.ub.name)
+            x = self.name
+            code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
+            return
         if is_native_sym(self):
             code.append('__lit<'+varname(self.sort)+'>(' + self.name + ')')
             return
@@ -3401,10 +3437,11 @@ def emit_bv_op(self,header,code):
     code.append(') & {})'.format((1 << sparms[0])-1))
 
 def is_bv_term(self):
-    return (il.is_first_order_sort(self.sort)
-            and (self.sort.name in il.sig.interp
-                 and il.sig.interp[self.sort.name].startswith('bv[')
-                 or self.rep.name.startswith('bfe[') and ctype(self.args[0].sort) in int_ctypes))
+    if not il.is_first_order_sort(self.sort):
+        return False
+    itp = il.sig.interp.get(self.sort.name,None)
+    return (isinstance(itp,str) and itp.startswith('bv[')
+            or self.rep.name.startswith('bfe[') and ctype(self.args[0].sort) in int_ctypes)
 
 def capture_emit(a,header,code,capture_args):
     if capture_args != None:
@@ -3431,12 +3468,20 @@ def emit_app(self,header,code,capture_args=None):
         if is_bv_term(self):
             emit_bv_op(self,header,code)
             return
-        if self.func.name == '-' and il.sig.interp.get(self.func.sort.rng.name,None) == 'nat':
+        itp = il.sig.interp.get(self.func.sort.rng.name,None)
+        if self.func.name == '-' and itp == 'nat':
             x = new_temp(header,self.func.sort.rng)
             code_line(header,x + ' = ' + code_eval(header,self.args[0]))
             y = new_temp(header,self.func.sort.rng)
             code_line(header,y + ' = ' + code_eval(header,self.args[1]))
             code.append('( {} < {} ? 0 : {} - {})'.format(x,y,x,y))
+            return
+        if isinstance(itp,il.RangeSort):
+            x = new_temp(header,self.func.sort.rng)
+            code_line(header,x + ' = ' + code_eval(header,self.args[0]) + ' {} '.format(self.func.name) + code_eval(header,self.args[1]))
+            lb = code_eval(header,itp.lb)
+            ub = code_eval(header,itp.ub)
+            code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
             return
         assert len(self.args) == 2 # handle only binary ops for now
         code.append('(')
@@ -3472,7 +3517,7 @@ def emit_app(self,header,code,capture_args=None):
             a.emit(header,code)
             first = False
         code.append(')')
-    elif is_large_type(self.rep.sort) and len(self.args[skip_params:]) > 1:
+    elif (is_large_destr if skip_params > 0 else is_large_type)(self.rep.sort) and len(self.args[skip_params:]) > 1:
         code.append('[' + ctuple(self.rep.sort.dom[skip_params:],classname=the_classname) + '(')
         first = True
         for a in self.args[skip_params:]:
@@ -3576,6 +3621,10 @@ def get_bounds(header,v0,variables,body,exists,varname=None):
     if sort_card(v0.sort) != None:
         his.append(csortcard(v0.sort))
     varname = varname if varname != None else v0
+    itp = il.sig.interp.get(v0.sort.name,None)
+    if isinstance(itp,il.RangeSort):
+        los.append(code_eval(header,itp.lb))
+        his.append(code_eval(header,itp.ub))
     if not los:
         raise iu.IvyError(None,'cannot find a lower bound for {}'.format(varname))
     if not his:
@@ -4132,6 +4181,40 @@ def emit_choice(self,header):
         header.append('}\n')
 
 ia.ChoiceAction.emit = emit_choice
+
+def emit_print_expr(impl,expr):    
+    vs = list(ilu.variables_ast(expr))
+    print 'expr: {}'.format(expr)
+    print 'vs: {}'.format(map(str,vs))
+    dom = [v.sort for v in vs]
+    print 'dom: {}'.format(map(str,dom))
+    for d,v in zip(dom,vs):
+        code_line(impl,'std::cout << "["')
+        open_loop(impl,[v])
+        code_line(impl,'if ({}) std::cout << ","'.format(varname(v)))
+    code_line(impl,'std::cout << ' + code_eval(impl,expr))
+    for d,v in zip(dom,vs):
+        close_loop(impl,[v])
+        code_line(impl,'std::cout << "]"')
+
+
+def emit_debug(self,header): 
+    def quote(event):
+        if not event.startswith('"'):
+            event = '"' + event + '"'
+        event = event.replace('"','\\"')
+        return event
+    event = quote(self.args[0].rep)
+    code_line(header,'std::cout << "{" << std::endl')
+    code_line(header,'std::cout << "    \\"event\\" : {}," << std::endl'.format(event))
+    for eqn in self.args[1:]:
+        code_line(header,'std::cout << "    {} : "'.format(quote(eqn.args[0].rep)))
+        emit_print_expr(header,eqn.args[1])
+        code_line(header, 'std::cout << "," << std::endl')
+    code_line(header,'std::cout << "}" << std::endl')
+
+ia.DebugAction.emit = emit_debug
+
 
 native_classname = None
 
@@ -4733,8 +4816,6 @@ public:
     z3::model model;
 
 protected:
-    gen(): slvr(ctx), model(ctx,(Z3_model)0) {}
-
     hash_map<std::string, z3::sort> enum_sorts;
     hash_map<Z3_sort, z3::func_decl_vector> enum_values;
     hash_map<std::string, z3::func_decl> decls_by_name;
@@ -4744,6 +4825,10 @@ protected:
     std::vector<Z3_symbol> decl_names;
     std::vector<Z3_func_decl> decls;
     std::vector<z3::expr> alits;
+
+    gen(): slvr(ctx), model(ctx,(Z3_model)0) {
+        enum_sorts.insert(std::pair<std::string, z3::sort>("bool",ctx.bool_sort()));
+    }
 
 
 public:
@@ -5077,8 +5162,13 @@ public:
 
     void mk_decl(const char *decl_name, unsigned arity, const char **domain_names, const char *range_name) {
         std::vector<z3::sort> domain;
-        for (unsigned i = 0; i < arity; i++)
+        for (unsigned i = 0; i < arity; i++) {
+            if (enum_sorts.find(domain_names[i]) == enum_sorts.end()) {
+                std::cout << "unknown sort: " << domain_names[i] << std::endl;
+                exit(1);
+            }
             domain.push_back(enum_sorts.find(domain_names[i])->second);
+        }
         std::string bool_name("Bool");
         z3::sort range = (range_name == bool_name) ? ctx.bool_sort() : enum_sorts.find(range_name)->second;   
         z3::func_decl decl = ctx.function(decl_name,arity,&domain[0],range);
@@ -5234,8 +5324,10 @@ def main_int(is_ivyc):
                         isol.with_args = 1
                         im.module.isolates['extract'] = isol
                         isolates = ['extract']
-                    elif len(extracts) == 1:
-                        isolates = [extracts[0][0]]
+                    else:
+                        isolates = [ex[0] for ex in extracts]
+#                    elif len(extracts) == 1:
+#                        isolates = [extracts[0][0]]
         else:
             if isolate != None:
                 isolates = [isolate]
@@ -5256,6 +5348,7 @@ def main_int(is_ivyc):
 
         import json
         processes = []
+        mod_name = opt_classname.get() or im.module.name
         for isolate in isolates:
             with im.module.copy():
                 with iu.ErrorPrinter():
@@ -5291,7 +5384,7 @@ def main_int(is_ivyc):
 #                    if target.get() != 'repl':
 #                        ifc.check_fragment(True)
                     with im.module.theory_context():
-                        basename = opt_classname.get() or im.module.name
+                        basename = mod_name
                         if len(isolates) > 1:
                             basename = basename + '_' + isolate
                         classname = varname(basename)
@@ -5390,10 +5483,23 @@ def main_int(is_ivyc):
                         if target.get() == 'repl' and not iu.version_le(iu.get_string_version(),"1.6"):
                             def describe_params(params,defaults):
                                 res = []
+                                print params
                                 for param,default in zip(params,defaults):
                                     desc = {}
-                                    desc['name'] = param.name
+                                    if isinstance(param,ivy_ast.App):
+                                        desc['name'] = param.rep
+                                    else:
+                                        desc['name'] = param.name
                                     desc['type'] = str(param.sort)
+                                    if default is not None:
+                                        desc['default'] = str(default)
+                                    itp = il.sig.interp.get(param.sort,None)
+                                    def bound_val(b):
+                                        if b.is_numeral():
+                                            return int(b.name)
+                                        return b.name
+                                    if isinstance(itp,il.RangeSort):
+                                        desc['range'] = [bound_val(itp.lb),bound_val(itp.ub)]
                                     res.append(desc)
                                 return res
                             descriptor = {}
@@ -5405,12 +5511,13 @@ def main_int(is_ivyc):
                             descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
                             processes.append(descriptor)
         if target.get() == 'repl':
+            print 'descriptor:{}'.format(descriptor)
             try:
                 descriptor = {'processes' : processes}
-                with open(basename + '.dsc','w') as dscf:
+                with open(mod_name + '.dsc','w') as dscf:
                     json.dump(descriptor,dscf)
             except:
-                sys.stderr.write('cannot write to file: {}\n'.format(basename + '.dsc'))
+                sys.stderr.write('cannot write to file: {}\n'.format(mod_name + '.dsc'))
                 exit(1)
 
 def outfile(name):

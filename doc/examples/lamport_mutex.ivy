@@ -34,11 +34,13 @@ global {
     # `node_max` is implicitly defined here as global parameter whose
     # value can be selected a run time.
     
-#    type host_id = {0..node_max}
-    instance host_id : iterable
-    alias node_max = host_id.max
-    #    type host_id
-#    parameter node_max : host_id
+    # instance host_id : iterable
+    # alias node_max = host_id.max
+    object host_id = {
+        type this = {0..2}
+        action next(x:host_id) returns (x:host_id) = {x := x + 1;}
+    }
+    alias node_max = 2
     
     # Since we have three kinds of messages in our protocol, we define
     # an enumerated type for the message kind with three symbolic

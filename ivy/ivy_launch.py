@@ -112,17 +112,21 @@ def main():
             print "wrong number of parameters in instance list for process {}".format(pname)
             exit(1)
         for param in process['params']:
-            if param['type'].endswith('udp.endpoint') or param['type'].endswith('tcp.endpoint') :
+            ptype = param['type']
+            print type(ptype)
+            type_rng = ptype if not isinstance(ptype,dict) else ptype['name']
+            if type_rng == 'udp.endpoint' or type_rng == 'tcp.endpoint' :
                 if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':
                     ids = []
-                    for d in dim:
+                    pdim = [[]] if not isinstance(ptype,dict) else get_process_dimensions(ptype)
+                    for d in pdim:
                         port = get_unused_port('udp')
                         id = '{{addr:{},port:{}}}'.format(lookup_ip_addr(hosts[pname]),port)
                         ids.append(id)
                     if param['name'] in param_vals:
                         sys.stderr.write("endpoint {} is used by multiple processes".format(param['name']))
                         sys.exit(1)
-                    param_vals[param['name']] = '"{}"'.format(ids[0] if len(pparms) == 0 else ('[' + ','.join('[' + ','.join(map(str,d)) + ',' + id + ']' for d,id in zip(dim,ids)) + ']'))
+                    param_vals[param['name']] = '"{}"'.format(ids[0] if len(pdim[0]) == 0 else ('[' + ','.join('[' + ','.join(map(str,d)) + ',' + id + ']' for d,id in zip(pdim,ids)) + ']'))
                     
         ps.update(param_vals)
 
@@ -130,7 +134,7 @@ def main():
         dim = get_process_dimensions(process)
         for d in dim:
             binary = process['binary']
-            cmd = [binary if '/' in binary else './' + binary]
+            cmd = ["`ivy_shell`;",binary if '/' in binary else './' + binary]
             psc = ps.copy()
             for p,v in zip(process['indices'],d):
                 psc[p['name']] = str(v)
@@ -142,7 +146,10 @@ def main():
                     else:
                         cmd.append('{}'.format(val))
             print ' '.join(cmd)
-            wname = process['name'] + ('('+','.join(map(str,d))+')' if d else '')
+            pname = process['name']
+            if pname == 'this':
+                pname = dscfname[:-4]
+            wname = pname + ('('+','.join(map(str,d))+')' if d else '')
             run_in_terminal(' '.join(cmd),wname)
             time.sleep(0.5)
             

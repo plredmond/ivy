@@ -586,14 +586,14 @@ def emit_sorts(header):
             if name in il.sig.interp:
                 sortname = il.sig.interp[name]
 #            print "name: {} sortname: {}".format(name,sortname)
+                if sortname in ['int','nat'] or isinstance(sort,il.RangeSort) :
+                    indent(header)
+                    header.append('mk_int("{}");\n'.format(name))
+                    continue
                 if sortname.startswith('bv[') and sortname.endswith(']'):
                     width = int(sortname[3:-1])
                     indent(header)
                     header.append('mk_bv("{}",{});\n'.format(name,width))
-                    continue
-                if sortname in ['int','nat'] or isinstance(sort,il.RangeSort) :
-                    indent(header)
-                    header.append('mk_int("{}");\n'.format(name))
                     continue
                 if sortname == 'strlit':
                     indent(header)
@@ -663,7 +663,7 @@ def emit_eval(header,symbol,obj=None,classname=None,lhs=None):
         indent_level += 1
     indent(header)
     if sort.rng.name in im.module.sort_destructors or sort.rng.name in im.module.native_types or sort.rng in sort_to_cpptype:
-        code_line(header,'__from_solver<'+classname+'::'+varname(sort.rng.name)+'>(*this,apply("'+sname+'"'+''.join(','+int_to_z3(s,'X{}'.format(idx)) for idx,s in enumerate(domain))+'),'+cname+''.join('[X{}]'.format(idx) for idx in range(len(domain)))+')')
+        code_line(header,'__from_solver<'+classname+'::'+varname(sort.rng.name)+'>(*this,apply("'+sname+'"'+''.join(','+int_to_z3(s,'X{}'.format(idx)) for idx,s in enumerate(domain))+'),'+(obj + '.' if obj else '')+cname+''.join('[X{}]'.format(idx) for idx in range(len(domain)))+')')
     else:
         header.append((obj + '.' if obj else '')
                       + cname + ''.join("[X{}]".format(idx) for idx in range(len(domain)))
@@ -1074,7 +1074,6 @@ def emit_action_gen(header,impl,name,action,classname):
         return sort_card(sort)
         
 #    action = action.unroll_loops(card)
-    iu.dbg('name')
     if name in im.module.ext_preconds:
         orig_action = action
         action = ia.Sequence(ia.AssumeAction(im.module.ext_preconds[name]),action)
@@ -3328,8 +3327,11 @@ def emit_one_initial_state(header):
         if sym.name in im.module.destructor_sorts:
             continue
         if sym in im.module.params:
-            name = varname(sym)
-            header.append('    this->{} = {};\n'.format(name,name))
+            vs = variables(sym.sort.dom)
+            expr = sym(*vs) if vs else sym
+            open_loop(header,vs)
+            code_line(header,'this->' + code_eval(header,expr) + ' = ' + code_eval(header,expr))
+            close_loop(header,vs)
         elif sym not in is_derived and not is_native_sym(sym):
             if sym in used:
                 assign_symbol_from_model(header,sym,m)
@@ -3340,8 +3342,11 @@ def emit_one_initial_state(header):
 
 def emit_parameter_assignments(impl):
     for sym in im.module.params:
-        name = varname(sym)
-        impl.append('    this->{} = {};\n'.format(name,name))
+            vs = variables(sym.sort.dom)
+            expr = sym(*vs) if vs else sym
+            open_loop(impl,vs)
+            code_line(impl,'this->' + code_eval(impl,expr) + ' = ' + code_eval(impl,expr))
+            close_loop(impl,vs)
     
 
 def emit_constant(self,header,code):
@@ -3556,8 +3561,11 @@ def new_temp(header,sort=None):
     global temp_ctr
     name = '__tmp' + str(temp_ctr)
     temp_ctr += 1
-    indent(header)
-    header.append(('int' if sort == None else ctype(sort)) + ' ' + name + ';\n')
+    if sort is None:
+        indent(header)
+        header.append(('int' if sort == None else ctype(sort)) + ' ' + name + ';\n')
+    else:
+        code_line(header,sym_decl(il.Symbol(name,sort)));
     return name
 
 
@@ -4005,14 +4013,22 @@ def emit_assume(self,header):
 ia.AssumeAction.emit = emit_assume
 
 
-def emit_call(self,header):
+def emit_call(self,header,ignore_vars=False):
     # tricky: a call can have variables on the lhs. we lower this to
-    # a call with temporary return actual followed by assignment 
-    if len(self.args) == 2 and list(ilu.variables_ast(self.args[1])):
+    # a call with temporary return actual followed by assignment
+    # tricker: in a parameterized initializer, the rhs may also have variables.
+    # we iterate over these.
+    if not ignore_vars and len(self.args) == 2 and list(ilu.variables_ast(self.args[1])):
+        vs = list(iu.unique(ilu.variables_ast(self.args[0])))
         sort = self.args[1].sort
+        if vs:
+            sort = il.FunctionSort(*([v.sort for v in vs] + [sort]))
         sym = il.Symbol(new_temp(header,sort=sort),sort)
-        emit_call(self.clone([self.args[0],sym]),header)
-        ac = ia.AssignAction(self.args[1],sym)
+        lhs = sym(*vs) if vs else sym
+        open_loop(header,vs)
+        emit_call(self.clone([self.args[0],lhs]),header,ignore_vars=True)
+        close_loop(header,vs)
+        ac = ia.AssignAction(self.args[1],lhs)
         if hasattr(self,'lineno'):
             ac.lineno = self.lineno
         emit_assign(ac,header)
@@ -4085,7 +4101,8 @@ def local_start(header,params,nondet_id=None):
     indent_level += 1
     for p in params:
         indent(header)
-        header.append(ctype(p.sort) + ' ' + varname(p.name) + ';\n')
+        code_line(header,sym_decl(p))
+#        header.append(ctype(p.sort) + ' ' + varname(p.name) + ';\n')
         if nondet_id != None:
             mk_nondet_sym(header,p,p.name,nondet_id)
 
@@ -5269,6 +5286,7 @@ def main_int(is_ivyc):
     ia.set_determinize(True)
     slv.set_use_native_enums(True)
     iso.set_interpret_all_sorts(True)
+    ic.set_verifying(False)
 
     # set different defaults for ivyc
 
@@ -5480,20 +5498,27 @@ def main_int(is_ivyc):
                         status = os.system(cmd)
                         if status:
                             exit(1)
-                        if target.get() == 'repl' and not iu.version_le(iu.get_string_version(),"1.6"):
+                        if target.get() in ['repl','test'] and not iu.version_le(iu.get_string_version(),"1.6"):
                             def describe_params(params,defaults):
                                 res = []
-                                print params
                                 for param,default in zip(params,defaults):
                                     desc = {}
                                     if isinstance(param,ivy_ast.App):
                                         desc['name'] = param.rep
                                     else:
                                         desc['name'] = param.name
-                                    desc['type'] = str(param.sort)
+                                    sort_desc = {}
+                                    param_sort = il.find_sort(param.sort) if isinstance(param.sort,str) else param.sort
+                                    print repr(param_sort)
+                                    if il.is_function_sort(param_sort):
+                                        sort_desc['name'] = str(param_sort.rng)
+                                        sort_desc['indices'] = describe_params(variables(param_sort.dom),[None for x in param_sort.dom] )
+                                        desc['type'] = sort_desc
+                                    else:
+                                        desc['type'] = str(param.sort)
                                     if default is not None:
                                         desc['default'] = str(default)
-                                    itp = il.sig.interp.get(param.sort,None)
+                                    itp = il.sig.interp.get(str(param.sort),None)
                                     def bound_val(b):
                                         if b.is_numeral():
                                             return int(b.name)
@@ -5510,7 +5535,7 @@ def main_int(is_ivyc):
                                 descriptor['indices'] = describe_params(the_iso.params(),[None for x in the_iso.params()])
                             descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
                             processes.append(descriptor)
-        if target.get() == 'repl':
+        if target.get() in ['repl','test']:
             print 'descriptor:{}'.format(descriptor)
             try:
                 descriptor = {'processes' : processes}

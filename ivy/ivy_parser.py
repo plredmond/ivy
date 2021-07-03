@@ -2488,7 +2488,7 @@ if not (iu.get_numeric_version() <= [1,5]):
         p[0] = check_non_temporal(p[2])
 
     def p_action_var_opttypedsym_assign_fmla(p):
-        'simpleact : VAR opttypedsym optinit'
+        'simpleact : VAR tterm optinit'
         p[0] = VarAction(p[2],p[3]) if p[3] is not None else VarAction(p[2])
         p[0].lineno = get_lineno(p,1)
 

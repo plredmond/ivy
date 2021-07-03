@@ -467,6 +467,8 @@ def compile_local(self):
         if len(ls) == 1 and isinstance(ls[0],AssignAction):
             v = ls[0]
             lhs = v.args[0]
+            if not hasattr(lhs,"sort"):
+                lhs.sort = 'S'
             rhs = v.args[1]
             # temporarily rename lhs symbol in case it clashes with an existing symbol
 #            tmp_lhs = lhs.prefix('__var_tmp:')
@@ -474,7 +476,7 @@ def compile_local(self):
             code = []
             local_syms = []
             with ExprContext(code,local_syms):
-                with alpha_sort_as_default():
+                with top_sort_as_default():
                     sym = compile_const(tmp_lhs,sig)
                     ctmp_lhs = tmp_lhs.compile()
                     crhs = rhs.compile()
@@ -1875,7 +1877,9 @@ def apply_assert_proofs(mod,prover):
             return self
         if isinstance(self,AssertAction):
             if len(self.args) > 1:
-                return apply_assert_proof(prover,self,self.args[1])
+                if option_verifying:
+                    return apply_assert_proof(prover,self,self.args[1])
+                return self.clone(self.args[:1])
             return self
 
         if isinstance(self,LocalAction):
@@ -1970,7 +1974,11 @@ def check_properties(mod):
                     prover.admit_proposition(prop,ivy_ast.ComposeTactics())
     apply_assert_proofs(mod,prover)
 
-
+option_verifying = False
+def set_verifying(tv):
+    global option_verifying
+    option_verifying = tv
+    
 def ivy_compile_theory(mod,decls,**kwargs):
     IvyDomainSetup(mod)(decls)
     

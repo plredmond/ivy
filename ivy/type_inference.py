@@ -114,6 +114,18 @@ def convert_from_sortvars(s):
     else:
         return s
 
+def convert_to_sortvars(s):
+    """
+    Convert TopSort to sort vars
+    """
+    if type(s) is TopSort:
+        return SortVar()
+    elif type(s) is FunctionSort:
+        return FunctionSort(*(
+            convert_to_sortvars(x) for x in s
+        ))
+    else:
+        return s
 
 def insert_sortvars(s,env):
     """
@@ -156,7 +168,8 @@ def infer_sorts(t, env=None):
             s = insert_sortvars(t.sort,{})
         else:
             s = env[t.name]
-            unify(s, t.sort)
+            ts = convert_to_sortvars(t.sort)
+            unify(s, ts)
         return s, lambda: type(t)(t.name, convert_from_sortvars(s))
 
     elif type(t) is Apply:

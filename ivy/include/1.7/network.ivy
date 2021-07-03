@@ -112,7 +112,7 @@ global {
                     }
                     
                     before send {
-                        require net.sent(id,dst,M) -> M < msg;
+#                        require net.sent(id,dst,M) -> M < msg;
                     }
                     after send {
                         net.sent(id,dst,msg) := true;
@@ -161,12 +161,12 @@ global {
                 }
                 trusted isolate iso = this
                 
-                attribute test = impl
+                attribute test = spec
             }
 
             trusted isolate iso = this
 
-            attribute test = impl
+            attribute test = spec
         }
     }
 }

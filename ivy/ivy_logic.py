@@ -67,7 +67,7 @@ import ivy_utils as iu
 import logic as lg
 import logic_util as lu
 from logic import And,Or,Not,Globally,Eventually,Implies,Iff,Ite,ForAll,Exists,Lambda,NamedBinder
-from type_inference import concretize_sorts, concretize_terms
+from type_inference import concretize_sorts, concretize_terms, SortVar
 from collections import defaultdict
 from itertools import chain
 import ivy_smtlib
@@ -1276,7 +1276,7 @@ def nary_ugly(op,args,myprec,prec):
     return ('(' + res + ')') if len(args) > 1 and myprec <= prec else res
 
 lg.Var.ugly = (lambda self,prec: (self.name+':'+self.sort.name)
-                  if show_variable_sorts and not isinstance(self.sort,lg.TopSort) else self.name)
+                  if show_variable_sorts and not isinstance(self.sort,(lg.TopSort,SortVar)) else self.name)
 lg.Const.ugly = (lambda self,prec: (self.name+':'+self.sort.name)
                     if show_numeral_sorts and self.is_numeral() and not isinstance(self.sort,lg.TopSort)
                  else self.name)

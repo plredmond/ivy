@@ -252,7 +252,11 @@ class Atom(Formula):
     def is_numeral(self):
         return False
     def prefix(self,s):
-        return Atom(s+self.rep,*self.args)
+        res = self.clone(self.args)
+        res.rep = s + res.rep
+        if hasattr(self,'lineno'):
+            res.lineno = self.lineno
+        return res
     def suffix(self,s):
         res = self.clone(self.args)
         res.rep = res.rep + s
@@ -319,9 +323,10 @@ class App(Term):
     def is_numeral(self):
         return self.rep.rep[0].isdigit() or self.rep.rep[0] == '"'
     def prefix(self,s):
-        res = type(self)(s + self.rep)
-        if hasattr(self,'sort'):
-            res.sort = self.sort
+        res = self.clone(self.args)
+        res.rep = s + res.rep
+        if hasattr(self,'lineno'):
+            res.lineno = self.lineno
         return res
     def drop_prefix(self,s):
         assert self.rep.startswith(s)

@@ -189,7 +189,8 @@ def rename_ast(ast,subs):
     """
     args = [rename_ast(x,subs) for x in ast.args]
     if is_app(ast) and not is_named_binder(ast):
-        return subs.get(ast.rep,ast.rep)(*args)
+        sym = subs.get(ast.rep,ast.rep)
+        return sym if is_constant(ast) else sym(*args)
     return ast.clone(args)
 
 def normalize_free_variables(ast):

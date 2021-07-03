@@ -324,6 +324,9 @@ def sort_card(sort):
         return 2**sig.size()
     if isinstance(sig,z3.DatatypeSortRef):
         return sig.num_constructors()
+    itp = ivy_logic.sig.interp.get(sort.name,None)
+    if isinstance(itp,ivy_logic.RangeSort) and ivy_logic.is_numeral(itp.ub):
+        return int(itp.ub.name) + 1
     return None
 
 

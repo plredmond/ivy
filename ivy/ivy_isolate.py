@@ -1176,6 +1176,8 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                         if not(type(called) == ia.Sequence and not called.args):
                             if (isinstance(called,ia.NativeAction) or 
                                 any(p.sort.name not in mod.ghost_sorts for p in called.formal_returns)):
+                                print "actname:{}".format(actname)
+                                print "action:{}".format(action)
                                 raise iu.IvyError(None,"No implementation for action {}".format(c))
         for c in mod.definitions + mod.native_definitions:
             if not keep_ax(c.label) and c.formula.args[0].rep in all_syms:
@@ -1588,6 +1590,11 @@ def create_isolate(iso,mod = None,**kwargs):
                 if impname in implementation_map:
                     impname = implementation_map[impname]
                 action = im.module.actions[impname]
+                for attr in ['spec','impl','private']:
+                    attrname = iu.compose_names(impname,attr)
+                    if attrname in mod.attributes:
+                        extattrname = iu.compose_names(extname,attr)
+                        mod.attributes[extattrname] = mod.attributes[attrname]
                 call = ia.CallAction(*([ivy_ast.Atom(extname,action.formal_params)] + action.formal_returns))
                 call.formal_params = action.formal_params
                 call.formal_returns = action.formal_returns

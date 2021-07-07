@@ -7,7 +7,7 @@ from ivy_interp import Interp, eval_state_facts
 from functools import partial
 from ivy_concept_space import *
 from ivy_parser import parse,ConstantDecl,ActionDef,Ivy,inst_mod
-from ivy_actions import DerivedUpdate, type_check_action, type_check, SymbolList, UpdatePattern, ActionContext, LocalAction, AssignAction, CallAction, Sequence, IfAction, WhileAction, AssertAction, AssumeAction, NativeAction, ChoiceAction, CrashAction, ThunkAction, DebugAction, has_code
+from ivy_actions import DerivedUpdate, NamedUpdate, type_check_action, type_check, SymbolList, UpdatePattern, ActionContext, LocalAction, AssignAction, CallAction, Sequence, IfAction, WhileAction, AssertAction, AssumeAction, NativeAction, ChoiceAction, CrashAction, ThunkAction, DebugAction, has_code
 from ivy_utils import IvyError
 import ivy_logic
 import ivy_dafny_compiler as dc
@@ -1041,6 +1041,7 @@ class IvyDomainSetup(IvyDeclInterp):
         dom = [x.sort for x in targs]
         sym = self.domain.sig.add_symbol(lhs.rep,ivy_logic.FuncConstSort(*(dom+[rng])))
         self.domain.named.append((self.last_fact,sym(*targs) if targs else sym))
+        self.domain.updates.append(NamedUpdate(sym,cond))
     def schema(self,sch):
         if isinstance(sch.defn.args[1],ivy_ast.SchemaBody):
             label = ivy_ast.Atom(sch.defn.defines(),[])
@@ -1877,7 +1878,16 @@ def apply_assert_proofs(mod,prover):
             if len(self.args) > 1:
                 return apply_assert_proof(prover,self,self.args[1])
             return self
-
+        if isinstance(self,WhileAction):
+            if len(self.args) > 2:
+                new_invars = []
+                for a in self.args[2:]:
+                    r = recur(a)
+                    if isinstance(r,Sequence):
+                        new_invars.extend(r.args)
+                    else:
+                        new_invars.append(r)
+                return self.clone(map(recur,self.args[0:2]) + new_invars)
         if isinstance(self,LocalAction):
             with ivy_logic.WithSymbols(self.args[0:-1]):
                 return self.clone(map(recur,self.args))

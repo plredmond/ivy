@@ -130,6 +130,13 @@ def main():
                     
         ps.update(param_vals)
 
+    process_count = 0
+    for process in processes:
+        dim = get_process_dimensions(process)
+        for d in dim:
+            process_count += 1
+
+
     for process in processes:
         dim = get_process_dimensions(process)
         for d in dim:
@@ -150,8 +157,11 @@ def main():
             if pname == 'this':
                 pname = dscfname[:-4]
             wname = pname + ('('+','.join(map(str,d))+')' if d else '')
-            run_in_terminal(' '.join(cmd),wname)
-            time.sleep(0.5)
+            if process_count > 1:
+                run_in_terminal(' '.join(cmd),wname)
+                time.sleep(0.5)
+            else:
+                os.system(' '.join(cmd))
             
         
 if __name__ == "__main__":

@@ -326,33 +326,26 @@ module iterable = {
     instance iter : sequence_iterator(this)
     isolate iso_iter = iter with this
 
-    individual max : t
-
+    implementation {
+        interpret t -> {0..max}
+        
+        implement next(x:t) returns (y:t) {
+            y := x + 1; 
+        }
+        implement prev(x:t) returns (y:t) {
+            y := x - 1;
+        }
+        implement is_max(x:t) returns (r:bool) {
+            r := (x = max); 
+        }
+    }
+    
     specification {
         property 0 <= X:t & X <= max
     }
 
-    implementation {
-        parameter size : t
-        interpret t -> <<< int >>>
-        definition (x:t < y:t) = <<< x < y >>>
-        definition (x:t - y:t) = <<< x - y >>>
-        definition 0:t = <<< 0 >>>
-        definition max = <<< `size` - 1 >>>
-        
-        implement next(x:t) returns (y:t) {
-            <<< y = x + 1; >>>
-        }
-        implement prev(x:t) returns (y:t) {
-            <<< y = x - 1; >>>
-        }
-        implement is_max(x:t) returns (r:bool) {
-            <<< r = (x == `size` - 1); >>>
-        }
-    }
-    
     trusted isolate iso = this
-    attribute cardinality = size
+#    attribute cardinality = max
 
     # When testing, use the integer implementation.
 

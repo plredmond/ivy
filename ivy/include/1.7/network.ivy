@@ -78,19 +78,6 @@ global {
             }
         }
 
-        action to_ip_endpoint(id:endpoint) returns (res:ip.endpoint) = {
-            res.addr := id.addr;
-            res.port := id.port;
-            res.protocol := ip.tcp;
-        }
-
-        action from_ip_endpoint(id:ip.endpoint) returns (res:endpoint) = {
-            res.addr := id.addr;
-            res.port := id.port;
-        }
-
-        type host = {me}
-
         module net(msg_t) = {
 
             specification {
@@ -112,7 +99,7 @@ global {
                     }
                     
                     before send {
-#                        require net.sent(id,dst,M) -> M < msg;
+                        require net.sent(id,dst,M) -> M < msg;
                     }
                     after send {
                         net.sent(id,dst,msg) := true;
@@ -161,12 +148,12 @@ global {
                 }
                 trusted isolate iso = this
                 
-                attribute test = spec
+                attribute test = impl
             }
 
             trusted isolate iso = this
 
-            attribute test = spec
+            attribute test = impl
         }
     }
 }

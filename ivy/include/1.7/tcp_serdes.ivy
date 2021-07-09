@@ -21,9 +21,9 @@ module tcp_serdes(endpoint,data) = {
 
 # These empty objects are used to hold C++ values.
 
-    object rdr = {}         # the listener object
-    object cb = {}          # struct holding the callbacks
-    object send_queue = {}  # queues of outgoing packets
+    # object rdr = {}         # the listener object
+    # object cb = {}          # struct holding the callbacks
+    # object send_queue = {}  # queues of outgoing packets
     
 # This code goes in the C++ header file, ahead of the ivy object declaration.
 # Here, we put declarations (perhaps forward) of any auxiliary classes we need).
@@ -457,13 +457,24 @@ module tcp_serdes(endpoint,data) = {
 # object, we declared it here anti-quoted. The plugs in the actual member name, which may
 # be any array if this is a parameterized instance.
 
-<<< member
+# <<< member
 
-    hash_space::hash_map<int,void *> `rdr`;
-    tcp_callbacks *`cb`;             // the callbacks to ivy
-    hash_space::hash_map<int,tcp_queue *> `send_queue`;   // queues of blocked packets, per socket
+#     hash_space::hash_map<int,void *> `rdr`;
+#     tcp_callbacks *`cb`;             // the callbacks to ivy
+#     hash_space::hash_map<int,tcp_queue *> `send_queue`;   // queues of blocked packets, per socket
 
->>>
+# >>>
+
+type rdr_map_t
+interpret rdr_map_t -> <<< primitive hash_space::hash_map<int,void *> >>>
+type callback_t
+interpret callback_t -> <<< primitive tcp_callbacks * >>>
+type queue_t
+interpret queue_t -> <<< primitive hash_space::hash_map<int,tcp_queue *> >>>
+
+var rdr : rdr_map_t
+var cb : callback_t
+var send_queue : queue_t
 
 
 # Here, we put code to go in the initializer. If this is a

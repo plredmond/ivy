@@ -33,6 +33,47 @@ def all_state_symbols():
     syms = il.all_symbols()
     return [s for s in syms if s not in il.sig.constructors and slv.solver_name(il.normalize_symbol(s)) != None]
 
+# A relation is extensional if:
+#
+# 1) It is not derived
+# 2) It is initialized to all false
+# 3) Every update is either to a simple point, or to false
+# 
+
+def extensional_relations():
+    bad = set()
+    for action in im.module.actions.values():
+        for sub in action.iter_subactions():
+            if isinstance(sub,ia.AssignAction):
+                lhs,rhs = sub.args
+                if lhs.rep.name not in im.module.destructor_sorts:
+                    if not(il.is_false(rhs) or all(not il.is_variable(a) for a in lhs.args)):
+                        bad.add(lhs.rep)
+            elif isinstance(sub,ia.HavocAction):
+                lhs = sub.args[0]
+                if lhs.rep.name not in im.module.destructor_sorts:
+                    if not(all(not il.is_variable(a) for a in lhs.args)):
+                        bad.add(lhs.rep)
+            elif isinstance(sub,ia.CallAction):
+                for lhs in sub.args[1:]:
+                    if lhs.rep.name not in im.module.destructor_sorts:
+                        if not(all(not il.is_variable(a) for a in lhs.args)):
+                            bad.add(lhs.rep)
+    def get_inited(action,inited):
+        if isinstance(action,ia.Sequence):
+            for act in action.args:
+                get_inited(act,inited)
+        elif isinstance(action,ia.AssignAction):
+            lhs,rhs = action.args
+            if lhs.rep.name not in im.module.destructor_sorts:
+                if il.is_false(rhs) and all(il.is_variable(a) for a in lhs.args):
+                    inited.add(lhs.rep)
+    inited = set()
+    for name,ini in im.module.initializers:
+        get_inited(ini,inited)
+    res = [x for x in all_state_symbols() if x in inited and x not in bad]
+    return res
+
 def sort_card(sort):
     if hasattr(sort,'card'):
         return sort.card
@@ -537,7 +578,10 @@ def emit_cpp_sorts(header):
     for name in im.module.sort_order:
         if name in im.module.native_types:
             nt = native_type_full(im.module.native_types[name]).strip()
-            if nt in ['int','bool']:
+            if nt.startswith('primitive '):
+                nt = nt[10:]
+                header.append("    typedef " + nt + ' ' + varname(name) + ";\n");
+            elif nt in ['int','bool']:
                 header.append("    typedef " + nt + ' ' + varname(name) + ";\n");
             else:
                 if nt == 'std::vector<bool>':
@@ -657,9 +701,10 @@ def emit_eval(header,symbol,obj=None,classname=None,lhs=None):
     sort = symbol.sort
     domain = sort_domain(sort)
     for idx,dsort in enumerate(domain):
-        dcard = sort_card(dsort)
+        lb,ub = sort_bounds(dsort,obj=obj)
+#        dcard = sort_card(dsort)
         indent(header)
-        header.append("for (int X{} = 0; X{} < {}; X{}++)\n".format(idx,idx,dcard,idx))
+        header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
     indent(header)
     if sort.rng.name in im.module.sort_destructors or sort.rng.name in im.module.native_types or sort.rng in sort_to_cpptype:
@@ -726,9 +771,10 @@ def emit_set(header,symbol):
         close_scope(header)
         return
     for idx,dsort in enumerate(domain):
-        dcard = sort_card(dsort)
+        lb,ub = sort_bounds(dsort,obj='obj')
+#        dcard = sort_card(dsort)
         indent(header)
-        header.append("for (int X{} = 0; X{} < {}; X{}++)\n".format(idx,idx,dcard,idx))
+        header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
     indent(header)
     header.append('slvr.add(__to_solver(*this,apply("{}"'.format(sname)
@@ -1080,7 +1126,6 @@ def emit_action_gen(header,impl,name,action,classname):
         action.lineno = orig_action.lineno
         action.formal_params = orig_action.formal_params
         action.formal_returns = orig_action.formal_returns
-        iu.dbg('action')
         
     with ia.UnrollContext(card):
         upd = action.update(im.module,None)
@@ -1098,6 +1143,8 @@ def emit_action_gen(header,impl,name,action,classname):
     old_pre_clauses = pre_clauses
     pre_clauses, param_defs = extract_defined_parameters(pre_clauses,inputs)
     rdefs = im.relevant_definitions(ilu.symbols_clauses(pre_clauses))
+    print "pre_clauses:{}".format(pre_clauses)
+    print "rdefs:{}".format(rdefs)
     pre_clauses = ilu.and_clauses(pre_clauses,ilu.Clauses([fix_definition(ldf.formula).to_constraint() for ldf in rdefs]))
     pre_clauses = ilu.and_clauses(pre_clauses,ilu.Clauses(im.module.variant_axioms()))
     pre = pre_clauses.to_formula()
@@ -1148,6 +1195,12 @@ def emit_action_gen(header,impl,name,action,classname):
     for cpptype in cpptypes:
         code_line(impl,cpptype.short_name()+'::prepare()')
     pre_used = ilu.used_symbols_ast(pre)
+    for psym in im.module.params:
+        if not psym.sort.dom:
+            itp = il.sig.interp.get(psym.sort.name,None)
+            if isinstance(itp,il.RangeSort) and psym in [itp.lb,itp.ub]:
+                pre_used.add(psym)
+    print 'used: {}'.format(list(str(x) for x in pre_used))
     for sym in all_state_symbols():
         if sym in pre_used and sym not in old_pre_clauses.defidx: # skip symbols not used in constraint
             if slv.solver_name(il.normalize_symbol(sym)) != None: # skip interpreted symbols
@@ -1521,14 +1574,23 @@ def is_any_integer_type(sort):
 def check_iterable_sort(sort):
     if not is_any_integer_type(sort):
         raise iu.IvyError(None,"cannot iterate over non-integer sort {}".format(sort))
-    
+
+def sort_bounds(sort,obj=None):
+    itp = il.sig.interp.get(sort.name,None)
+    print "keys: {}".format(list(il.sig.interp.keys()))
+    print "sort: {}, itp: {}".format(type(sort),itp)
+    if isinstance(itp,il.RangeSort):
+        lb = varname(itp.lb.name)
+        ub = varname(itp.ub.name)
+        return [lb,'(' + ((obj + '.') if obj else '') + ub + '+1)']
+    return ["0",str(sort_card(sort))]
 
 def open_loop(impl,vs,declare=True,bounds=None):
     global indent_level
     for num,idx in enumerate(vs):
         check_iterable_sort(idx.sort)
         indent(impl)
-        bds = bounds[num] if bounds else ["0",str(sort_card(idx.sort))]
+        bds = bounds[num] if bounds else sort_bounds(idx.sort)
         vn = varname(idx.name)
         ct = ctype(idx.sort)
         ct = 'int' if ct == 'bool' else ct if ct in int_ctypes else 'int'
@@ -1673,7 +1735,7 @@ def emit_hash_thunk_to_solver(header,dom,classname,ct_name,ch_name):
     open_scope(header,line='z3::expr operator()( gen &g, const  z3::expr &v, hash_thunk<D,R> &val)'.replace('D',ct_name).replace('H',ch_name))
     code_line(header,'z3::expr res = g.ctx.bool_val(true)')
     code_line(header,'z3::expr disj = g.ctx.bool_val(false)')
-    code_line(header,'z3::expr bg = dynamic_cast<z3_thunk<D,R> *>(val.fun)->to_z3(g,v)'.replace('D',ct_name))
+    code_line(header,'z3::expr bg = val.fun ? dynamic_cast<z3_thunk<D,R> *>(val.fun)->to_z3(g,v) : g.ctx.bool_val(true)'.replace('D',ct_name))
     open_scope(header,line='for(typename hash_map<D,R>::iterator it=val.memo.begin(), en = val.memo.end(); it != en; it++)'.replace('D',ct_name).replace('H',ch_name))
 #    code_line(header,'if ((*val.fun)(it->first) == it->second) continue;')
     code_line(header,'z3::expr asgn = __to_solver(g,v,it->second)')
@@ -1738,6 +1800,9 @@ def module_to_cpp_class(classname,basename):
     for sortname, conss in im.module.sort_constructors.iteritems():
         for cons in conss:
             is_derived[cons] = True
+    global the_extensional_relations
+    the_extensional_relations = set(extensional_relations())
+    
     global cpptypes
     cpptypes = []
     global sort_to_cpptype
@@ -2947,17 +3012,19 @@ class z3_thunk : public thunk<D,R> {
                     close_scope(impl)
                     impl.append('template <>\n')
                     open_scope(impl,line='z3::expr  __to_solver<' + cfsname + '>( gen &g, const  z3::expr &v,' + cfsname + ' &val)')
-                    code_line(impl,'z3::expr res = g.ctx.bool_val(1)')
+                    code_line(impl,'std::string fname = g.fresh_name()')
+                    code_line(impl,'z3::expr tmp = g.ctx.constant(fname.c_str(),g.sort("{}"))'.format(sort.name))
+#                    code_line(impl,'z3::expr res = g.ctx.bool_val(1)')
                     for idx,sym in enumerate(destrs):
                         fname = memname(sym)
                         vs = variables(sym.sort.dom[1:])
                         for v in vs:
                             open_loop(impl,[v])
                         sname = slv.solver_name(sym)
-                        code_line(impl,'res = res && __to_solver(g,g.apply("'+sname+'",v'+ ''.join(',g.int_to_z3(g.sort("'+v.sort.name+'"),'+varname(v)+')' for v in vs)+'),val.'+fname+''.join('[{}]'.format(varname(v)) for v in vs) + ')')
+                        code_line(impl,'g.slvr.add(__to_solver(g,g.apply("'+sname+'",tmp'+ ''.join(',g.int_to_z3(g.sort("'+v.sort.name+'"),'+varname(v)+')' for v in vs)+'),val.'+fname+''.join('[{}]'.format(varname(v)) for v in vs) + '))')
                         for v in vs:
                             close_loop(impl,[v])
-                    code_line(impl,'return res')
+                    code_line(impl,'return v==tmp')
                     close_scope(impl)
                     impl.append('template <>\n')
                     open_scope(impl,line='void  __randomize<' + cfsname + '>( gen &g, const  z3::expr &v)')
@@ -3605,6 +3672,13 @@ def get_bound_exprs(v0,variables,body,exists,res):
 def sort_has_negative_values(sort):
     return sort.name in il.sig.interp and il.sig.interp[sort.name] == 'int'
 
+class BoundsError(object):
+    def __init__(self,ast,msg):
+        self.ast = ast
+        self.msg = msg
+    def throw(self):
+        raise iu.IvyError(self.ast,self.msg)
+        
 def get_bounds(header,v0,variables,body,exists,varname=None):
     bes = []
     get_bound_exprs(v0,variables,body,exists,bes)
@@ -3632,17 +3706,18 @@ def get_bounds(header,v0,variables,body,exists,varname=None):
     itp = il.sig.interp.get(v0.sort.name,None)
     if isinstance(itp,il.RangeSort):
         los.append(code_eval(header,itp.lb))
-        his.append(code_eval(header,itp.ub))
+        his.append(code_eval(header,itp.ub)+'+1')
     if not los:
-        raise iu.IvyError(None,'cannot find a lower bound for {}'.format(varname))
+        return BoundsError(None,'cannot find a lower bound for {}'.format(varname))
     if not his:
         if il.is_uninterpreted_sort(v0.sort) and iu.compose_names(v0.sort.name,'cardinality') in im.module.attributes:
             his.append(other_varname(iu.compose_names(v0.sort.name,im.module.attributes[iu.compose_names(v0.sort.name,'cardinality')].rep)))
         else:
-            raise iu.IvyError(None,'cannot find an upper bound for {}'.format(varname))
+            return BoundsError(None,'cannot find an upper bound for {}'.format(varname))
     return los[0],his[0]
 
 def get_all_bounds(header,variables,body,exists,varnames):
+    get_bound_exprs(v0,variables,body,exists,bes)
     if not variables:
         return []
     v0 = variables[0]
@@ -3650,7 +3725,37 @@ def get_all_bounds(header,variables,body,exists,varnames):
     varname = varnames[0]
     varnames = varnames[1:]
     b = get_bounds(header,v0,variables,body,exists,varname=varname)
+    if isinstance(b,BoundsError):
+        b.throw()
     return [b] + get_all_bounds(header,variables,body,exists,varnames)
+
+def get_extensional_bound_exprs(v0,body,exists,res):
+    global is_derived
+    if isinstance(body,il.Not):
+        return get_extensional_bound_exprs(v0,body.args[0],not exists,res)
+    if il.is_app(body) and body.rep in the_extensional_relations:
+        if v0 in body.args and exists:
+            res.append(body)
+    if isinstance(body,il.Implies) and not exists:
+        get_extensional_bound_exprs(v0,body.args[0],not exists,res)
+        get_extensional_bound_exprs(v0,body.args[1],exists,res)
+        return
+    if isinstance(body,il.Or) and not exists:
+        for arg in body.args:
+            get_extensional_bound_exprs(v0,arg,exists,res)
+        return
+    if isinstance(body,il.And) and exists:
+        for arg in body.args:
+            get_extensional_bound_exprs(v0,arg,exists,res)
+        return
+    if il.is_app(body) and body.rep in is_derived and v0 in body.args:
+        ldf = find_definition(body.rep)
+        if ldf is None:  # happens for native definitions
+            return
+        if all(il.is_variable(v) for v in ldf.formula.args[0].args):
+            subst = dict((v.name,a) for v,a in zip(ldf.formula.args[0].args,body.args))
+            thing = ilu.substitute_ast(ldf.formula.args[1],subst)
+            get_extensional_bound_exprs(v0,thing,exists,res)
 
 
 def emit_quant(variables,body,header,code,exists=False):
@@ -3681,8 +3786,6 @@ def emit_quant(variables,body,header,code,exists=False):
     has_iter = il.is_uninterpreted_sort(v0.sort) and iu.compose_names(v0.sort.name,'iterable') in im.module.attributes
     if has_iter:
         iter = iu.compose_names(v0.sort.name,'iter')
-    else:
-        check_iterable_sort(v0.sort)
     res = new_temp(header)
     idx = v0.name
     indent(header)
@@ -3704,10 +3807,32 @@ def emit_quant(variables,body,header,code,exists=False):
         header.append('); !' + varname(iu.compose_names(iter,'is_end')) + '(' + idx + ');' 
                        + idx + '=' + varname(iu.compose_names(iter,'next')) + '(' + idx + ')) {\n')
     else:
-        lo,hi = get_bounds(header,v0,variables,body,exists)
-        ct = ctype(v0.sort)
-        ct = 'int' if ct == 'bool' else ct if ct in int_ctypes else 'int'
-        header.append('for (' + ct + ' ' + idx + ' = ' + lo + '; ' + idx + ' < ' + hi + '; ' + idx + '++) {\n')
+        
+        berr = get_bounds(header,v0,variables,body,exists)
+        if not isinstance(berr,BoundsError) and is_any_integer_type(v0.sort):
+            lo,hi = berr
+            ct = ctype(v0.sort)
+            ct = 'int' if ct == 'bool' else ct if ct in int_ctypes else 'int'
+            header.append('for (' + ct + ' ' + idx + ' = ' + lo + '; ' + idx + ' < ' + hi + '; ' + idx + '++) {\n')
+        else:
+            ebnds = []
+            get_extensional_bound_exprs(v0,body,exists,ebnds)
+            if not ebnds:
+                if not isinstance(berr):
+                    berr = BoundsError(None,"cannot iterate over sort {}".format(v0.sort))
+                berr.throw()
+            ebnd = ebnds[0]
+            header.append('for(auto it={}.memo.begin(),en={}.memo.end(); it != en; ++it)if (it->second) {{ \n'.format(varname(ebnd.rep),varname(ebnd.rep)))
+            for pos,v in enumerate(ebnd.args):
+                if v == v0 or v in variables:
+                    ct = ctype(v.sort)
+                    ct = 'auto'
+                    if len(ebnd.args) > 1:
+                        header.append('    ' + ct + ' ' + v.name + ' = it->first.arg' + str(pos) + ';\n')
+                    else:
+                        header.append('    ' + ct + ' ' + v.name + ' = it->first;\n')
+            variables = [v for v in variables if v not in ebnd.args]
+
     indent_level += 1
     subcode = []
     emit_quant(variables,body,header,subcode,exists)
@@ -4842,9 +4967,11 @@ protected:
     std::vector<Z3_symbol> decl_names;
     std::vector<Z3_func_decl> decls;
     std::vector<z3::expr> alits;
+    int tmp_ctr;
 
     gen(): slvr(ctx), model(ctx,(Z3_model)0) {
         enum_sorts.insert(std::pair<std::string, z3::sort>("bool",ctx.bool_sort()));
+        tmp_ctr = 0;
     }
 
 
@@ -4852,6 +4979,12 @@ public:
     virtual bool generate(classname& obj)=0;
     virtual void execute(classname& obj)=0;
     virtual ~gen(){}
+    
+    std::string fresh_name() {
+        std::ostringstream ss;
+        ss << "$tmp" << tmp_ctr++;
+        return(ss.str());
+    }
 
     z3::expr mk_apply_expr(const char *decl_name, unsigned num_args, const int *args){
         z3::func_decl decl = decls_by_name.find(decl_name)->second;
@@ -5295,7 +5428,7 @@ def main_int(is_ivyc):
         opt_build.set("true")
 
     ivy_init.read_params()
-    iu.set_parameters({'coi':'false',"create_imports":'true',"enforce_axioms":'true','ui':'none','isolate_mode':'test','assume_invariants':'false'})
+    iu.set_parameters({'coi':'false',"create_imports":'true',"enforce_axioms":'true','ui':'none','isolate_mode':'test' if target.get() == 'test' else 'compile','assume_invariants':'false'})
     if target.get() == "gen":
         iu.set_parameters({'filter_symbols':'false'})
     else:
@@ -5431,7 +5564,7 @@ def main_int(is_ivyc):
                     else:
                         libs = []    
                     cpp11 = any((x == 'cppstd' or x.endswith('.cppstd')) and y.rep=='cpp11' for x,y in im.module.attributes.iteritems())
-                    gpp11_spec = ' -std=c++11 ' if cpp11 else '' 
+                    gpp11_spec = ' -std=c++11 ' if cpp11 else ' -std=c++11 ' 
                     libspec = ''
                     for x,y in im.module.attributes.iteritems():
                         p,c = iu.parent_child_name(x)

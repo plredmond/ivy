@@ -60,7 +60,7 @@ def summarize_action(action):
     if hasattr(action,'labels'):
         res.labels = action.labels
     # have to havoc the in/out parameters, other outs are non-deterministic anyway
-    if isolate_mode.get() != 'test':
+    if isolate_mode.get() == 'check':
         for x in res.formal_returns:
             if x in res.formal_params:
                 res.args.append(ia.HavocAction(x))
@@ -677,13 +677,15 @@ def set_privates_prefer(mod,isolate,preferred):
             if suff in l and preferred in l:
                 mod.privates.add(iu.compose_names(n,suff))
 
-def get_private_from_attributes(mod,name,suff):
+def get_private_from_attributes(mod,name,suff,isolate):
+    if any(x.rep == name for x in isolate.present()):
+        return suff
     attrname = iu.compose_names(name,isolate_mode.get())
     if attrname in mod.attributes:
         aval = mod.attributes[attrname].rep
-        if aval not in ['spec','impl']:
+        if aval not in ['spec','impl','priv']:
             raise iu.IvyError(None,'attribute {} has bad value "{}". should be "spec" or "impl"'.format(attrname,aval))
-        suff = 'spec' if aval == 'impl' else 'impl'
+        suff = 'priv' if aval == 'priv' else 'spec' if aval == 'impl' else 'impl'
     return suff
 
 def set_privates(mod,isolate,suff=None):
@@ -695,15 +697,16 @@ def set_privates(mod,isolate,suff=None):
     if suff in mod.hierarchy:
         mod.privates.add(suff)
     for n,l in mod.hierarchy.iteritems():
-        nsuff = get_private_from_attributes(mod,n,suff)
-        if nsuff in l:
-            mod.privates.add(iu.compose_names(n,nsuff))
+        nsuff = get_private_from_attributes(mod,n,suff,isolate)
+        for ns in ['impl','spec'] if nsuff == 'priv' else [nsuff]:
+            if ns in l:
+                mod.privates.add(iu.compose_names(n,ns))
     for name in mod.attributes:
         p,c = iu.parent_child_name(name)
         if c in ['spec','impl','private']:
             pp,pc = iu.parent_child_name(p)
-            nsuff = get_private_from_attributes(mod,pp,suff)
-            if c == nsuff or c == "private":
+            nsuff = get_private_from_attributes(mod,pp,suff,isolate)
+            if c == nsuff or nsuff == 'priv' or c == "private":
                 mod.privates.add(p)
     global vprivates
     vprivates = set()
@@ -1313,7 +1316,7 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
 
     # check that native code does not occur in an untrusted isolate
 
-    if type(isolate) == ivy_ast.IsolateDef and isolate_mode.get() != 'test':
+    if type(isolate) == ivy_ast.IsolateDef and isolate_mode.get() == 'check':
         for action in mod.actions.values():
             if isinstance(action,ia.NativeAction):
                 raise iu.IvyError(action,'trusted code used in untrusted isolate')

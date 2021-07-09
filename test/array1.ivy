@@ -1,4 +1,4 @@
-#lang ivy1.6
+#lang ivy1.7
 
 include collections
 
@@ -7,3 +7,8 @@ interpret t -> bv[8]
 
 instance arr : array(t,t)
 
+var x : arr
+
+export action a(y:t) = {
+    x := x.append(y);
+}

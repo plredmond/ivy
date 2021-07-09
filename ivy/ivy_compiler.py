@@ -1974,7 +1974,7 @@ def check_properties(mod):
                     prover.admit_proposition(prop,ivy_ast.ComposeTactics())
     apply_assert_proofs(mod,prover)
 
-option_verifying = False
+option_verifying = True
 def set_verifying(tv):
     global option_verifying
     option_verifying = tv

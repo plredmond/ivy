@@ -9,7 +9,7 @@ import time
 import itertools
 
 def usage():
-    print "usage: \n {} {{option=value...}} <file>.dsc".format(sys.argv[0])
+    print "usage: \n {} {{option=value...}} <file>[.dsc]".format(sys.argv[0])
     sys.exit(1)
 
 next_unused_port = 49123
@@ -24,7 +24,7 @@ def lookup_ip_addr(hostname):
 
 def run_in_terminal(cmd,name):
     xcmd = "xterm -T '{}' -e '{}'&\n".format(name,cmd+'; read -p "--press enter--"')
-    print xcmd
+#    print xcmd
     os.system(xcmd)
     
 def read_params():
@@ -44,6 +44,8 @@ def main():
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
     dscfname = sys.argv[1]
+    if not dscfname.endswith('.dsc'):
+        dscfname += '.dsc'
     try:
         with open(dscfname) as inp:
             try:
@@ -64,7 +66,8 @@ def main():
 
     legal_params = set(p['name'] for p in processes)
     legal_params.update(set(prm['name'] for p in processes for prm in p['params']))
-    print legal_params
+    if 'test_params' in descriptor:
+        legal_params.update(descriptor['test_params'])
     for prm in ps:
         if prm not in legal_params:
             print "unknown parameter: {}".format(prm)
@@ -99,7 +102,6 @@ def main():
                             sys.exit(1)
                     return b
                 rng = map(get_bound,rng)
-                print rng
                 ranges.append(list(range(rng[0],rng[1]+1)))
             dim = list(itertools.product(*ranges))
         return dim
@@ -113,7 +115,6 @@ def main():
             exit(1)
         for param in process['params']:
             ptype = param['type']
-            print type(ptype)
             type_rng = ptype if not isinstance(ptype,dict) else ptype['name']
             if type_rng == 'udp.endpoint' or type_rng == 'tcp.endpoint' :
                 if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':
@@ -152,7 +153,11 @@ def main():
                         cmd.append('{}={}'.format(param['name'],val))
                     else:
                         cmd.append('{}'.format(val))
-            print ' '.join(cmd)
+            if 'test_params' in descriptor:
+                for param in descriptor['test_params']:
+                    if param in ps:
+                        cmd.append('{}={}'.format(param,ps[param]))
+            # print ' '.join(cmd)
             pname = process['name']
             if pname == 'this':
                 pname = dscfname[:-4]

@@ -75,7 +75,7 @@ global {
     # parameter, which is the type of messages to be sent. Our instance
     # of this template is an object called `net`. 
 
-    instance net : tcp.net(msg_t)
+    instance net : tcp_test.net(msg_t)
 }
 
 

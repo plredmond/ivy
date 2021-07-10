@@ -1,6 +1,7 @@
 #lang ivy
 
 
+include collections
 include udp_impl
 include tcp_serdes
 include serdes
@@ -155,5 +156,57 @@ global {
 
             attribute test = impl
         }
+
+
+
     }
+
+    # This is a model of tcp that is useful for testing. It uses
+    # queues to store channel messages, which is much easier for the
+    # test generator to handle than the relational model above.
+
+    object tcp_test = {
+
+        module net(msg_t) = {
+
+            specification {
+                relation sent(S:tcp.endpoint,D:tcp.endpoint,M:msg_t)
+                function queue(S:tcp.endpoint,D:tcp.endpoint) : vector[msg_t]
+                function len(S:tcp.endpoint,D:tcp.endpoint) : vector[msg_t].domain
+                after init {
+                    len(S,D) := 0;
+                }
+            }
+            
+            module socket = {
+
+                parameter id : tcp.endpoint
+                attribute id.global_parameter = true    
+
+                action send(dst : tcp.endpoint, msg : msg_t)
+                export action recv(src : tcp.endpoint, msg : msg_t)
+
+                specification {
+
+                    after send {
+                        net.queue(id,dst) := net.queue(id,dst).append(msg);
+                        net.len(id,dst) := net.queue(id,dst).end;
+                        net.sent(id,dst,msg) := true;
+                    }
+                    before recv {
+                        require net.len(src,id) > 0;
+                        require msg = net.queue(src,id).value(0);
+                    }
+                    after recv {
+                        net.queue(src,id) := net.queue(src,id).segment(1,net.queue(src,id).end);
+                        net.len(src,id) := net.queue(src,id).end;
+                    }
+                }
+                trusted isolate iso = this
+            }
+            trusted isolate iso = this
+        }
+    }
+
+
 }

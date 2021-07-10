@@ -678,8 +678,6 @@ def set_privates_prefer(mod,isolate,preferred):
                 mod.privates.add(iu.compose_names(n,suff))
 
 def get_private_from_attributes(mod,name,suff,isolate):
-    if any(x.rep == name for x in isolate.present()):
-        return suff
     attrname = iu.compose_names(name,isolate_mode.get())
     if attrname in mod.attributes:
         aval = mod.attributes[attrname].rep
@@ -872,7 +870,9 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
 
     if not interpret_all_sorts:
         for type_name in list(ivy_logic.sig.interp):
-            if not (type_name in present and type_name not in mod.hierarchy or any(startswith_eq_some(itp.label.rep,present,mod) for itp in mod.interps[type_name] if itp.label)):
+            cond1 = type_name in present and type_name not in mod.hierarchy
+            cond2 = any(startswith_eq_some(itp.label.rep,present,mod) for itp in mod.interps[type_name] if itp.label)
+            if not (cond1 or cond2):
                 del ivy_logic.sig.interp[type_name]
     delegates = set(s.delegated() for s in mod.delegates if not s.delegee())
     delegated_to = dict((s.delegated(),s.delegee()) for s in mod.delegates if s.delegee())
@@ -1179,8 +1179,8 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                         if not(type(called) == ia.Sequence and not called.args):
                             if (isinstance(called,ia.NativeAction) or 
                                 any(p.sort.name not in mod.ghost_sorts for p in called.formal_returns)):
-                                print "actname:{}".format(actname)
-                                print "action:{}".format(action)
+                                # print "actname:{}".format(actname)
+                                # print "action:{}".format(action)
                                 raise iu.IvyError(None,"No implementation for action {}".format(c))
         for c in mod.definitions + mod.native_definitions:
             if not keep_ax(c.label) and c.formula.args[0].rep in all_syms:

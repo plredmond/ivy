@@ -451,7 +451,7 @@ def is_large_lhs(term):
     freevars = lu.free_variables(term)
     if any(not is_any_integer_type(v.sort) for v in freevars):
         return True
-    cards = [sort_card(v.sort) for v in lu.free_variables(term)]
+    cards = [sort_size(v.sort) for v in lu.free_variables(term)]
     return not(all(cards) and reduce(mul,cards,1) <= large_thresh)
     
 
@@ -526,7 +526,7 @@ def make_thunk(impl,vs,expr):
     close_scope(impl)
     if target.get() in ["gen","test"]:
         open_scope(impl,line = 'z3::expr to_z3(gen &g, const z3::expr &v)')
-        if False and isinstance(expr,HavocSymbol) or skip_z3:
+        if is_primitive_sort(expr.sort) or False and isinstance(expr,HavocSymbol) or skip_z3:
             code_line(impl,'return g.ctx.bool_val(true)')
         else:
             if lu.free_variables(expr):
@@ -574,6 +574,14 @@ def emit_struct_hash(header,the_type,field_names,field_sorts):
     };
 """.replace('the_type',the_type).replace('the_val',struct_hash_fun(['__s.'+n for n in field_names],field_sorts)))
 
+def is_primitive_sort(sort):
+    if not sort.dom:
+        name = sort.name
+        if name in im.module.native_types:
+            nt = native_type_full(im.module.native_types[name]).strip()
+            return nt.startswith('primitive ')
+    return False
+            
 def emit_cpp_sorts(header):
     for name in im.module.sort_order:
         if name in im.module.native_types:
@@ -815,8 +823,9 @@ def emit_clear_progress(impl,obj=None):
         close_loop(impl,vs)
 
 def mk_rand(sort,classname=None):
-    card = sort_card(sort)
-    return '('+ctype(sort,classname=classname)+')' + ('(rand() % {})'.format(card) if card
+    bds = sort_bounds(sort)
+#    card = sort_card(sort)
+    return '('+ctype(sort,classname=classname)+')' + ('(rand() % (({})-({})) + ({}))'.format(bds[1],bds[0],bds[0]) if bds
                                                       else '((rand()%2) ? "a" : "b")' if has_string_interp(sort)
                                                       else sort_to_cpptype[sort].rand() if sort in sort_to_cpptype
                                                       else "0")
@@ -866,7 +875,7 @@ public:
                     else:
                         emit_randomize(impl,sym,classname=classname)
                 else:
-                    if sym not in im.module.params:
+                    if sym not in im.module.params and not is_primitive_sort(sym.sort.rng):
                         if is_large_type(sym.sort):
                             code_line(impl,'obj.'+varname(sym) + ' = ' + make_thunk(impl,variables(sym.sort.dom),HavocSymbol(sym.sort.rng,sym.name,0)))
                         elif not is_native_sym(sym):
@@ -904,9 +913,10 @@ def emit_randomize(header,symbol,classname=None):
     sort = symbol.sort
     domain = sort_domain(sort)
     for idx,dsort in enumerate(domain):
-        dcard = sort_card(dsort)
+        lb,ub = sort_bounds(dsort,obj='obj')
+#        dcard = sort_card(dsort)
         indent(header)
-        header.append("for (int X{} = 0; X{} < {}; X{}++)\n".format(idx,idx,dcard,idx))
+        header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
     if sort.rng.name in im.module.sort_destructors or sort.rng.name in im.module.native_types or sort.rng in sort_to_cpptype:
         code_line(header,'__randomize<'+classname+'::'+varname(sort.rng.name)+'>(*this,apply("'+sname+'"'+''.join(','+int_to_z3(s,'X{}'.format(idx)) for idx,s in enumerate(domain))+'))')
@@ -1143,8 +1153,6 @@ def emit_action_gen(header,impl,name,action,classname):
     old_pre_clauses = pre_clauses
     pre_clauses, param_defs = extract_defined_parameters(pre_clauses,inputs)
     rdefs = im.relevant_definitions(ilu.symbols_clauses(pre_clauses))
-    print "pre_clauses:{}".format(pre_clauses)
-    print "rdefs:{}".format(rdefs)
     pre_clauses = ilu.and_clauses(pre_clauses,ilu.Clauses([fix_definition(ldf.formula).to_constraint() for ldf in rdefs]))
     pre_clauses = ilu.and_clauses(pre_clauses,ilu.Clauses(im.module.variant_axioms()))
     pre = pre_clauses.to_formula()
@@ -1200,7 +1208,6 @@ def emit_action_gen(header,impl,name,action,classname):
             itp = il.sig.interp.get(psym.sort.name,None)
             if isinstance(itp,il.RangeSort) and psym in [itp.lb,itp.ub]:
                 pre_used.add(psym)
-    print 'used: {}'.format(list(str(x) for x in pre_used))
     for sym in all_state_symbols():
         if sym in pre_used and sym not in old_pre_clauses.defidx: # skip symbols not used in constraint
             if slv.solver_name(il.normalize_symbol(sym)) != None: # skip interpreted symbols
@@ -1577,13 +1584,18 @@ def check_iterable_sort(sort):
 
 def sort_bounds(sort,obj=None):
     itp = il.sig.interp.get(sort.name,None)
-    print "keys: {}".format(list(il.sig.interp.keys()))
-    print "sort: {}, itp: {}".format(type(sort),itp)
     if isinstance(itp,il.RangeSort):
         lb = varname(itp.lb.name)
         ub = varname(itp.ub.name)
         return [lb,'(' + ((obj + '.') if obj else '') + ub + '+1)']
-    return ["0",str(sort_card(sort))]
+    card = sort_card(sort)
+    return ["0",str(card)] if card else None
+
+def sort_size(sort):
+    itp = il.sig.interp.get(sort.name,None)
+    if isinstance(itp,il.RangeSort):
+        return 1 # just a guess!
+    return sort_card(sort)
 
 def open_loop(impl,vs,declare=True,bounds=None):
     global indent_level
@@ -2305,7 +2317,9 @@ struct ivy_socket_deser : public ivy_binary_deser {
         while (inp.size() < pos + bytes) {
             int oldsize = inp.size();
             int get = pos + bytes - oldsize;
-            get = (get < 1024) ? 1024 : get;
+"""
++ ("            get = (get < 1024) ? 1024 : get;" if target.get() not in ["gen","test"] else "") +
+"""
             inp.resize(oldsize + get);
             int newbytes;
 	    if ((newbytes = read(sock,&inp[oldsize],get)) < 0)
@@ -4055,38 +4069,50 @@ def emit_assign(self,header):
         if len(vs) == 0:
             emit_assign_simple(self,header)
             return
-        global temp_ctr
-        tmp = '__tmp' + str(temp_ctr)
-        temp_ctr += 1
-        indent(header)
-        header.append(ctype(self.args[1].sort) + '  ' + tmp)
-        for v in vs:
-            header.append('[' + str(sort_card(v.sort)) + ']')
-        header.append(';\n')
-        for idx in vs:
-            indent(header)
-            vn = varname(idx.name)
-            header.append('for (int ' + vn + ' = 0; ' + vn + ' < ' + str(sort_card(idx.sort)) + '; ' + vn + '++) {\n')
-            indent_level += 1
+        sort = self.args[1].sort
+        tsort = il.FunctionSort(*([v.sort for v in vs] + [sort]))
+        sym = il.Symbol(new_temp(header,sort=tsort),tsort)
+        lhs = sym(*vs) if vs else sym
+        open_loop(header,vs)
+#        global temp_ctr
+#        tmp = '__tmp' + str(temp_ctr)
+#        temp_ctr += 1
+#        indent(header)
+#        header.append(ctype(self.args[1].sort) + '  ' + tmp)
+#        for v in vs:
+#            header.append('[' + str(sort_card(v.sort)) + ']')
+#        header.append(';\n')
+#        for idx in vs:
+#            indent(header)
+#            vn = varname(idx.name)
+#            lb,ub = sort_bounds(dsort)
+#            #        dcard = sort_card(dsort)
+#            header.append('for (int ' + vn + ' = ' + lb + '; ' + vn + ' < ' + ub + '; ' + vn + '++) {\n')
+#            indent_level += 1
         code = []
         indent(code)
-        code.append(tmp + ''.join('['+varname(v.name)+']' for v in vs) + ' = ')
+        lhs.emit(header,code)
+        # code.append(tmp + ''.join('['+varname(v.name)+']' for v in vs) + ' = ')
+        code.append(' = ');
         self.args[1].emit(header,code)
         code.append(';\n')    
         header.extend(code)
-        for idx in vs:
-            indent_level -= 1
-            indent(header)
-            header.append('}\n')
+        close_loop(header,vs)
+#        for idx in vs:
+#            indent_level -= 1
+#            indent(header)
+#            header.append('}\n')
         for idx in vs:
             indent(header)
             vn = varname(idx.name)
-            header.append('for (int ' + vn + ' = 0; ' + vn + ' < ' + str(sort_card(idx.sort)) + '; ' + vn + '++) {\n')
+            lb,ub = sort_bounds(idx.sort)
+            #        dcard = sort_card(dsort)
+            header.append('for (int ' + vn + ' = ' + lb + '; ' + vn + ' < ' + ub + '; ' + vn + '++) {\n')
             indent_level += 1
         code = []
         indent(code)
         self.args[0].emit(header,code)
-        code.append(' = ' + tmp + ''.join('['+varname(v.name)+']' for v in vs) + ';\n')
+        code.append(' = ' + code_eval(header,lhs) + ';\n')
         header.extend(code)
         for idx in vs:
             indent_level -= 1
@@ -4326,10 +4352,7 @@ ia.ChoiceAction.emit = emit_choice
 
 def emit_print_expr(impl,expr):    
     vs = list(ilu.variables_ast(expr))
-    print 'expr: {}'.format(expr)
-    print 'vs: {}'.format(map(str,vs))
     dom = [v.sort for v in vs]
-    print 'dom: {}'.format(map(str,dom))
     for d,v in zip(dom,vs):
         code_line(impl,'std::cout << "["')
         open_loop(impl,[v])
@@ -5642,7 +5665,6 @@ def main_int(is_ivyc):
                                         desc['name'] = param.name
                                     sort_desc = {}
                                     param_sort = il.find_sort(param.sort) if isinstance(param.sort,str) else param.sort
-                                    print repr(param_sort)
                                     if il.is_function_sort(param_sort):
                                         sort_desc['name'] = str(param_sort.rng)
                                         sort_desc['indices'] = describe_params(variables(param_sort.dom),[None for x in param_sort.dom] )
@@ -5669,9 +5691,11 @@ def main_int(is_ivyc):
                             descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
                             processes.append(descriptor)
         if target.get() in ['repl','test']:
-            print 'descriptor:{}'.format(descriptor)
+            # print 'descriptor:{}'.format(descriptor)
             try:
                 descriptor = {'processes' : processes}
+                if target.get() == 'test':
+                    descriptor['test_params'] = ['iters','runs','seed','delay','wait','modelfile']
                 with open(mod_name + '.dsc','w') as dscf:
                     json.dump(descriptor,dscf)
             except:

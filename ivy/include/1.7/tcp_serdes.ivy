@@ -180,7 +180,9 @@ module tcp_serdes(endpoint,data) = {
             { std::cerr << "cannot create socket\n"; exit(1); }
         int one = 1;
         if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one)) < 0) 
-            { perror("setsockopt failed"); exit(1); }
+            { perror("setsockopt TCP_NODELAY failed"); exit(1); }
+        if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0)
+            { perror("setsockopt SO_REUSEADDR failed"); exit(1); }
         return sock;
     }
     
@@ -332,7 +334,7 @@ module tcp_serdes(endpoint,data) = {
             // if queue has been closed asynchrononously, close the socket. 
 
             if (qclosed) {
-                // std::cout << "CLOSING " << sock << std::endl;
+                std::cout << "CLOSING " << sock << std::endl;
                 ::close(sock);
                 connected = false;
                 return;

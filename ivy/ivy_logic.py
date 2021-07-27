@@ -211,7 +211,9 @@ class Some(AST):
         return [self.args[0]]
     def clone_binder(self,vs,body):
         return Some(*(vs+self.args[1:]))
-
+    def sort(self):
+        self.args[0].sort
+    
 
 class Definition(AST):
     """

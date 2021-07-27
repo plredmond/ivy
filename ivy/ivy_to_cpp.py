@@ -1074,7 +1074,6 @@ def emit_action_gen(header,impl,name,action,classname):
         return sort_card(sort)
         
 #    action = action.unroll_loops(card)
-    iu.dbg('name')
     if name in im.module.ext_preconds:
         orig_action = action
         action = ia.Sequence(ia.AssumeAction(im.module.ext_preconds[name]),action)

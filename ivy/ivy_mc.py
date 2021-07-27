@@ -403,8 +403,8 @@ class Encoder(object):
 
     def saturate(self,sort,x):
         interp = thy.get_sort_theory(sort)
-        ub = int(interp.ub.name)
         if il.is_range_sort(x):
+            ub = int(interp.ub.name)
             x = self.encode_ite(sort,self.gebin(x,ub),self.binenc(ub,len(x)))
         return x
 
@@ -1108,7 +1108,7 @@ def to_table_lookup(trans,invariant):
     return trans,invariant
 
 
-def to_aiger(mod,ext_act):
+def to_aiger(mod,ext_act,method="mc"):
 
     erf = il.Symbol('err_flag',il.find_sort('bool'))
     errconds = []
@@ -1153,7 +1153,12 @@ def to_aiger(mod,ext_act):
     # compute the transition relation
 
     bgt = mod.background_theory()
-    stvars,trans,error = tr.add_post_axioms(action.update(mod,None),bgt)
+    if method=="fsmc":  # if finite-state, unroll the loops
+        with ia.UnrollContext(im.module.sort_card):
+            upd = action.update(im.module,None)
+    else:
+        upd = action.update(im.module,None)
+    stvars,trans,error = tr.add_post_axioms(upd,bgt)
     trans = ilu.and_clauses(trans,ilu.Clauses(defs=bgt.defs))
     defsyms = set(x.defines() for x in bgt.defs)
     rn = dict((tr.new(sym),tr.new(sym).prefix('__')) for sym in defsyms)
@@ -1668,7 +1673,7 @@ class ABCModelChecker(ModelChecker):
         return 'Property proved' in alltext
 
 
-def check_isolate():
+def check_isolate(method="mc"):
     
     if verbose:
         print
@@ -1689,7 +1694,7 @@ def check_isolate():
     
     # convert to aiger
 
-    aiger,decoder,annot,cnsts,action,stvarset = to_aiger(mod,ext_act)
+    aiger,decoder,annot,cnsts,action,stvarset = to_aiger(mod,ext_act,method=method)
 #    print aiger
 
     # output aiger to temp file

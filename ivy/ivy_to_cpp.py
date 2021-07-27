@@ -641,6 +641,9 @@ def emit_sorts(header):
                 if sortname in ['int','nat'] or isinstance(sort,il.RangeSort) :
                     indent(header)
                     header.append('mk_int("{}");\n'.format(name))
+                    if isinstance(sortname,il.RangeSort):
+                        lb,ub = sort_bounds(il.sig.sorts[name],obj='obj')
+                        code_line(header,'int_ranges[sort("{}")] = std::pair<unsigned long long, unsigned long long>({},{}-1)'.format(name,lb,ub))
                     continue
                 if sortname.startswith('bv[') and sortname.endswith(']'):
                     width = int(sortname[3:-1])
@@ -1582,12 +1585,18 @@ def check_iterable_sort(sort):
     if not is_any_integer_type(sort):
         raise iu.IvyError(None,"cannot iterate over non-integer sort {}".format(sort))
 
+def fix_bound(sym,obj):
+    res = varname(sym.name)
+    if not sym.is_numeral() and obj is not None:
+        res = obj + '.' + res
+    return res
+
 def sort_bounds(sort,obj=None):
     itp = il.sig.interp.get(sort.name,None)
     if isinstance(itp,il.RangeSort):
-        lb = varname(itp.lb.name)
-        ub = varname(itp.ub.name)
-        return [lb,'(' + ((obj + '.') if obj else '') + ub + '+1)']
+        lb = fix_bound(itp.lb,obj)
+        ub = fix_bound(itp.ub,obj)
+        return [lb,'(' + ub + '+1)']
     card = sort_card(sort)
     return ["0",str(card)] if card else None
 
@@ -4983,6 +4992,7 @@ public:
 protected:
     hash_map<std::string, z3::sort> enum_sorts;
     hash_map<Z3_sort, z3::func_decl_vector> enum_values;
+    hash_map<Z3_sort, std::pair<unsigned long long, unsigned long long> > int_ranges;
     hash_map<std::string, z3::func_decl> decls_by_name;
     hash_map<Z3_symbol,int> enum_to_int;
     std::vector<Z3_symbol> sort_names;
@@ -5021,7 +5031,7 @@ public:
         return decl(arity,&expr_args[0]);
     }
 
-    int eval(const z3::expr &apply_expr) {
+    long long eval(const z3::expr &apply_expr) {
         try {
             z3::expr foo = model.eval(apply_expr,true);
             // std::cout << apply_expr << " = " << foo << std::endl;
@@ -5036,9 +5046,9 @@ public:
             }
             if (foo.is_bv()) {
                 assert(foo.is_numeral());
-                unsigned v;
-                if (Z3_get_numeral_uint(ctx,foo,&v) != Z3_TRUE) {
-                    std::cerr << "bit vector value from Z3 too large for machine int: " << foo << std::endl;
+                uint64_t v;
+                if (Z3_get_numeral_uint64(ctx,foo,&v) != Z3_TRUE) {
+                    std::cerr << "bit vector value from Z3 too large for machine uint64: " << foo << std::endl;
                     assert(false);
                 }
                 return v;
@@ -5066,11 +5076,27 @@ public:
         }
     }
 
-    int eval_apply(const char *decl_name, unsigned num_args, const int *args) {
+    long long eval_apply(const char *decl_name, unsigned num_args, const int *args) {
         z3::expr apply_expr = mk_apply_expr(decl_name,num_args,args);
         //        std::cout << "apply_expr: " << apply_expr << std::endl;
         try {
             z3::expr foo = model.eval(apply_expr,true);
+            if (foo.is_int()) {
+                assert(foo.is_numeral());
+                int v;
+                if (Z3_get_numeral_int(ctx,foo,&v) != Z3_TRUE) {
+                    assert(false && "integer value from Z3 too large for machine int");
+                }
+                return v;
+            }
+            if (foo.is_bv()) {
+                assert(foo.is_numeral());
+                uint64_t v;
+                if (Z3_get_numeral_uint64(ctx,foo,&v) != Z3_TRUE) {
+                    assert(false && "bit vector value from Z3 too large for machine uint64");
+                }
+                return v;
+            }
             if (foo.is_bv() || foo.is_int()) {
                 assert(foo.is_numeral());
                 unsigned v;
@@ -5089,25 +5115,25 @@ public:
         }
     }
 
-    int eval_apply(const char *decl_name) {
+    long long eval_apply(const char *decl_name) {
         return eval_apply(decl_name,0,(int *)0);
     }
 
-    int eval_apply(const char *decl_name, int arg0) {
+    long long eval_apply(const char *decl_name, int arg0) {
         return eval_apply(decl_name,1,&arg0);
     }
     
-    int eval_apply(const char *decl_name, int arg0, int arg1) {
+    long long eval_apply(const char *decl_name, int arg0, int arg1) {
         int args[2] = {arg0,arg1};
         return eval_apply(decl_name,2,args);
     }
 
-    int eval_apply(const char *decl_name, int arg0, int arg1, int arg2) {
+    long long eval_apply(const char *decl_name, int arg0, int arg1, int arg2) {
         int args[3] = {arg0,arg1,arg2};
         return eval_apply(decl_name,3,args);
     }
 
-    int eval_apply(const char *decl_name, int arg0, int arg1, int arg2, int arg3) {
+    long long eval_apply(const char *decl_name, int arg0, int arg1, int arg2, int arg3) {
         int args[4] = {arg0,arg1,arg2,arg3};
         return eval_apply(decl_name,4,args);
     }
@@ -5178,14 +5204,25 @@ public:
         return ctx.string_val(value);
     }
 
-    unsigned sort_card(const z3::sort &range) {
+    std::pair<unsigned long long, unsigned long long> sort_range(const z3::sort &range) {
+        std::pair<unsigned long long, unsigned long long> res;
+        res.first = 0;
         if (range.is_bool())
-            return 2;
-        if (range.is_bv())
-            return 1 << range.bv_size();
-        if (range.is_int())
-            return 1;  // bogus -- we need a good way to randomize ints
-        return enum_values.find(range)->second.size();
+            res.second = 1;
+        else if (range.is_bv()) {
+            int size = range.bv_size();
+            if (size >= 64) 
+                res.second = (unsigned long long)(-1);
+            else res.second = (1 << size) - 1;
+        }
+        else if (range.is_int()) {
+            if (int_ranges.find(range) != int_ranges.end())
+                res = int_ranges[range];
+            else res.second = 4;  // bogus -- we need a good way to randomize ints
+        }
+        else res.second = enum_values.find(range)->second.size() - 1;
+        // std::cout <<  "sort range: " << range << " = " << res.first << " .. " << res.second << std::endl;
+        return res;
     }
 
     int set(const char *decl_name, unsigned num_args, const int *args, int value) {
@@ -5236,11 +5273,19 @@ public:
         slvr.add(!alit || pred);
     }
 
+    unsigned long long random_range(std::pair<unsigned long long, unsigned long long> rng) {
+        unsigned long long res = 0;
+        for (unsigned i = 0; i < 4; i++) res = (res << 16) | (rand() & 0xffff);
+        unsigned long long card = rng.second - rng.first;
+        if (card != (unsigned long long)(-1))
+            res = (res % (card+1)) + rng.first;
+        return res;
+    }
+
     void randomize(const z3::expr &apply_expr) {
         z3::sort range = apply_expr.get_sort();
 //        std::cout << apply_expr << " : " << range << std::endl;
-        unsigned card = sort_card(range);
-        int value = rand() % card;
+        unsigned long long value = random_range(sort_range(range));
         z3::expr val_expr = int_to_z3(range,value);
         z3::expr pred = apply_expr == val_expr;
         add_alit(pred);
@@ -5250,8 +5295,7 @@ public:
         z3::func_decl decl = decls_by_name.find(decl_name)->second;
         z3::expr apply_expr = mk_apply_expr(decl_name,num_args,args);
         z3::sort range = decl.range();
-        unsigned card = sort_card(range);
-        int value = rand() % card;
+        unsigned long long value = random_range(sort_range(range));
         z3::expr val_expr = int_to_z3(range,value);
         z3::expr pred = apply_expr == val_expr;
         add_alit(pred);

@@ -894,7 +894,10 @@ class InstantiateDecl(Decl):
         assert all(hasattr(x,'lineno') for x in self.args)
     def name(self):
         return 'instantiate'
-
+    def defines(self):
+        foo = [c.args[0] for c in self.args]
+        return [(c.relname,lineno(c)) for c in foo if c is not None]
+        
 class AutoInstanceDecl(Decl):
     def name(self):
         return 'autoinstance'
@@ -1664,6 +1667,8 @@ def ast_rewrite(x,rewrite):
         return x.clone([x.args[0],ast_rewrite(x.args[1],rewrite)])
     if hasattr(x,'args'):
         return x.clone(ast_rewrite(x.args,rewrite)) # yikes!
+    if x is None:
+        return None
     print "wtf: {} {}".format(x,type(x))
     assert False
 

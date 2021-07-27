@@ -208,6 +208,18 @@ class Module(object):
             if sort == rsort:
                 return idx
 
+    # Gets an estimate of the cardinality of a sort, or None. This is
+    # used for unrolling loops over the sort.
+
+    def sort_card(self,sort):
+        if il.is_function_sort(sort):
+            return None
+        attr = iu.compose_names(sort.name,'cardinality')
+        if attr in self.attributes:
+            return int(self.attributes[attr].rep)
+        return sort_card(sort)
+
+
     # This makes a semi-shallow copy so we can side-effect 
 
     def copy(self):

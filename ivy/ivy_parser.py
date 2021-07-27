@@ -126,11 +126,15 @@ def stack_action_lookup(name,params=0):
 def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
     save = ivy.attributes
     ivy.attributes = ()
+    static = module.static.copy()
+    for name,dfs in module.defined.iteritems():
+        if any(df[1] is TypeDecl for df in dfs):
+            static.add(name)
     def spaa(decl,subst,pref):
         if modname is not None and pref is not None and isinstance(decl,ModuleDecl):
             subst = subst.copy()
             subst[modname] = pref.rep
-        return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=module.static)
+        return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=static)
     for decl in module.decls:
         if isinstance(decl,AttributeDecl):
             if vsubst:
@@ -154,7 +158,16 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
                 if not hasattr(foo.args[1],'lineno'):
                     print 'no lineno: {}'.format(foo)
         idecl.attributes = decl.attributes
-        ivy.declare(idecl)
+        if isinstance(idecl,ObjectDecl):
+            ivy.declare(idecl)
+            ivy.set_object_defined(idecl.args[0].rep,module.get_object_defined(idecl.args[0].rep))
+        elif isinstance(idecl,InstantiateDecl):
+            old_attrs = ivy.attributes
+            ivy.attributes = ivy.attributes + idecl.attributes
+            do_insts(ivy,idecl.args)
+            ivy.attributes = old_attrs
+        else:
+            ivy.declare(idecl)
     ivy.attributes = save
 
 def do_insts(ivy,insts):
@@ -184,7 +197,7 @@ def do_insts(ivy,insts):
         else:
             inst.lineno = instantiation.lineno
             assert hasattr(inst,"lineno")
-            others.append(inst)
+            others.append(instantiation)
     if others:
         ivy.declare(InstantiateDecl(*others))
 
@@ -223,7 +236,6 @@ class Ivy(object):
         # if we are a continuation object, inherent defined symbols from previous declaration
         global parent_object
         if parent_object is not None:
-#            print 'got parent_object = {}'.format(parent_object)
             parent = stack[-1]
             if parent_object == "this":
                 defined = parent.defined
@@ -232,7 +244,6 @@ class Ivy(object):
 #                    print parent.defined[parent_object]
 #                print parent.defined.keys()
                 defined = parent.get_object_defined(parent_object)
-#            print 'defined = {}'.format(defined)
             if defined is not None:
                 self.defined = defined
             parent_object = None
@@ -1750,7 +1761,7 @@ if not (iu.get_numeric_version() <= [1,1]):
         d.lineno = get_lineno(p,3)
         p[0].declare(d)
     def p_top_opttrusted_extract_callatom_eq_lcb_top_rcb_optwith(p):
-        'top : top EXTRACT SYMBOL optargs EQ LCB top RCB optwith'
+        'top : top EXTRACT objsym optargs EQ LCB top RCB optwith'
         p[0] = p[1]
         create_object(p[0],p[3],p[4],p[7],get_lineno(p,3))
         ty = ExtractDef
@@ -1760,7 +1771,9 @@ if not (iu.get_numeric_version() <= [1,1]):
         d.lineno = get_lineno(p,2)
         p[0].declare(d)
     def p_top_extract_callatom_eq_callatoms(p):
-        'top : top EXTRACT SYMBOL optargs EQ callatoms'
+        'top : top EXTRACT objsym optargs EQ callatoms'
+        global parent_object
+        parent_object = None
         d = IsolateDecl(ExtractDef(*([Atom(p[3],p[4])] + p[6])))
         d.args[0].with_args = len(p[6])
         d.args[0].lineno = get_lineno(p,2)
@@ -2852,7 +2865,7 @@ def parse(s,nested=False):
     vernum = iu.get_numeric_version()
     with LexerVersion(vernum):
         # shallow copy the parser and lexer to try for re-entrance (!!!)
-        res = copy.copy(parser).parse(s,lexer=copy.copy(lexer))
+        res = copy.copy(parser).parse(s,lexer=copy.copy(lexer),tracking=True)
     if not nested:
         expand_autoinstances(res)
     if error_list:
@@ -2860,7 +2873,7 @@ def parse(s,nested=False):
     return res
     
 def to_formula(s):
-    return formula_parser.parse(s)
+    return formula_parser.parse(s,tracking=True)
 
 if __name__ == '__main__':
 #    while True:

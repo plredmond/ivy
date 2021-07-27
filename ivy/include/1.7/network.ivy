@@ -208,5 +208,53 @@ global {
         }
     }
 
+    # This is a model of tcp that is useful for finite-state model echecking. It uses
+    # queues of bounded size to store channel messages. The model *assumes* that the bounded
+    # queue does not overflow. That means that behaviors in which the number of messages in the
+    # channel exceed the queue size are effectively ignored. 
+
+    object tcp_bounded = {
+
+        module net(msg_t,max) = {
+
+            specification {
+                type len_t = {0..max}
+                function queue(S:tcp.endpoint,D:tcp.endpoint,P:len_t) : msg_t
+                function len(S:tcp.endpoint,D:tcp.endpoint) : len_t
+                after init {
+                    len(S,D) := 0;
+                }
+            }
+            
+            module socket = {
+
+                parameter id : tcp.endpoint
+                attribute id.global_parameter = true    
+
+                action send(dst : tcp.endpoint, msg : msg_t)
+                export action recv(src : tcp.endpoint, msg : msg_t)
+
+                specification {
+
+                    after send {
+                        var pos := net.len(id,dst);
+                        assume pos < max;  # unsound!
+                        net.queue(id,dst,pos) := msg;
+                        net.len(id,dst) := pos + 1;
+                    }
+                    before recv {
+                        require net.len(src,id) > 0;
+                        require msg = net.queue(src,id,0);
+                    }
+                    after recv {
+                        net.queue(src,id,P) := net.queue(src,id,P+1);
+                        net.len(src,id) := net.len(src,id) - 1;
+                    }
+                }
+                trusted isolate iso = this
+            }
+            trusted isolate iso = this
+        }
+    }
 
 }

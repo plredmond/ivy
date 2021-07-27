@@ -1510,7 +1510,7 @@ def create_isolate(iso,mod = None,**kwargs):
 
         mod = mod or im.module
 
-#        ivy_printer.print_module(mod)
+        # ivy_printer.print_module(mod)
 
         # from version 1.7, if no isolate specified on command line and
         # there is only one, use it.

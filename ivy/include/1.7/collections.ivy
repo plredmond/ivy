@@ -170,6 +170,25 @@ autoinstance vector[range] : vector(range)
 
 ################################################################################
 #
+# A bounded vector of size max can hold up to max-1 elements. 
+#
+
+module vector_bounded(range,max) = {
+    
+    type domain = {0..max}
+    
+    instantiate array(domain,range)
+
+    specification {
+        before append(a:t,v:range) {
+            assume a.end < max;
+        }
+    }
+}
+
+
+################################################################################
+#
 # rel_array
 #
 # This is the same as array, except that its specification exposes a

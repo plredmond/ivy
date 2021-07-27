@@ -228,7 +228,8 @@ def sort_infer_contravariant(term,sort):
         return res
 
 def compile_inline_call(self,args,methodcall=False):
-    params,returns,keypos = top_context.actions[self.rep]
+    rep = resolve_alias(self.rep) if isinstance(self.rep,str) else self.rep
+    params,returns,keypos = top_context.actions[rep]
     if return_context is None or return_context.values is None:
         if len(returns) != 1:
             raise IvyError(self,"wrong number of return values")
@@ -239,7 +240,7 @@ def compile_inline_call(self,args,methodcall=False):
                 res = ivy_logic.Symbol('loc:'+str(len(expr_context.local_syms)),sort)
                 expr_context.local_syms.append(res)
                 ress.append(res())
-            act = CallAction(*([ivy_ast.Atom(self.rep,args)]+ress))
+            act = CallAction(*([ivy_ast.Atom(rep,args)]+ress))
             act.lineno = self.lineno
             expr_context.code.append(act)
             return ivy_ast.Tuple(*ress)
@@ -257,7 +258,7 @@ def compile_inline_call(self,args,methodcall=False):
             raise iu.IvyError(self,"wrong number of input parameters (got {}, expecting {})".format(len(args),len(params)))
         args = [sort_infer_contravariant(a,cmpl_sort(p.sort)) for a,p in zip(args,params)]
 
-    call = CallAction(*([ivy_ast.Atom(self.rep,args)]+return_values))
+    call = CallAction(*([ivy_ast.Atom(rep,args)]+return_values))
     call.lineno = self.lineno
 
     # Handle dispatch for method call with variants
@@ -265,13 +266,13 @@ def compile_inline_call(self,args,methodcall=False):
     if methodcall and args[keypos].sort.name in im.module.variants:
 #        print 'variants:{}'.format(im.module.variants)
 #        print top_context.actions.keys()
-        _,methodname = iu.parent_child_name(self.rep)
+        _,methodname = iu.parent_child_name(rep)
         for vsort in im.module.variants[args[keypos].sort.name]:
             vactname = iu.compose_names(vsort.name,methodname)
             if vactname not in top_context.actions:
                 parent,_ = iu.parent_child_name(vsort.name)
                 vactname = iu.compose_names(parent,methodname)
-                if vactname not in top_context.actions or vactname == self.rep:
+                if vactname not in top_context.actions or vactname == rep:
                     continue
             tmpsym = ivy_logic.Symbol('self:'+vsort.name,vsort)
             tmpargs = list(args)
@@ -777,6 +778,9 @@ def compile_native_def(self):
     args = [compile_native_name(self.args[0]),self.args[1]] + [compile_native_arg(a) if not fields[i*2].endswith('"') else compile_native_symbol(a) for i,a in enumerate(self.args[2:])]
     return self.clone(args)
 
+def compile_native_type(self):
+    return self.clone([self.args[0]] + [x.rename(resolve_alias(x.rep)) for x in self.args[1:]])
+
 def compile_action_def(a,sig):
     sig = sig.copy()
     if not hasattr(a.args[1],'lineno'):
@@ -985,13 +989,19 @@ def compile_proof_tactic(self):
     
 ivy_ast.ProofTactic.compile = compile_proof_tactic
 
-def resolve_alias(name): 
+def resolve_alias_int(name): 
     if name in im.module.aliases:
         return im.module.aliases[name]
     parts = name.rsplit(iu.ivy_compose_character,1)
     if len(parts) == 2:
-        return resolve_alias(parts[0]) + iu.ivy_compose_character + parts[1]
+        return resolve_alias_int(parts[0]) + iu.ivy_compose_character + parts[1]
     return name
+
+def resolve_alias(name): 
+    res = resolve_alias_int(name)
+    if name == 'file.empty':
+        print 'file.empty -> {}'.format(res)
+    return res
 
 defined_attributes = set(["weight","test","check","mc","bmc","method","separate","iterable","cardinality","radix","override","cppstd","libspec","macro_finder","global_parameter"])
 
@@ -1060,7 +1070,8 @@ class IvyDomainSetup(IvyDeclInterp):
             self.domain.labeled_props.append(ldf)
             self.domain.theorems[label.relname] = ldf.formula
             self.last_fact = ldf
-    def instantiate(self,inst):
+    def instantiate(self,instantiation):
+        pref, inst = instantiation.args
         try:
             self.domain.schemata[inst.relname].instantiate(inst.args)
         except LookupError:
@@ -1232,7 +1243,7 @@ class IvyDomainSetup(IvyDeclInterp):
         if isinstance(thing.formula.args[1],ivy_ast.NativeType):
             if lhs in interp or lhs in self.domain.native_types :
                 raise IvyError(thing,"{} is already interpreted".format(lhs))
-            self.domain.native_types[lhs] = thing.formula.args[1]
+            self.domain.native_types[lhs] = compile_native_type(thing.formula.args[1])
             if thing.formula.args[1].args[0].code.strip() == 'int':
                 compile_theory(self.domain,lhs,'int')
             return
@@ -1576,7 +1587,8 @@ def check_instantiations(mod,decls):
                 schemata.add(inst.defines())
     for decl in decls.decls:
         if isinstance(decl,ivy_ast.InstantiateDecl):
-            for inst in decl.args:
+            for instantiation in decl.args:
+                pref, inst = instantiation.args
                 if inst.relname not in schemata:
                     raise IvyError(inst,"{} undefined in instantiation".format(inst.relname))
 

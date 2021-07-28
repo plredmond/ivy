@@ -174,7 +174,12 @@ def iname(name):
         return "bool"
     return name.replace('-','_')
 
-
+temp_ctr = 0
+def new_temp():
+    global temp_ctr
+    temp_ctr += 1
+    return 'temp' + str(temp_ctr)
+    
 def main():
     if len(sys.argv) != 2 or not sys.argv[1].endswith('.json'):
         sys.stderr.write('syntax: python extract.py <file>.json\n')
@@ -182,6 +187,7 @@ def main():
 
     inpname = sys.argv[1]
     outname = iname(inpname[:-5])+'.ivy'
+    modname = iname(inpname[:-5])
 
     try:
         with open(inpname) as inp:
@@ -215,9 +221,10 @@ def main():
 #    out.write('type byte\n')
 #    out.write('interpret byte->bv[8]\n')
 #    out.write('instance blob : vector(byte)\n')
-    out.write('type blob\n')
+#    out.write('type blob\n')
 #    out.write('interpret blob -> strbv[3]\n')
     out.write('attribute libspec="aws-cpp-sdk-s3,aws-cpp-sdk-core,aws-crt-cpp,aws-c-common"\n')
+    out.write ('module ' + modname + '(blob) = {\n')
     if not isinstance(spec,dict):
         format_error(inpname,'top-level not a dictionary')
 
@@ -304,7 +311,47 @@ def main():
             return df["member"]
         return get_member_type(defs[df["shape"]])
 
-    def to_aws(arg,df):
+    def get_cpp_type(df):
+        if "type" in df:
+            ty = df["type"]
+            if ty == "list":
+                return 'Aws::Vector<' + get_cpp_type(get_member_type(df)) + '>'
+            if ty == "map":
+                return 'Aws::Map<Aws::String, Aws::String>'
+            if ty == "string":
+                return 'Aws::String'
+            if ty == "integer":
+                return 'Aws::Int'
+        elif "shape" in df:
+            rf = df["shape"]
+            if rf not in defs:
+                format_error(inpname,'member {} of entry {} has unknown type {}'.format(prop,name,rf))
+            ty = defs[rf]
+            if "type" in ty and ty["type"] != "structure" or "shape" in ty:
+                return get_cpp_type(ty)
+            return 'Aws::S3::Model::' + df["shape"]
+        format_error(inpname,'unknown type: ' + str(df))
+
+    def struct_to_aws(res,arg,df,indent=1):
+        output_shape = df["shape"]
+        output_fields = defs[output_shape]["members"]
+        output_req = defs[output_shape].get("required",None)
+        out.write(indent * "    " + "Aws::S3::Model::{} {};\n".format(output_shape,res))
+        for name,df in output_fields.iteritems():
+            out_fld = '{}.{}_'.format(arg,iname(name))
+            if output_req is None or name in output_req:
+                out.write(indent * "    " + res + '.Set' + name + '(' + to_aws(out_fld,df,indent) + ');\n')
+            else:
+                out.write(indent * "    " + 'if (' + out_fld + '.size()) {\n')
+                out.write((indent+1) * "    " + res + '.Set' + name + '(' + to_aws(out_fld+'[0]',df,indent+1) + ');\n')
+                out.write(indent * "    " + '}\n')
+        
+
+    def to_aws(arg,df,indent=1):
+        if "shape" in df and df["shape"] in defs and "members" in defs[df["shape"]]:
+            res = new_temp()
+            struct_to_aws(res,arg,df,indent)
+            return res
         ty = get_ref_or_type("","",df)
         if ty == "string":
             res = arg + ".c_str()"
@@ -318,6 +365,15 @@ def main():
             return 'blob_to_iostream({})'.format(arg)
         elif ty.startswith('unordered_map'):
             return 'map_to_aws({})'.format(arg)
+        elif ty.startswith('vector'):
+            res = new_temp()
+            out.write(indent * "    " + get_cpp_type(df) + ' ' + res + ';\n')
+            out.write(indent * "    " + 'for (auto it = ' + arg + '.begin(), en = ' + arg + '.end(); it != en; ++it) {\n')
+            tmp = new_temp()
+            out.write((indent+1) * "    " + 'auto ' + tmp + ' = *it;\n')
+            out.write((indent+1) * "    " + res + '.push_back('+to_aws(tmp,get_member_type(df),indent+1) +');\n')
+            out.write(indent * "    " + '}\n')
+            return res;
         return arg
 
     def from_aws(lhs,arg,df,indent=0):
@@ -451,6 +507,7 @@ def main():
         for resp in responses:
             ty = get_ref_or_type(opname,opname,resp)
             out.write('\n    action {}(txid: txid_t, val:{})\n'.format(response_name(op,resp["shape"]),ty))
+        out.write('\n    action response_Error(txid: txid_t, code:string)\n')
         out.write("}\n")
     
 
@@ -518,10 +575,11 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
        `txid_t` txid;
        %`CALLBACK` cb;
 """ + ''.join('        %`{}.response_{}` err{};\n'.format(opname,err["shape"],idx) for idx,err in enumerate(errors)) + """
+""" + '        %`{}.response_Error` err_gen;\n'.format(opname) + """       
        std::thread *thr;
        Aws::S3::S3Client *s3_client;
        Aws::S3::S3Error errcode;
-       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*,Aws::S3::S3Client *)> func""" + ''.join(',%`{}.response_{}` err{}'.format(opname,err["shape"],idx) for idx,err in enumerate(errors)) + """ ) : ivy(ivy),txid(txid),cb(cb)""" + ''.join(',err{}(err{})'.format(idx,idx) for idx,err in enumerate(errors)) + """ {
+       myreader(ivy_class *ivy, `txid_t` txid, %`CALLBACK` cb, std::function<void(myreader*,Aws::S3::S3Client *)> func""" + ''.join(',%`{}.response_{}` err{}'.format(opname,err["shape"],idx) for idx,err in enumerate(errors)) + ',%`{}.response_Error` err_gen'.format(opname) + """ ) : ivy(ivy),txid(txid),cb(cb)""" + ''.join(',err{}(err{})'.format(idx,idx) for idx,err in enumerate(errors)) + """,err_gen(err_gen) {
            if (::pipe(fildes)) {
                perror("failed to create pipe");
                exit(1);
@@ -547,8 +605,10 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
                ivy->__unlock();
 //               std::cout << "finished callback" << std::endl;
            } else {
-//               std::cout << "exception" << errcode.GetExceptionName() << std::endl;
-""" + ''.join('if ("{}" == errcode.GetExceptionName()) {{`{}` thing; err{}(txid,thing);}}\n'.format(err["shape"],iname(err["shape"]),idx) for idx,err in enumerate(errors)) + """               
+                       std::cout << "exception txid=" << txid << ": " << errcode.GetExceptionName() << std::endl;
+
+""" + ' else '.join('if ("{}" == errcode.GetExceptionName()) {{`{}` thing; err{}(txid,thing);}}\n'.format(err["shape"],iname(err["shape"]),idx) for idx,err in enumerate(errors)) + (' else ' if errors else '') + """
+               err_gen(txid,errcode.GetExceptionName().c_str());               
            }
            thr->join();
            delete thr;
@@ -578,17 +638,17 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
         out.write('//std::cout << "in thread" << std::endl;\n')
         if "input" in op:
             input_shape = op["input"]["shape"]
-            out.write("        Aws::S3::Model::{} request;\n".format(input_shape))
-            input_fields = defs[input_shape]["members"]
-            input_req = defs[input_shape].get("required",None)
-            for name,df in input_fields.iteritems():
-                inp_fld = "input.{}_".format(iname(name))
-                if input_req is None or name in input_req:
-                    out.write("    request.Set{}({});\n".format(name,to_aws(inp_fld,df)))
-                else:
-                    out.write("    if ({}.size()) {{\n".format(inp_fld))
-                    out.write("        request.Set{}({});\n".format(name,to_aws(inp_fld+"[0]",df)))
-                    out.write("    }\n")
+            struct_to_aws('request','input',op["input"])
+            # input_fields = defs[input_shape]["members"]
+            # input_req = defs[input_shape].get("required",None)
+            # for name,df in input_fields.iteritems():
+            #     inp_fld = "input.{}_".format(iname(name))
+            #     if input_req is None or name in input_req:
+            #         out.write("    request.Set{}({});\n".format(name,to_aws(inp_fld,df)))
+            #     else:
+            #         out.write("    if ({}.size()) {{\n".format(inp_fld))
+            #         out.write("        request.Set{}({});\n".format(name,to_aws(inp_fld+"[0]",df)))
+            #         out.write("    }\n")
             out.write('//std::cout << "about to do request with output" << std::endl;\n')
             out.write("    Aws::S3::Model::{}Outcome outcome = s3_client->{}(request);\n".format(operation,operation));
         else:
@@ -622,11 +682,13 @@ void return_aws_client(Aws::S3::S3Client *s3_client) {
         #        out.write("        `{}.{}`(txid,res);\n".format(operation_name(op),response_name(op,output_shape)))
         out.write('//std::cout << "about to create reader" << std::endl;\n')
         out.write(("""
-        auto rdr = new myreader(this,txid,`CALLBACK`,func""" + ''.join(',`{}.{}`'.format(operation_name(op),response_name(op,err["shape"])) for err in errors) + """);
+        auto rdr = new myreader(this,txid,`CALLBACK`,func""" + ''.join(',`{}.{}`'.format(operation_name(op),response_name(op,err["shape"])) for err in errors) + ',`{}.response_Error`'.format(operation_name(op)) + """);
         install_reader(rdr);
         """).replace('CALLBACK',callback))
         out.write("    >>>\n")
         out.write("}}\n".format())
             
+    out.write ('}\n')
+
 if __name__ == "__main__":
     main()

@@ -194,7 +194,7 @@ class Module(object):
             cnst = ldf.formula.to_constraint()
             if not all(isinstance(p,il.Variable) for p in ldf.formula.args[0].args):
                 non_epr[ldf.formula.defines()] = (ldf,cnst)
-        return ModuleTheoryContext(functools.partial(instantiate_non_epr,non_epr))
+        return ModuleTheoryContext(non_epr)
         
 
     def is_variant(self,lsort,rsort):
@@ -357,17 +357,28 @@ def drop_label(labeled_fmla):
 
 class ModuleTheoryContext(object):
 
-    def __init__(self,instantiator):
-        self.instantiator = instantiator
+    def __init__(self,non_epr):
+        self.non_epr = non_epr
 
     def __enter__(self):
         self.old_instantiator = lu.instantiator
-        lu.instantiator = self.instantiator
+        lu.instantiator = self
         return self
 
     def __exit__(self,exc_type, exc_val, exc_tb):
         lu.instantiator = self.old_instantiator
         return False # don't block any exceptions
+
+    def __call__(self,clauses):
+        return instantiate_non_epr(self.non_epr,clauses)
+
+    def rename(self,subst):
+        new_non_epr = []
+        for (df,cnst) in self.non_epr:
+            dfns = df.defines()
+            if dfns in subst:
+                new_non_epr.append((lu.rename_ast(df,subst),lu.rename_ast(cnst,subst)))
+        self.non_epr.extend(new_non_epr)
 
 def relevant_definitions(symbols):
     dfn_map = dict((ldf.formula.defines(),ldf.formula.args[1]) for ldf in module.definitions)

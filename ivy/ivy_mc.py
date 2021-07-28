@@ -1165,7 +1165,7 @@ def to_aiger(mod,ext_act,method="mc"):
     trans = ilu.rename_clauses(trans,rn)
     error = ilu.rename_clauses(error,rn)
     stvars = [x for x in stvars if x not in defsyms]  # Remove symbols with state-dependent definitions
-#    iu.dbg('trans')
+    # iu.dbg('trans')
     
 
 #    print 'action : {}'.format(action)
@@ -1753,9 +1753,12 @@ def check_isolate(method="mc"):
 
     # scrape the output to get the answer
 
+    print "bar!"
+    
     if mc.scrape(alltext):
         return None
     else:
+        print "foo!"
         return aiger_witness_to_ivy_trace2(aiger,outfilename,action,stvarset,ext_act,annot,cnsts,decoder)        
         
     

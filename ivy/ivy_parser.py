@@ -2346,6 +2346,14 @@ else:
         a.lineno = get_lineno(p,2)
         p[0].append(a)
 
+    def p_invariant_invariant_fmla_proof(p):
+        'invariants : invariants INVARIANT fmla PROOF proofstep'
+        p[0] = p[1]
+        inv = check_non_temporal(p[3])
+        a = AssertAction(inv,p[5])
+        a.lineno = get_lineno(p,2)
+        p[0].append(a)
+
     def p_decreases_decreases_fmla(p):
         'decreases : DECREASES fmla'
         rank = Ranking(check_non_temporal(p[2]))

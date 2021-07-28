@@ -28,6 +28,8 @@ from collections import defaultdict
 #
 ################################################################################
 
+option_detailed = iu.BooleanParameter("detailed",False)
+
 class TraceBase(art.AnalysisGraph):
     def __init__(self):
         art.AnalysisGraph.__init__(self)
@@ -68,35 +70,68 @@ class TraceBase(art.AnalysisGraph):
 #        lineno = str(action.lineno) if hasattr(action,'lineno') else ''
         return iu.pretty(str(action),max_lines=4)
 
+    def eval_in_state(self,state,param):
+        for c in state.clauses.fmlas:
+            if c.args[0] == param:
+                return c.args[1]
+        return None
+
     def to_lines(self,lines,hash,indent,hidden):
         for state in self.states:
             if hasattr(state,'expr') and state.expr is not None:
                 expr = state.expr
                 action = expr.rep
-                if not hasattr(action,'label') and hasattr(action,'lineno'):
-                    lines.append(str(action.lineno) + '\n')
-                newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(action).split('\n')]
-                lines.extend(newlines)
+                if option_detailed.get():
+                    if not hasattr(action,'label') and hasattr(action,'lineno'):
+                        lines.append(str(action.lineno) + '\n')
+                    newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(action).split('\n')]
+                    lines.extend(newlines)
+                else:
+                    if isinstance(action,itp.fail_action):
+                        lines.append("{}error: assertion failed\n".format(action.lineno))
+                    if isinstance(action,(act.CallAction,act.EnvAction)):
+                        if isinstance(action,act.CallAction):
+                            callee_name = action.args[0].rep 
+                            callee_name = callee_name if any(x.imported() == callee_name for x in im.module.imports) else None
+                            callee = im.module.actions.get(callee_name,None)
+                            params = callee.formal_params if callee else []
+                        else:
+                            callee_name = action.args[0].label if hasattr(action.args[0],'label') else None
+                            params = action.args[0].formal_params if hasattr(action.args[0],'formal_params') else None
+                        if callee_name:
+                            callee_state = expr.subgraph.states[0] if hasattr(expr,'subgraph') else state
+                            state_hash = dict((x.args[0],x.args[1]) for x in callee_state.clauses.fmlas)
+                            def eval_in_state(param):
+                                return state_hash.get(param,None)
+#                            param_vals = [eval_in_state(callee_state,param) for param in params]
+                            arr = '> ' if isinstance(action,act.EnvAction) else '< '
+                            lines.append(arr + callee_name
+                                         + (('(' + ','.join(value_to_str(eval_in_state(v),eval_in_state) for v in params) + ')') if params else '')
+                                         + '\n')
                 if hasattr(expr,'subgraph'):
-                    lines.append(indent * '    ' + '{\n')
+                    if option_detailed.get():
+                        lines.append(indent * '    ' + '{\n')
                     expr.subgraph.to_lines(lines,hash,indent+1,hidden)
-                    lines.append(indent * '    ' + '}\n')
-                lines.append('\n')
-            foo = False
-            if hasattr(state,"loop_start") and state.loop_start:
-                lines.append('\n--- the following repeats infinitely ---\n\n')
-            for c in state.clauses.fmlas:
-                if hidden(c.args[0].rep):
-                    continue
-                s1,s2 = map(str,c.args)
-                if not(s1 in hash and hash[s1] == s2): # or state is self.states[0]:
-                    hash[s1] = s2
-                    if not foo:
-                        lines.append(indent * '    ' + '[\n')
-                        foo = True
-                    lines.append((indent+1) * '    ' + str(c) + '\n')
-            if foo:
-                lines.append(indent * '    ' + ']\n')
+                    if option_detailed.get():
+                        lines.append(indent * '    ' + '}\n')
+                if option_detailed.get():
+                    lines.append('\n')
+            if option_detailed.get():
+                foo = False
+                if hasattr(state,"loop_start") and state.loop_start:
+                    lines.append('\n--- the following repeats infinitely ---\n\n')
+                for c in state.clauses.fmlas:
+                    if hidden(c.args[0].rep):
+                        continue
+                    s1,s2 = map(str,c.args)
+                    if not(s1 in hash and hash[s1] == s2): # or state is self.states[0]:
+                        hash[s1] = s2
+                        if not foo:
+                            lines.append(indent * '    ' + '[\n')
+                            foo = True
+                        lines.append((indent+1) * '    ' + str(c) + '\n')
+                if foo:
+                    lines.append(indent * '    ' + ']\n')
         
     def __str__(self):
         lines = []
@@ -244,6 +279,7 @@ def check_vc(clauses,action,final_cond=None,rels_to_min=[],shrink=False,handler_
         vocab = lut.used_symbols_clauses(mclauses)
         handler = (handler_class(mclauses,model,vocab) if handler_class is not None
                    else Trace(mclauses,model,vocab))
+        print "Converting model to trace..."
         act.match_annotation(action,clauses.annot,handler)
         handler.end()
         return handler
@@ -298,3 +334,25 @@ def make_vc(action,precond=[],postcond=[],check_asserts=True):
     return clauses
 
 
+# Converting values to strings for trace display
+
+def value_to_str(val,eval_in_state):
+    if val is None:
+        return '...'
+    if lg.is_constant(val):
+        sort = val.sort
+        end = lg.sig.symbols.get(iu.compose_names(sort.name,'end'),None)
+        value = lg.sig.symbols.get(iu.compose_names(sort.name,'value'),None)
+        if  isinstance(end,lg.Symbol) and isinstance(value,lg.Symbol):
+            print 'foo'
+            dom = end.sort.dom
+            vdom = value.sort.dom
+            if len(dom) == 1 and dom[0] == sort and len(vdom) == 2 and vdom[0] == sort and vdom[1] == end.sort.rng:
+                endval = eval_in_state(end(val))
+                if endval is not None and lg.is_constant(endval) and endval.is_numeral():
+                    endvalnum = int(endval.name)
+                    indices = [lg.Symbol(str(i),endval.sort) for i in range(endvalnum)]
+                    vals = [eval_in_state(value(val,idx)) for idx in indices]
+                    return '[' + ','.join(value_to_str(v,eval_in_state) for v in vals) + ']'
+        return val.rep.name
+    return str(val) 

@@ -157,6 +157,18 @@ class DerivedUpdate(object):
     def __str__(self):
         return str(self.defn)
 
+class NamedUpdate(object):
+    def __init__(self,sym,fmla):
+        self.sym = sym
+        self.dependencies = used_symbols_ast(fmla)
+    def get_update_axioms(self,updated,action):
+        defines = self.sym
+        if defines not in updated and any(x in self.dependencies for x in updated):
+            updated.append(defines)
+        return (updated,None,None)
+    def __str__(self):
+        return str(self.sym)
+
 class Action(AST):
     def __init__(self,*args):
         self.args = list(args)
@@ -864,7 +876,8 @@ class WhileAction(Action):
         else:
             asserts = self.args[2:]
             decreases = None
-        assumes = [a.assert_to_assume([AssertAction]) for a in asserts]
+        assumes = [a.assert_to_assume([AssertAction]) for a in asserts if not isinstance(a,SubgoalAction)]
+        asserts = [a for a in asserts if not isinstance(a,AssumeAction)]
         entry_asserts = []
         exit_asserts = []
         if decreases is not None:
@@ -1479,7 +1492,8 @@ def match_annotation(action,annot,handler):
                 annots = unite_annot(annot)
                 assert len(annots) == len(action.args)
                 for act,(cond,ann) in reversed(zip(action.args,annots)):
-                    if handler.eval(cond):
+                    rncond = env.get(cond,cond)
+                    if handler.eval(rncond):
                         if isinstance(action,EnvAction) and not hasattr(action,'label'):
                             callact = act
                             label = act.label if hasattr(act,'label') else 'unknown'

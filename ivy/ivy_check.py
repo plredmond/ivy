@@ -711,14 +711,20 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
         raise iu.IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
     if not check_separately(isolate):
         with im.module.theory_context():
-            meth()
+            res = meth()
+            if res is not None:
+                print res
+                exit(1)
         return
     for lineno in all_assert_linenos():
         with im.module.copy():
             old_checked_assert = act.checked_assert.get()
             act.checked_assert.value = lineno
             with im.module.theory_context():
-                meth()
+                res = meth()
+            if res is not None:
+                print res
+                exit(1)
             act.checked_assert.value = old_checked_assert
     
 def get_isolate_method(isolate):
@@ -743,7 +749,6 @@ def check_module():
         else:
             if coverage.get():
                 missing = ivy_isolate.check_isolate_completeness()
-            
     if missing:
         raise iu.IvyError(None,"Some assertions are not checked")
 

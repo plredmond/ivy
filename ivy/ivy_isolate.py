@@ -922,9 +922,9 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                               else []))
 
     # for unverified internal actions, we assume the asserts in after mixins
-    # Ensure behaves like assert in after mixins
+    # Ensure coverts to assume in unverified mixins.
 
-    int_assumes = lambda m: ([ia.EnsuresAction] + 
+    int_assumes = lambda m: (([ia.EnsuresAction] if not vstartswith_eq_some(m.mixer(),verified,mod) else []) + 
                              ([ia.AssertAction]
                               if after_mixins(m) and not delegated_to_verified(m.mixer())
                               else []))
@@ -939,7 +939,7 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
     # for an internal summarized action, we assume the asserts in after mixins
     # Ensure behaves like assert in after mixins
 
-    int_sum_assumes = lambda m: ([ia.EnsuresAction] + 
+    int_sum_assumes = lambda m: (([ia.EnsuresAction] if not vstartswith_eq_some(m.mixer(),verified,mod) else []) + 
                                  ([ia.AssertAction]
                                   if after_mixins(m)
                                   else []))
@@ -1749,6 +1749,7 @@ def check_isolate_completeness(mod = None):
     checked = set()
     checked_props = set()
     checked_context = defaultdict(set) # maps action name to set of delegees
+    verified_context = defaultdict(set) # maps action name to set of delegees
     delegates = set(s.delegated() for s in mod.delegates if not s.delegee())
     delegated_to = dict((s.delegated(),s.delegee()) for s in mod.delegates if s.delegee())
 
@@ -1777,6 +1778,7 @@ def check_isolate_completeness(mod = None):
         for a in verified_actions:
             if a not in delegates:
                 checked.add(a)
+                verified_context[a].update(verified_actions)
         for a in present_actions:
             checked_context[a].update(verified_actions)
         # for prop in mod.labeled_props:
@@ -1819,7 +1821,8 @@ def check_isolate_completeness(mod = None):
                 verifier = actname if isinstance(mixin,ivy_ast.MixinBeforeDef) else callee
                 verifier = implementation_map.get(verifier,verifier)
                 if verifier not in checked_context[mixed]:
-                    missing.append((actname,mixin,None))
+                    if actname not in verified_context[mixed]:
+                        missing.append((actname,mixin,None))
     for e in mod.exports:
         if e.scope(): # global export
             continue
@@ -1831,7 +1834,7 @@ def check_isolate_completeness(mod = None):
             if has_assertions(mod,mixed) and not isinstance(mixin,ivy_ast.MixinBeforeDef):
                 if callee not in checked_context[mixed]:
                     missing.append(("external",mixin,None))
-                
+
     if missing:
         for x,y,z in missing:
             mixer = y.mixer() if isinstance(y,ivy_ast.MixinDef) else y

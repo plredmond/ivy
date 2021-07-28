@@ -15,6 +15,7 @@ import ivy_theory as thy
 import ivy_ast
 import ivy_proof
 import ivy_trace
+import ivy_interp
 
 def check_isolate(n_steps):
     
@@ -47,5 +48,13 @@ def check_isolate(n_steps):
             print
             print res
             exit(0)
-        post = ag.execute(step_action)
+        with ivy_interp.EvalContext(False):
+            post = ag.execute(step_action)
+        fail = ivy_interp.State(expr = ivy_interp.fail_expr(post.expr))
+        res = ivy_trace.check_final_cond(ag,fail,ilu.true_clauses(),[],True)
+        if res is not None:
+            print 'BMC with bound {} found a counter-example...'.format(n+1)
+            print
+            print res
+            exit(0)
             

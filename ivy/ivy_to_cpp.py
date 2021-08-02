@@ -3740,7 +3740,7 @@ def get_bounds(header,v0,variables,body,exists,varname=None):
     return los[0],his[0]
 
 def get_all_bounds(header,variables,body,exists,varnames):
-    get_bound_exprs(v0,variables,body,exists,bes)
+#    get_bound_exprs(v0,variables,body,exists,bes)
     if not variables:
         return []
     v0 = variables[0]

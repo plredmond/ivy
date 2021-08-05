@@ -64,6 +64,7 @@ class Module(object):
         self.natives = [] # list of NativeDef
         self.native_definitions = [] # list of definitions whose rhs is NativeExpr
         self.initializers = [] # list of name,action pairs
+        self.initial_actions = [] # list of actions with formal parameters
         self.params = [] # list of symbol
         self.param_defaults = [] # list of string or None
         self.ghost_sorts = set() # set of sort names

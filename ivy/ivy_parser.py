@@ -133,7 +133,8 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
     def spaa(decl,subst,pref):
         if modname is not None and pref is not None and isinstance(decl,ModuleDecl):
             subst = subst.copy()
-            subst[modname] = pref.rep
+            p,c = iu.parent_child_name(modname)
+            subst[c] = pref.rep
         return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=static)
     for decl in module.decls:
         if isinstance(decl,AttributeDecl):
@@ -1755,7 +1756,9 @@ if not (iu.get_numeric_version() <= [1,1]):
         p[0] = p[1]
         create_object(p[0],p[4],p[5],p[8],get_lineno(p,4))
         ty = TrustedIsolateDef if p[2] else IsolateDef
-        d = IsolateObjectDecl(ty(*([Atom(p[4],p[5]),Atom(p[4],p[5])]+p[10])))
+        df = ty(*([Atom(p[4],p[5]),Atom(p[4],p[5])]+p[10]))
+        df.is_object = True
+        d = IsolateObjectDecl(df)
         d.args[0].with_args = len(p[10])
         d.args[0].lineno = get_lineno(p,3)
         d.lineno = get_lineno(p,3)

@@ -39,7 +39,9 @@ module tcp_serdes(endpoint,data) = {
     #include <mutex>
     #include <condition_variable>
 
+    template <typename data>
     class tcp_listener;   // class of threads that listen for connections
+    template <typename data>
     class tcp_callbacks;  // class holding callbacks to ivy
 
     class tcp_queue;
@@ -190,15 +192,16 @@ module tcp_serdes(endpoint,data) = {
     // This structure holds all the callbacks for the endpoint. These are function objects
     // that are called asynchronously.
 
+    template <typename data>
     struct tcp_callbacks {
         virtual void acb(int,`endpoint`) const = 0;
-        virtual void rcb(int,`data`) const = 0;
+        virtual void rcb(int,data) const = 0;
         virtual void fcb(int) const = 0;
         virtual void ccb(int) const = 0;
     };
 
-    template<class acb_thunk, class rcb_thunk, class fcb_thunk, class ccb_thunk>
-    struct tcp_callbacks_thunk : tcp_callbacks {
+    template<class acb_thunk, class rcb_thunk, class fcb_thunk, class ccb_thunk, typename data>
+    struct tcp_callbacks_thunk : tcp_callbacks<data> {
         acb_thunk acbt;
         rcb_thunk rcbt;
         fcb_thunk fcbt;
@@ -208,7 +211,7 @@ module tcp_serdes(endpoint,data) = {
         virtual void acb(int sock,`endpoint` ep) const {
             acbt(sock,ep);
         }
-        virtual void rcb(int sock, `data` pkt) const {
+        virtual void rcb(int sock, data pkt) const {
             rcbt(sock,pkt);
         }
         virtual void fcb(int sock) const {
@@ -224,15 +227,16 @@ module tcp_serdes(endpoint,data) = {
     // associated with the object. If fdes returns a negative value, the thread deletes the
     // object and terminates.
 
+    template <typename data>
     class tcp_task : public reader {
       protected:
         int sock;           // socket associated to this task, or -1 if task complete
-        const tcp_callbacks *cb;   // callbacks to ivy
+        const tcp_callbacks<data> *cb;   // callbacks to ivy
         ivy_class *ivy;     // pointer to main ivy object (mainly to get lock)
 
       public:
 
-        tcp_task(int sock, const tcp_callbacks *cb, ivy_class *ivy)
+        tcp_task(int sock, const tcp_callbacks<data> *cb, ivy_class *ivy)
           : sock(sock), cb(cb), ivy(ivy) {} 
 
         virtual int fdes() {
@@ -245,11 +249,15 @@ module tcp_serdes(endpoint,data) = {
 
     // This task reads messages from a socket and calls the "recv" callback.
 
-    class tcp_reader : public tcp_task {
+    template <typename data> 
+    class tcp_reader : public tcp_task<data> {
         std::vector<char> buf;
+        using tcp_task<data>::sock;
+        using tcp_task<data>::cb;
+        using tcp_task<data>::ivy;
       public:
-        tcp_reader(int sock, const tcp_callbacks *cb, ivy_class *ivy)
-            : tcp_task(sock, cb, ivy) {
+        tcp_reader(int sock, const tcp_callbacks<data> *cb, ivy_class *ivy)
+            : tcp_task<data>(sock, cb, ivy) {
         }
 
         // This is called in a loop by the task thread.
@@ -257,7 +265,7 @@ module tcp_serdes(endpoint,data) = {
         virtual void read() {
 //            std::cout << "RECEIVING\n";
 
-            `data` pkt;                      // holds received message
+            data pkt;                      // holds received message
             ivy_socket_deser ds(sock,buf);  // initializer deserialize with any leftover bytes
             buf.clear();                    // clear the leftover bytes
 
@@ -300,12 +308,16 @@ module tcp_serdes(endpoint,data) = {
 
     // invariant: if socket is closed, queue is closed
 
-    class tcp_writer : public tcp_task {
+    template <typename data>
+    class tcp_writer : public tcp_task<data> {
         tcp_queue *queue;
         bool connected;
+        using tcp_task<data>::sock;
+        using tcp_task<data>::cb;
+        using tcp_task<data>::ivy;
       public:
-        tcp_writer(int sock, tcp_queue *queue, const tcp_callbacks *cb, ivy_class *ivy)
-            : tcp_task(sock,cb,ivy), queue(queue), connected(false) {
+        tcp_writer(int sock, tcp_queue *queue, const tcp_callbacks<data> *cb, ivy_class *ivy)
+            : tcp_task<data>(sock,cb,ivy), queue(queue), connected(false) {
         }
 
         virtual int fdes() {
@@ -380,7 +392,13 @@ module tcp_serdes(endpoint,data) = {
             }
             else {
                 // std::cout << "CONNECT FAILED " << sock << std::endl;
-                fail_close();
+                perror("connect failed");
+                ivy->__unlock();
+                ::sleep(1);
+                close(sock);
+                sock = make_tcp_socket();
+                return;
+                // fail_close();
             }
             ivy->__unlock();
 
@@ -403,13 +421,17 @@ module tcp_serdes(endpoint,data) = {
 
     // This task listens for connections on a socket in the background. 
 
-    class tcp_listener : public tcp_task {
+    template <typename data>
+    class tcp_listener : public tcp_task<data> {
+        using tcp_task<data>::sock;
+        using tcp_task<data>::cb;
+        using tcp_task<data>::ivy;
       public:
 
         // The constructor creates a socket to listen on.
 
-        tcp_listener(const tcp_callbacks *cb, ivy_class *ivy)
-            : tcp_task(0,cb,ivy) {
+        tcp_listener(const tcp_callbacks<data> *cb, ivy_class *ivy)
+            : tcp_task<data>(0,cb,ivy) {
             sock = make_tcp_socket();
         }
 
@@ -447,7 +469,7 @@ module tcp_serdes(endpoint,data) = {
             ivy->__unlock();
 
             // Install a reader task to read messages from the new socket.
-            ivy->install_reader(new tcp_reader(new_sock,cb,ivy));
+            ivy->install_reader(new tcp_reader<data>(new_sock,cb,ivy));
         }
     };
 
@@ -470,7 +492,7 @@ module tcp_serdes(endpoint,data) = {
 type rdr_map_t
 interpret rdr_map_t -> <<< primitive hash_space::hash_map<int,void *> >>>
 type callback_t
-interpret callback_t -> <<< primitive tcp_callbacks * >>>
+interpret callback_t -> <<< primitive tcp_callbacks<`data`> * >>>
 type queue_t
 interpret queue_t -> <<< primitive hash_space::hash_map<int,tcp_queue *> >>>
 
@@ -493,7 +515,7 @@ var send_queue : queue_t
     // that captures the instance environment, in this case including
     // the instance's endpoint id "me".
 
-    `cb` = new tcp_callbacks_thunk<%`handle_accept`,%`handle_recv`,%`handle_fail`,%`handle_connected`>
+    `cb` = new tcp_callbacks_thunk<%`handle_accept`,%`handle_recv`,%`handle_fail`,%`handle_connected`,`data`>
                   (`handle_accept`,`handle_recv`,`handle_fail`,`handle_connected`);
 
 >>>
@@ -525,7 +547,7 @@ var send_queue : queue_t
 
     action open(addr:endpoint) returns (s:socket) = {
         <<< impure
-            tcp_listener *r = new tcp_listener(`cb`,this);
+            tcp_listener<`data`> *r = new tcp_listener<`data`>(`cb`,this);
             s = r->fdes();
             // std::cout << "SOCKET " << s << std::endl;
             struct sockaddr_in myaddr;
@@ -593,7 +615,7 @@ var send_queue : queue_t
             tcp_queue *queue;
             if (`send_queue`.find(s) == `send_queue`.end()) {
                 `send_queue`[s] = queue = new tcp_queue(other);
-                 install_thread(new tcp_writer(s,queue,`cb`,this));
+                 install_thread(new tcp_writer<`data`>(s,queue,`cb`,this));
             } else
                 `send_queue`[s] -> set_open(other);
         >>>

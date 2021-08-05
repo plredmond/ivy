@@ -1396,6 +1396,10 @@ class IvyARGSetup(IvyDeclInterp):
             self.mod.assertions.append(type(a)(a.args[0],sortify_with_inference(a.args[1])))
     def isolate(self,iso):
         args = [a.rename('this') if isinstance(a.rep,ivy_ast.This) else a for a in iso.args]
+        if hasattr(iso,'is_object') and iso.is_object:
+            print "isolate: {}".format(map(str,args))
+            args[0] = args[0].clone([])  # strip off parameters from isolate objects
+            args[1] = args[1].clone([])
         self.mod.isolates[iso.name()] = iso.clone(args)
     def export(self,exp):
         check_is_action(self.mod,exp,exp.exported())

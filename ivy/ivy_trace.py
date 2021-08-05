@@ -76,8 +76,8 @@ class TraceBase(art.AnalysisGraph):
                 return c.args[1]
         return None
 
-    def to_lines(self,lines,hash,indent,hidden):
-        for state in self.states:
+    def to_lines(self,lines,hash,indent,hidden,failed=False):
+        for idx,state in enumerate(self.states):
             if hasattr(state,'expr') and state.expr is not None:
                 expr = state.expr
                 action = expr.rep
@@ -88,7 +88,13 @@ class TraceBase(art.AnalysisGraph):
                     lines.extend(newlines)
                 else:
                     if isinstance(action,itp.fail_action):
-                        lines.append("{}error: assertion failed\n".format(action.lineno))
+                        if not isinstance(action.action,(act.EnvAction,act.CallAction)):
+                            lines.append("{}error: assertion failed\n".format(action.lineno if hasattr(action,'lineno') else ''))
+                        else:
+                            action = action.action
+                            failed=True
+                    elif failed and idx == len(self.states) - 1 and isinstance(action,act.AssertAction):
+                        lines.append("{}error: assertion failed\n".format(action.lineno if hasattr(action,'lineno') else ''))
                     if isinstance(action,(act.CallAction,act.EnvAction)):
                         if isinstance(action,act.CallAction):
                             callee_name = action.args[0].rep 
@@ -111,7 +117,7 @@ class TraceBase(art.AnalysisGraph):
                 if hasattr(expr,'subgraph'):
                     if option_detailed.get():
                         lines.append(indent * '    ' + '{\n')
-                    expr.subgraph.to_lines(lines,hash,indent+1,hidden)
+                    expr.subgraph.to_lines(lines,hash,indent+1,hidden,failed=failed)
                     if option_detailed.get():
                         lines.append(indent * '    ' + '}\n')
                 if option_detailed.get():
@@ -344,7 +350,6 @@ def value_to_str(val,eval_in_state):
         end = lg.sig.symbols.get(iu.compose_names(sort.name,'end'),None)
         value = lg.sig.symbols.get(iu.compose_names(sort.name,'value'),None)
         if  isinstance(end,lg.Symbol) and isinstance(value,lg.Symbol):
-            print 'foo'
             dom = end.sort.dom
             vdom = value.sort.dom
             if len(dom) == 1 and dom[0] == sort and len(vdom) == 2 and vdom[0] == sort and vdom[1] == end.sort.rng:
@@ -354,5 +359,9 @@ def value_to_str(val,eval_in_state):
                     indices = [lg.Symbol(str(i),endval.sort) for i in range(endvalnum)]
                     vals = [eval_in_state(value(val,idx)) for idx in indices]
                     return '[' + ','.join(value_to_str(v,eval_in_state) for v in vals) + ']'
+        if sort.name in im.module.sort_destructors:
+            destrs = im.module.sort_destructors[sort.name]
+            vals = [value_to_str(eval_in_state(destr(val)),eval_in_state) if len(destr.sort.dom) == 1 else '...' for destr in destrs]
+            return '{' + ','.join(destr.name + ':' + val for destr,val in zip(destrs,vals)) + '}'
         return val.rep.name
     return str(val) 

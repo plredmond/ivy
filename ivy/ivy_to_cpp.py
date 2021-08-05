@@ -840,11 +840,11 @@ def emit_init_gen(header,impl,classname):
     header.append("""
 class init_gen : public gen {
 public:
-    init_gen();
+    init_gen(""" + classname + """&);
 """)
     header.append("    bool generate(" + classname + "&);\n")
     header.append("    void execute(" + classname + "&){}\n};\n")
-    impl.append("init_gen::init_gen(){\n");
+    impl.append("init_gen::init_gen(" + classname + " &obj){\n");
     indent_level += 1
     emit_sig(impl)
     indent(impl)
@@ -1177,10 +1177,10 @@ def emit_action_gen(header,impl,name,action,classname):
             if not sym.name.startswith('__ts') and sym not in old_pre_clauses.defidx and sym.name != '*>':
                 declare_symbol(header,sym,classname=classname)
             decld.add(sym)
-    header.append("    {}_gen();\n".format(caname))
+    header.append("    {}_gen(".format(caname) + classname + "&);\n")
     header.append("    bool generate(" + classname + "&);\n");
     header.append("    void execute(" + classname + "&);\n};\n");
-    impl.append(caname + "_gen::" + caname + "_gen(){\n");
+    impl.append(caname + "_gen::" + caname + "_gen(" + classname + " &obj){\n");
     indent_level += 1
     emit_sig(impl)
     to_decl = set(syms)
@@ -1562,6 +1562,15 @@ def init_method():
     res.formal_returns = []
     return res
 
+def emit_initial_action(header,impl,classname):
+    code_line(header,'void __init()')
+    open_scope(impl,line = 'void ' + classname + '::__init()')
+    for action in im.module.initial_actions:
+        open_loop(impl,action.formal_params)
+        action.emit(impl)
+        close_loop(impl,action.formal_params)
+    close_scope(impl)
+    
 int_ctypes = ["bool","int","long long","unsigned","unsigned long long"]
 
 def is_iterable_sort(sort):
@@ -2776,7 +2785,8 @@ class z3_thunk : public thunk<D,R> {
     header.append('    ');
     emit_param_decls(header,classname,im.module.params)
     header.append(';\n');
-    im.module.actions['.init'] = init_method()
+#    im.module.actions['.init'] = init_method()
+    emit_initial_action(header,impl,classname)
     for a in im.module.actions:
         emit_action(header,impl,a,classname)
     emit_tick(header,impl,classname)
@@ -4803,7 +4813,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
             readers[rdridx]->bind();
         }
                     
-        init_gen my_init_gen;
+        init_gen my_init_gen(ivy);
         my_init_gen.generate(ivy);
         std::vector<gen *> generators;
         std::vector<double> weights;
@@ -4816,7 +4826,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
             continue
         num_public_actions += 1
         action = im.module.actions[actname]
-        impl.append("        generators.push_back(new {}_gen);\n".format(varname(actname)))
+        impl.append("        generators.push_back(new {}_gen(ivy));\n".format(varname(actname)))
         aname = (actname[4:] if actname.startswith('ext:') else actname) +'.weight'
         if aname in im.module.attributes:
             astring = im.module.attributes[aname].rep

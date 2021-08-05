@@ -117,7 +117,8 @@ def main():
             ptype = param['type']
             type_rng = ptype if not isinstance(ptype,dict) else ptype['name']
             if type_rng == 'udp.endpoint' or type_rng == 'tcp.endpoint' :
-                if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':
+                # if param['name'].startswith(pname+'.') or pname == 'extract' or pname == 'this':
+                if param['name'] not in param_vals:
                     ids = []
                     pdim = [[]] if not isinstance(ptype,dict) else get_process_dimensions(ptype)
                     for d in pdim:
@@ -157,7 +158,7 @@ def main():
                 for param in descriptor['test_params']:
                     if param in ps:
                         cmd.append('{}={}'.format(param,ps[param]))
-            # print ' '.join(cmd)
+            print ' '.join(cmd)
             pname = process['name']
             if pname == 'this':
                 pname = dscfname[:-4]

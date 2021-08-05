@@ -1108,6 +1108,8 @@ class IsolateDef(AST):
     def clone(self,args):
         res = AST.clone(self,args)
         res.with_args = self.with_args
+        if hasattr(self,'is_object'):
+            res.is_object = self.is_object
         return res
         
 class TrustedIsolateDef(IsolateDef):

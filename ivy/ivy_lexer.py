@@ -133,6 +133,7 @@ reserved = all_reserved = {
    'specification' : 'SPECIFICATION',
    'implementation' : 'IMPLEMENTATION',
    'global' : 'GLOBAL',
+   'common' : 'COMMON',
    'ensure' : 'ENSURE',
    'require' : 'REQUIRE',
    'around' : 'AROUND',
@@ -257,7 +258,7 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,6]:
-            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','debug']:
+            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','common','debug']:
                 if s in reserved:
                     del reserved[s]
         else:

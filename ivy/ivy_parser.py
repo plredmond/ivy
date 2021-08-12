@@ -137,23 +137,25 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
             subst[c] = pref.rep
         return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=static)
     for decl in module.decls:
+        dpref = pref.clone([]) if pref is not None and "common" in decl.attributes else pref
+        dvsubst = dict() if "common" in decl.attributes else vsubst
         if isinstance(decl,AttributeDecl):
-            if vsubst:
-                map1 = distinct_variable_renaming(used_variables_ast(pref),used_variables_ast(decl))
-                vpref = substitute_ast(pref,map1)
-                vvsubst = dict((x,map1[y.rep]) for x,y in vsubst.iteritems())
+            if dvsubst:
+                map1 = distinct_variable_renaming(used_variables_ast(dpref),used_variables_ast(decl))
+                vpref = substitute_ast(dpref,map1)
+                vvsubst = dict((x,map1[y.rep]) for x,y in dvsubst.iteritems())
                 idecl = AttributeDecl(*[x.clone([compose_atoms(vpref,x.args[0]),x.args[1]]) for x in decl.args]) if vpref is not None else decl
                 idecl = substitute_constants_ast(idecl,vvsubst)
             else:
-                idecl = AttributeDecl(*[x.clone([compose_atoms(pref,x.args[0]),x.args[1]]) for x in decl.args]) if pref is not None else decl
-        elif vsubst:
-            map1 = distinct_variable_renaming(used_variables_ast(pref),used_variables_ast(decl))
-            vpref = substitute_ast(pref,map1)
-            vvsubst = dict((x,map1[y.rep]) for x,y in vsubst.iteritems())
+                idecl = AttributeDecl(*[x.clone([compose_atoms(dpref,x.args[0]),x.args[1]]) for x in decl.args]) if dpref is not None else decl
+        elif dvsubst:
+            map1 = distinct_variable_renaming(used_variables_ast(dpref),used_variables_ast(decl))
+            vpref = substitute_ast(dpref,map1)
+            vvsubst = dict((x,map1[y.rep]) for x,y in dvsubst.iteritems())
             idecl = spaa(decl,subst,vpref)
             idecl = substitute_constants_ast2(idecl,vvsubst)
         else:
-            idecl = spaa(decl,subst,pref)
+            idecl = spaa(decl,subst,dpref)
         if isinstance(idecl,ActionDecl):
             for foo in idecl.args:
                 if not hasattr(foo.args[1],'lineno'):
@@ -215,6 +217,7 @@ def check_non_temporal(x):
 special_attribute = None
 parent_object = None
 global_attribute = None
+common_attribute = None
 
 class Ivy(object):
     def __init__(self):
@@ -230,10 +233,13 @@ class Ivy(object):
         self.params = []
         global special_attribute
         global global_attribute
+        global common_attribute
         self.attributes = (((special_attribute,) if special_attribute is not None else ()) +
-                           ((global_attribute,) if global_attribute is not None else ()))
+                           ((global_attribute,) if global_attribute is not None else ()) +
+                           ((common_attribute,) if common_attribute is not None else ()))
         special_attribute = None
         global_attribute = None
+        common_attribute = None
         # if we are a continuation object, inherent defined symbols from previous declaration
         global parent_object
         if parent_object is not None:
@@ -1840,11 +1846,17 @@ if not (iu.get_numeric_version() <= [1,6]):
         global special_attribute
         special_attribute =  "private"
 
-    def p_specimpl_private(p):
+    def p_specimpl_global(p):
         'specimpl : GLOBAL'
         p[0] = p[1]
         global global_attribute
         global_attribute =  "global"
+
+    def p_specimpl_common(p):
+        'specimpl : COMMON'
+        p[0] = p[1]
+        global common_attribute
+        common_attribute =  "common"
 
     def p_top_specification_lcb_top_rcb(p):
         'top : top specimpl LCB top RCB'

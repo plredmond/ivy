@@ -699,7 +699,6 @@ def set_privates(mod,isolate,suff=None):
         for ns in ['impl','spec'] if nsuff == 'priv' else [nsuff]:
             if ns in l:
                 mod.privates.add(iu.compose_names(n,ns))
-    print "privates: {}".format(mod.privates)
     for name in mod.attributes:
         p,c = iu.parent_child_name(name)
         if c in ['spec','impl','private']:
@@ -707,7 +706,6 @@ def set_privates(mod,isolate,suff=None):
             nsuff = get_private_from_attributes(mod,pp,suff,isolate)
             if c == nsuff or nsuff == 'priv' or c == "private":
                 mod.privates.add(p)
-    print "privates: {}".format(mod.privates)
     global vprivates
     vprivates = set()
     for isol in mod.isolates.values():
@@ -797,25 +795,19 @@ def get_isolate_info(mod,isolate,kind,extra_with=[]):
         for v in isol.verified():
             vp.add(v.rep)
     for name in mod.attributes:
-        print "attrib: {}".format(name)
         p,c = iu.parent_child_name(name)
         if c == kind or c == "private":
             is_iso = p in vp
             def recur(p1):
                 p1,c1 = iu.parent_child_name(p1)
-                print "p1: {}".format(p1)
                 if p1 in verified:
                     if not is_iso:
                         verified.add(p)
                     present.add(p)
-                    print "added: {}".format(p)
                 else:
                     if p1 != 'this' and p1 not in vp:
                         recur(p1)
             recur(p)
-    
-
-    print "present2: {}".format(present)
     return verified,present
 
 
@@ -1023,20 +1015,12 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
             mod.before_export['ext:' + actname] = act
 
 
-    print "present: {}".format(present)
-    print "verified: {}".format(verified)
-    print "privates: {}".format(mod.privates)
     for e in mod.exports:
-        print "e: {} scope: '{}' ({})".format(e.exported(),e.scope(),type(e.scope()))
-    
         if not e.scope() and startswith_eq_some(e.exported(),present,mod): # global scope
-            print "foo!"
             exported.add('ext:' + e.exported())
             make_before_export(e.exported())
             
     explicit_exports = set(exported)
-
-    print "exported: {}".format(exported)
 
     with_effects = set()
     for actname,action in mod.actions.iteritems():
@@ -1053,12 +1037,8 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                             if not has_side_effect(mod,new_actions,c):
                                 with_effects.add(c)
                                 continue
-                            print "actname: {}".format(actname)
                             exported.add('ext:' + c)
                             make_before_export(c)
-
-
-    print "exported: {}".format(exported)
 
     for actname in export_preconds:
         pcs = export_preconds[actname]
@@ -1236,7 +1216,6 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
     mod.actions.clear()
     mod.actions.update(new_actions)
     
-    print "public_actions: {}".format(mod.public_actions)
 
     # filter the signature
     # keep only the symbols referenced in the remaining

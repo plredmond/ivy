@@ -21,6 +21,9 @@ class AST(object):
        if hasattr(self,'lineno'):
            res.lineno = self.lineno
        return res
+    def sln(self,lineno):
+        self.lineno = lineno
+        return self
 
 class NoneAST(AST):
     pass

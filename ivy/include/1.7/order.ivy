@@ -167,8 +167,10 @@ module order_iterator(range) = {
     function done(X,Y) = is_end(Y) | X < val(Y)
     function ahead(X,Y) = ~is_end(Y) & val(Y) < X
     function between(X,V,Y) = ~done(V,X) & done(V,Y)
+    function value(X:t) = val(X)
 
     action create(x:range.t) returns (y:t)
+    action begin returns (y:t)
     action end returns (y:t)
     
     object spec = {
@@ -183,6 +185,10 @@ module order_iterator(range) = {
 	    assert is_end(y);
 	    assert val(y) = 0
 	}
+	after begin {
+	    assert ~is_end(y);
+	    assert val(y) = 0
+	}
     }
 
     object impl = {
@@ -192,6 +198,10 @@ module order_iterator(range) = {
 	}
 	implement end {
 	    is_end(y) := true;
+	    val(y) := 0
+	}
+	implement begin {
+	    is_end(y) := false;
 	    val(y) := 0
 	}
     }
@@ -213,13 +223,19 @@ module order_iterator_impl(range) = {
     function done(X,Y) = is_end(Y) | X < val(Y)
     function ahead(X,Y) = ~is_end(Y) & val(Y) < X
     function between(X,V,Y) = ~done(V,X) & done(V,Y)
-
+    function value(X:t) = val(X)
+    
     action create(x:range.t) returns (y:t)
+    action begin returns (y:t)
     action end returns (y:t)
     
     implement create {
 	is_end(y) := false;
 	val(y) := x
+    }
+    implement begin {
+	is_end(y) := false;
+	val(y) := 0;
     }
     implement end {
 	is_end(y) := true;
@@ -268,6 +284,7 @@ module sequence_iterator(range) = {
 	implement prev {
 	    x := create(range.prev(val(x)))
 	}
+
     }
 
 }

@@ -545,6 +545,17 @@ def p_top_object_symbol_eq_lcb_top_rcb(p):
     p[0] = p[1]
     create_object(p[0],p[3],p[4],p[8],get_lineno(p,3),p[7])
 
+def p_top_class_symbol_eq_lcb_top_rcb(p):
+    'top : top CLASS objsym objectargs EQ LCB optdotdotdot top RCB objectend'
+    p[0] = p[1]
+    scnst = Atom(This())
+    scnst.lineno = get_lineno(p,2)
+    tdfn = TypeDef(scnst,UninterpretedSort())
+    tdfn.lineno = get_lineno(p,2)
+    p[8].declare(TypeDecl(tdfn))
+    p[8].decls = [p[8].decls[-1]] + p[8].decls[:-1]
+    create_object(p[0],p[3],p[4],p[8],get_lineno(p,3),p[7])
+
 def p_optsemi(p):
     'optsemi : '
     p[0] = None
@@ -786,6 +797,13 @@ def p_symdecl_constantdecl(p):
 def p_symdecl_destructor_tterms(p):
     'symdecl : DESTRUCTOR tterms'
     p[0] = DestructorDecl(*p[2])
+
+def p_symdecl_field_tterms(p):
+    'symdecl : FIELD tterms'
+    arg0 = Variable('SELF',This())
+    arg0.lineno = get_lineno(p,1)
+    tterms = [x.clone([arg0]+x.args) for x in p[2]]
+    p[0] = DestructorDecl(*tterms)
 
 if not(iu.get_numeric_version() <= [1,6]):
     def p_symdecl_constructor_tterms(p):
@@ -1607,17 +1625,31 @@ else:
       'optimpex : IMPORT'
       p[0] = ImportDecl
 
+  def p_actmeth_action(p):
+      'actmeth : ACTION'
+      p[0] = False
+
+  def p_actmeth_method(p):
+      'actmeth : METHOD'
+      p[0] = True
+
   def p_top_optimpex_action_symbol_optargs_optreturns_eq_action(p):
-    'top : top optimpex ACTION SYMBOL optargs optreturns optactiondef'
+    'top : top optimpex actmeth SYMBOL optargs optreturns optactiondef'
     p[0] = p[1]
     adef = p[7]
     if not hasattr(adef,'lineno'):
         adef.lineno = get_lineno(p,4)
+    formals = p[5]
+    if p[3]:
+        arg0 = App('self')
+        arg0.sort = This()
+        arg0.lineno = get_lineno(p,4)
+        formals = [arg0] + formals
     if isinstance(adef,CrashAction):
-        adef = adef.clone([Atom(This(),p[5])])
+        adef = adef.clone([Atom(This(),formals)])
     the_atom = Atom(p[4],[])
     the_atom.lineno = adef.lineno
-    actdef = ActionDef(the_atom,adef,formals=p[5],returns=p[6])
+    actdef = ActionDef(the_atom,adef,formals=formals,returns=p[6])
     actdef.lineno = adef.lineno
     decl = ActionDecl(actdef)
     decl.lineno = adef.lineno
@@ -2383,6 +2415,24 @@ else:
         'complexact : WHILE somefmla invariants decreases sequence'
         p[0] = WhileAction(*([check_non_temporal(p[2]), fix_if_part(p[2],p[5])] + p[3] + p[4]))
         p[0].lineno = get_lineno(p,1)
+
+    def methcall(lhs,rhs):
+        if (isinstance(lhs,App) or isinstance(lhs,Atom)) and len(lhs.args) == 0:
+            return compose_atoms(lhs,rhs)
+        return MethodCall(lhs,rhs)
+
+    def p_action_for_tterm_comma_tterm_in_expr_invariants_decreases_lcb_action_rcb(p):
+        'complexact : FOR tterm COMMA tterm IN fmla invariants decreases sequence'
+        itr,val,fmla,invars,decrs,seq = p[2],p[4],check_non_temporal(p[6]),p[7],p[8],p[9]
+        iend = itr.rename('loc:end')
+        ln = get_lineno(p,1)
+        didx = VarAction(itr,methcall(fmla,App('begin').sln(ln)).sln(ln)).sln(ln)
+        dend = VarAction(iend,methcall(fmla,App('end').sln(ln)).sln(ln)).sln(ln)
+        dval = VarAction(val,methcall(fmla,App('value',itr).sln(ln)).sln(ln)).sln(ln)
+        incr = AssignAction(itr,methcall(itr,App('next').sln(ln)).sln(ln)).sln(ln)
+        body = Sequence(*lower_var_stmts([dval,seq,incr])).sln(ln)
+        loop = WhileAction(*([App('<',itr,iend).sln(ln),body] + invars + decrs)).sln(ln)
+        p[0] = Sequence(*lower_var_stmts([didx,dend,loop])).sln(ln)
 
 def p_action_if_times_lcb_action_rcb_else_LCB_action_RCB(p):
     'complexact : IF TIMES sequence ELSE action'

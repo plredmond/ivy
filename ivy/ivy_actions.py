@@ -265,6 +265,9 @@ class Action(AST):
     def set_lineno(self,lineno):
         self.lineno = lineno
         return self
+    def sln(self,lineno):
+        self.lineno = lineno
+        return self
     def get_type_names(self,names):
         for a in self.iter_subactions():
             if isinstance(a,LocalAction):

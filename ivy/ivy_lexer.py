@@ -54,7 +54,8 @@ reserved = all_reserved = {
    'concept' : 'CONCEPT',
    'init' : 'INIT',
    'action' : 'ACTION',
-   'method' : 'ACTION',
+   'method' : 'METHOD',
+   'field' : 'FIELD',
    'state' : 'STATE',
    'assume' : 'ASSUME',
    'assert' : 'ASSERT',
@@ -74,7 +75,7 @@ reserved = all_reserved = {
    'fresh' : 'FRESH',
    'module' : 'MODULE',
    'object' : 'OBJECT',
-   'class' : 'MODULE',
+   'class' : 'CLASS',
    'type' : 'TYPE',
    'if' : 'IF',
    'else' : 'ELSE',
@@ -153,6 +154,7 @@ reserved = all_reserved = {
     'unfold' : 'UNFOLD',
     'forget' : 'FORGET',
     'debug' : 'DEBUG',
+    'for' : 'FOR'
 }
 
 tokens += tuple(all_reserved.values())
@@ -258,11 +260,11 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,6]:
-            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','common','debug']:
+            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','common','debug','field','for']:
                 if s in reserved:
                     del reserved[s]
         else:
-            for s in ['requires','ensures','method']:
+            for s in ['requires','ensures']:
                 if s in reserved:
                     del reserved[s]
 

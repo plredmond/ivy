@@ -1576,7 +1576,6 @@ def create_isolate(iso,mod = None,**kwargs):
                     action = mod.actions[impname]
                     if not(type(action) == ia.Sequence and not action.args):
                         raise iu.IvyError(imp,"cannot import implemented action: {}".format(impname))
-                    print "foo1: {}".format(impname)
                     outcalls.add(impname)
                 else:
                     newimps.append(imp)
@@ -1590,8 +1589,6 @@ def create_isolate(iso,mod = None,**kwargs):
                 present_actions = set(a for a in mod.actions if startswith_eq_some(a,present,mod))
                 present_actions.update(verified_actions)
                 mod.privates = save_privates
-                print "present: {}".format(present)
-                print "privates: {}".format(mod.privates)
                 for actname in present_actions:
                     for called in im.module.actions[actname].iter_calls():
                         if called not in present_actions:

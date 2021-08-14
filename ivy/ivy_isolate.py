@@ -204,6 +204,12 @@ def strip_map_lookup(name,strip_map,with_dot=False):
     name = canon_act(name)
     if iu.compose_names(name,'global_parameter') in im.module.attributes:
         return []
+    if iu.compose_names(name,'common') in im.module.attributes:
+        return []
+    if name in im.module.destructor_sorts:
+        return []
+    if name in im.module.sig.sorts:
+        return []
     for prefix in strip_map:
         if (name+iu.ivy_compose_character).startswith(prefix+iu.ivy_compose_character):
             return strip_map[prefix]
@@ -1592,7 +1598,6 @@ def create_isolate(iso,mod = None,**kwargs):
                 for actname in present_actions:
                     for called in im.module.actions[actname].iter_calls():
                         if called not in present_actions:
-                            print "foo2: {} -> {}".format(actname,called)
                             outcalls.add(called)
             for name in outcalls:
                 impname = name

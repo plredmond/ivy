@@ -125,7 +125,7 @@ def stack_action_lookup(name,params=0):
 
 def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
     save = ivy.attributes
-    ivy.attributes = ()
+    ivy.attributes = tuple(x for x in ivy.attributes if x == "common")
     static = module.static.copy()
     for name,dfs in module.defined.iteritems():
         if any(df[1] is TypeDecl for df in dfs):
@@ -262,6 +262,9 @@ class Ivy(object):
         for df in decl.static():
             self.static.add(df)
         decl.attributes = self.attributes + decl.attributes
+        if "common" in decl.attributes:
+            for df in decl.defines():
+                self.static.add(df[0])
         self.decls.append(decl)
         if isinstance(decl,MacroDecl):
             for d in decl.args:
@@ -2476,6 +2479,11 @@ if not (iu.get_numeric_version() <= [1,5]):
     def p_callatom_this(p):
         'callatom : THIS'
         p[0] = Atom(This())
+        p[0].lineno = get_lineno(p,1)
+        
+    def p_callatom_method(p):
+        'callatom : METHOD'
+        p[0] = Atom('method')
         p[0].lineno = get_lineno(p,1)
         
 

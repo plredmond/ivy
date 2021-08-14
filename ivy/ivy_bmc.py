@@ -17,7 +17,14 @@ import ivy_proof
 import ivy_trace
 import ivy_interp
 
-def check_isolate(n_steps):
+def check_isolate(n_steps,n_unroll=None):
+
+    if n_unroll is not None:
+        old_actions = im.module.actions
+
+        im.module.actions = dict()
+        for actname,action in old_actions.iteritems():
+            im.module.actions[actname] = action.unroll_loops(lambda x: n_unroll)
     
     step_action = ia.env_action(None)
 
@@ -57,4 +64,6 @@ def check_isolate(n_steps):
             print
             print res
             exit(0)
-            
+
+    if n_unroll is not None:
+        im.module.actions = old_actions

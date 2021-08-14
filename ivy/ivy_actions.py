@@ -210,10 +210,11 @@ class Action(AST):
              update = hide(to_hide,update)
         return update
     def copy_formals(self,res):
-        if hasattr(self,'formal_params'):
-            res.formal_params = self.formal_params
-        if hasattr(self,'formal_returns'):
-            res.formal_returns = self.formal_returns
+        if not isinstance(res,EnvAction):
+            if hasattr(self,'formal_params'):
+                res.formal_params = self.formal_params
+            if hasattr(self,'formal_returns'):
+                res.formal_returns = self.formal_returns
         if hasattr(self,'labels'):
             res.labels = self.labels
         return res
@@ -692,7 +693,8 @@ class Sequence(Action):
         axioms = domain.background_theory(pvars)
         for op in self.args:
             thing = op.int_update(domain,pvars);
-#            print "op: {}, thing[2].annot: {}".format(op,thing[2].annot)
+            if thing[1].annot is None or thing[2].annot is None:
+                print "op: {}, thing[1].annot: {}, thing[2].annot: {}".format(op,thing[1].annot,thing[2].annot)
             update = compose_updates(update,axioms,thing)
             if hasattr(op,'lineno') and update[1].annot is not None:
                 update[1].annot.lineno = op.lineno
@@ -939,13 +941,14 @@ class WhileAction(Action):
         elif isinstance(cond,Not) and is_eq(cond.args[0]):
             idx_sort = cond.args[0].args[0].sort
         else:
-            raise IvyError(self,'cannot determine an index sort for loop')
+            idx_sort = None
+        #            raise IvyError(self,'cannot determine an index sort for loop')
         cardsort = card(idx_sort)
+        sort_name = idx_sort if idx_sort is not None else "unknown sort"
         if cardsort is None:
-            raise IvyError(self,'cannot determine an iteration bound for loop over {}'.format(idx_sort))
+            raise IvyError(self,'cannot determine an iteration bound for loop over {}'.format(sort_name))
         if cardsort > 100:
-            assert False
-            raise IvyError(self,'cowardly refusing to unroll loop over {} {} times'.format(idx_sort,cardsort))
+            raise IvyError(self,'cowardly refusing to unroll loop over {} {} times'.format(sort_name,cardsort))
         res = IfAction(self.args[0],AssumeAction(Or())) # AssumeAction(Not(self.args[0]))
         for idx in range(cardsort):
             res = IfAction(self.args[0],Sequence(body or self.args[1],res))
@@ -1055,7 +1058,7 @@ class DebugAction(Action):
         return ('debug ' + str(self.args[0])
                 + ((' with ' + ','.join(map(str,self.args[1:]))) if len(self.args)>1 else ''))
     def int_update(self,domain,pvars):
-        return ([], true_clauses(), false_clauses())
+        return ([], true_clauses(EmptyAnnotation()), false_clauses(EmptyAnnotation()))
 
 class NativeAction(Action):
     """ Quote native code in an action """
@@ -1445,7 +1448,8 @@ def match_annotation(action,annot,handler):
                     pos = len(action.args)
                 if pos == 0:
                     if not isinstance(annot,EmptyAnnotation):
-                        raise AnnotationError()
+                        print "annotation error: should be empty annotation"
+#                        raise AnnotationError()
                     return
                 if isinstance(annot,IteAnnotation):
                     # This means a failure may occur here
@@ -1461,7 +1465,9 @@ def match_annotation(action,annot,handler):
                         recur(action,annot.elseb,env,pos=pos-1)
                         return
                 if not isinstance(annot,ComposeAnnotation):
-                        raise AnnotationError()
+                    print "annotation error: should be ComposeAnnotation"
+                    return
+#                        raise AnnotationError()
                 recur(action,annot.args[0],env,pos-1)
                 recur(action.args[pos-1],annot.args[1],env)
                 return
@@ -1533,15 +1539,21 @@ def match_annotation(action,annot,handler):
                 return
             handler.handle(action,env)
         except AnnotationError:
-            show_me()
+#            show_me()
             raise AnnotationError()
-    recur(action,annot,dict())
+    try:
+        recur(action,annot,dict())
+    except AnnotationError:
+        assert False
+        print "internal error: cannot convert satisfying assignment to program trace"
     
 def env_action(actname,label=None):
     actnames = sorted(ivy_module.module.public_actions) if actname is None else [actname] 
     racts = []
     for a in actnames:
         act = ivy_module.module.actions[a] if isinstance(a,str) else actname
+        # if unroll is not None:
+        #    act = act.unroll_loops(unroll)
         ract = Sequence(act,ReturnAction())
         if hasattr(act,'formal_params'):
             ract.formal_params = act.formal_params

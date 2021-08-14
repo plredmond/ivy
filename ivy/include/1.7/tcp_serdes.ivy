@@ -392,7 +392,7 @@ module tcp_serdes(endpoint,data) = {
             }
             else {
                 // std::cout << "CONNECT FAILED " << sock << std::endl;
-                perror("connect failed");
+                // perror("connect failed");
                 ivy->__unlock();
                 ::sleep(1);
                 close(sock);

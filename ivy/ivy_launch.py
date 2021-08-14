@@ -44,6 +44,8 @@ def main():
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
     dscfname = sys.argv[1]
+    if dscfname.endswith('.ivy'):
+        dscfname = dscfname[:-4]
     if not dscfname.endswith('.dsc'):
         dscfname += '.dsc'
     try:

@@ -1485,6 +1485,83 @@ module segment(domain,range,arr) = {
     isolate iso = this with domain.impl,arr
 }
 
+module unbounded_queue(range) = {
+
+    function empty : bool
+    function peek : range
+    action enqueue(val:range)
+    action dequeue returns (res:range)
+
+    common {
+        instance domain : unbounded_sequence
+    }
+    
+    # specification {
+        
+    #     var head_pos : domain
+    #     var tail_pos : domain
+    #     relation at_pos(T:domain,M:range)
+
+    #     invariant empty <-> head_pos >= tail_pos
+    #     invariant at_pos(head_pos,M) -> peek = M
+    #     invariant at_pos(T,M) -> head <= T & T < tail
+    #     invariant at_pos(T,M) & at_pos(T,M1) -> M = M1
+        
+    #     after init {
+    #         head_pos := 0;
+    #         tail_pos := 0;
+    #         at_pos(T,M) := false;
+    #     }
+        
+    #     after enqueue {
+    #         at_pos(tail,val) := true;
+    #         tail_pos := tail_pos.next;
+    #     }
+
+    #     before dequeue {
+    #         require ~empty;
+    #     }
+        
+    #     after dequeue {
+    #         ensure at_pos(head,res);
+    #         head_pos := head_pos.next;
+    #     }
+    # }
+
+#    implementation {
+
+        function map(D:domain) : range
+        var head : domain
+        var tail : domain
+        
+        after init {
+            head := 0;
+            tail := 0;
+        }
+        
+        definition empty = head >= tail
+        definition peek = map(head)
+        
+        implement enqueue {
+            map(tail) := val;
+            tail := tail.next;
+	}
+
+	implement dequeue {
+	    res := map(head);
+            head := head.next;
+	}
+
+#        invariant at_pos(T,M) -> map(T) = M
+#        invariant head_pos = head & tail_pos = tail
+                
+#   }
+
+    isolate iso = this
+    attribute test=impl
+    
+}
+
 
     
     

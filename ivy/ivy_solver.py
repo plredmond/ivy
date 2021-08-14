@@ -745,7 +745,9 @@ def mine_interpreted_constants(model,vocab):
         sort = s.sort.rng
         if sort in sort_values:
             sort_values[sort].update(collect_model_values(sort,model,s))
-    return dict((x,map(term_to_z3,list(y))) for x,y in sort_values.iteritems())
+    def get_const(c):
+        return model.eval(term_to_z3(c),model_completion=True)
+    return dict((x,map(get_const,list(y))) for x,y in sort_values.iteritems())
     
 def enumerated_range(sort):
     res = [z3_constants[x] for x in sort.defines()]

@@ -775,9 +775,9 @@ def check_module():
                 global some_bounded
                 some_bounded = True
                 _,prms = iu.parse_int_subscripts(method_name)
-                if len(prms) != 1:
-                    raise IvyError(None,'BMC method specifier should be bmc[<steps>]. Got "{}".'.format(method_name))
-                mc_isolate(isolate,lambda : ivy_bmc.check_isolate(prms[0]))
+                if len(prms) < 1 or len(prms) > 2:
+                    raise IvyError(None,'BMC method specifier should be bmc[<steps>] or bmc[<steps>][<unroll>]. Got "{}".'.format(method_name))
+                mc_isolate(isolate,lambda : ivy_bmc.check_isolate(prms[0],n_unroll = prms[1] if len(prms) >= 2 else None))
             else:
                 check_isolate()
         if isolate is not None and iu.compose_names(isolate,'macro_finder') in im.module.attributes:

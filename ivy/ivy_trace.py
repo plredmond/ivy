@@ -268,6 +268,7 @@ def check_final_cond(ag,post,final_cond,rels_to_min=[],shrink=False,handler_clas
     history = ag.get_history(post)
     axioms = im.module.background_theory()
     clauses = history.post
+    assert clauses.annot is not None
     clauses = lut.and_clauses(clauses,axioms)
     assert all(x is not None for x in history.actions)
     # work around a bug in ivy_interp
@@ -276,6 +277,7 @@ def check_final_cond(ag,post,final_cond,rels_to_min=[],shrink=False,handler_clas
     return check_vc(clauses,action,final_cond,rels_to_min,shrink,handler_class)
 
 def check_vc(clauses,action,final_cond=None,rels_to_min=[],shrink=False,handler_class=None):
+    assert clauses.annot is not None
     model = slv.get_small_model(clauses,lg.uninterpreted_sorts(),rels_to_min,final_cond=final_cond,shrink=shrink)
     if model is not None:
         failed = ([] if final_cond is None

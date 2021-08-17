@@ -2155,10 +2155,19 @@ def p_actseqrev_simpact_semi(p):
     'actseqrev : simpleact SEMI'
     p[0] = [p[1]]
 
-def p_actseqrev_complexact_optsemi_actseqrev(p):
-    'actseqrev : complexact optsemi actseqrev'
+def p_actseqrev_complexact_actseqrev(p):
+    'actseqrev : complexact actseqrev'
+    p[0] = p[2]
+    p[0].append(p[1])
+
+def p_actseqrev_complexact_semi_actseqrev(p):
+    'actseqrev : complexact SEMI actseqrev'
     p[0] = p[3]
     p[0].append(p[1])
+
+def p_actseqrev_complexact_semi(p):
+    'actseqrev : complexact SEMI'
+    p[0] = [p[1]]
 
 def p_actseq_actseqrev(p):
     'actseq : actseqrev'

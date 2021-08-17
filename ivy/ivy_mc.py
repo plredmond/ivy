@@ -230,7 +230,7 @@ def get_encoding_bits(sort):
     interp = thy.get_sort_theory(sort)
     if il.is_enumerated_sort(interp):
         n = ceillog2(len(interp.defines()))
-    if il.is_range_sort(interp) and il.is_numeral(interp.ub):
+    elif il.is_range_sort(interp) and il.is_numeral(interp.ub):
         n = ceillog2(int(interp.ub.name)+1)
     elif isinstance(interp,thy.BitVectorTheory):
         n = interp.bits
@@ -1753,12 +1753,9 @@ def check_isolate(method="mc"):
 
     # scrape the output to get the answer
 
-    print "bar!"
-    
     if mc.scrape(alltext):
         return None
     else:
-        print "foo!"
         return aiger_witness_to_ivy_trace2(aiger,outfilename,action,stvarset,ext_act,annot,cnsts,decoder)        
         
     

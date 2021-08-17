@@ -260,7 +260,11 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,6]:
-            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget','global','common','debug','field','for']:
+            for s in ['decreases','specification','implementation','require','ensure','around','parameter','apply','theorem','showgoals','spoil','explicit','thunk','isa','autoinstance','constructor','tactic','finite','unfold','forget']:
+                if s in reserved:
+                    del reserved[s]
+        if self.version <= [1,7]:
+            for s in ['global','common','debug','field','for','process']:
                 if s in reserved:
                     del reserved[s]
         else:

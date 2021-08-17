@@ -304,7 +304,6 @@ class ProofChecker(object):
         return [goal] + decls[1:]
 
     def lookup_schema(self,schemaname,decl,ast,close=False):
-        print list(self.schemata.keys())
         if schemaname in self.schemata:
             schema = self.schemata[schemaname]
             check_schema_capture(schema,decl)

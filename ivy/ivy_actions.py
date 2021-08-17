@@ -693,8 +693,8 @@ class Sequence(Action):
         axioms = domain.background_theory(pvars)
         for op in self.args:
             thing = op.int_update(domain,pvars);
-            if thing[1].annot is None or thing[2].annot is None:
-                print "op: {}, thing[1].annot: {}, thing[2].annot: {}".format(op,thing[1].annot,thing[2].annot)
+#            if thing[1].annot is None or thing[2].annot is None:
+#                print "op: {}, thing[1].annot: {}, thing[2].annot: {}".format(op,thing[1].annot,thing[2].annot)
             update = compose_updates(update,axioms,thing)
             if hasattr(op,'lineno') and update[1].annot is not None:
                 update[1].annot.lineno = op.lineno

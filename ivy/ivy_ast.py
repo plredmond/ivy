@@ -1045,7 +1045,9 @@ class InterpretDecl(LabeledDecl):
     def name(self):
         return 'interpret'
     def defines(self):
-        res = [(self.args[0].label.rep,self.lineno)]
+        res = []
+        if not(iu.get_numeric_version() <= [1,6]):
+            res = [(self.args[0].label.rep,self.lineno)]
         rhs = self.args[0].formula.args[1]
         if isinstance(rhs,Range):
             for arg in rhs.args:

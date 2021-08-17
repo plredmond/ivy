@@ -1563,6 +1563,8 @@ def init_method():
     return res
 
 def emit_initial_action(header,impl,classname):
+    global thunks
+    thunks = impl
     code_line(header,'void __init()')
     open_scope(impl,line = 'void ' + classname + '::__init()')
     for action in im.module.initial_actions:

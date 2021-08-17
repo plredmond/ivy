@@ -20,6 +20,10 @@ def p_SYMBOL_SYMBOL_LB_SYMBOL_RB(p):
     'SYMBOL : SYMBOL LB SYMBOL RB'
     p[0] = p[1] + p[2] + p[3] + p[4]
 
+def p_SYMBOL_SYMBOL_LB_THIS_RB(p):
+    'SYMBOL : SYMBOL LB THIS RB'
+    p[0] = p[1] + p[2] + 'this' + p[4]
+
 def p_LABEL_LB_SYMBOL_RB(p):
     'LABEL : LB SYMBOL RB'
     p[0] = p[1] + p[2] + p[3]

@@ -1,0 +1,15 @@
+#lang ivy
+
+module unsigned_bit_vector(bits) = {
+    type this
+    global {
+        interpret this -> bv[bits]
+    }
+}
+    
+autoinstance uint[bits] : unsigned_bit_vector(bits)
+
+type nat
+global {
+    interpret nat -> nat
+}

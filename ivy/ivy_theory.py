@@ -146,6 +146,8 @@ def parse_theory(name):
 
 def get_theory_schemata(name):
     if iu.version_le("1.6",iu.get_string_version()):
+        if isinstance(name,il.RangeSort):
+            return theories()['int']
         if name.startswith('bv[') or name == 'nat':
             return theories()['int']
         return theories().get(name,None)
@@ -168,5 +170,5 @@ def has_integer_interp(sort):
     name = sort.name
     if name in il.sig.interp:
         interp = il.sig.interp[name]
-        return interp in ['int','nat']
+        return interp in ['int','nat'] or isinstance(interp,il.RangeSort)
     return False

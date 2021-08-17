@@ -714,6 +714,7 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
             res = meth()
             if res is not None:
                 print res
+                print 'FAIL'
                 exit(1)
         return
     for lineno in all_assert_linenos():
@@ -724,6 +725,7 @@ def mc_isolate(isolate,meth=ivy_mc.check_isolate):
                 res = meth()
             if res is not None:
                 print res
+                print 'FAIL'
                 exit(1)
             act.checked_assert.value = old_checked_assert
     

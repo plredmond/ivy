@@ -28,7 +28,7 @@ from collections import defaultdict
 #
 ################################################################################
 
-option_detailed = iu.BooleanParameter("detailed",False)
+option_detailed = iu.BooleanParameter("detailed",True)
 
 class TraceBase(art.AnalysisGraph):
     def __init__(self):

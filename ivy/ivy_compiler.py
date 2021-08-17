@@ -298,6 +298,8 @@ def compile_app(self,old=False):
             raise IvyError(self,"{} is not a function".format(rep))
         return ivy_logic.And() if rep == "true" else ivy_logic.Or()
     with ReturnContext(None):
+        if any(isinstance(a,ivy_logic.Variable) for a in self.args):
+            print "foo!: {}".format(self)
         args = [a.compile() for a in self.args]
     # handle action calls in rhs of assignment
     if expr_context and top_context and rep in top_context.actions:
@@ -933,6 +935,7 @@ last_fmla = None
 ivy_ast.TacticWithMatch.compile = lambda self: compile_schema_instantiation(self,last_fmla)
 
 def compile_let_tactic(self):
+    return self
     fmla = ivy_ast.And(*[ivy_ast.Atom('=',x.args[0],x.args[1]) for x in self.args])
     thing = sortify_with_inference(fmla)
     return self.clone(thing.args)
@@ -1273,6 +1276,7 @@ class IvyDomainSetup(IvyDeclInterp):
             lo = compile_bound(rhs.lo)
             hi = compile_bound(rhs.hi)
             interp[lhs] = ivy_logic.RangeSort(lhs,lo,hi)
+            compile_theory(self.domain,lhs,interp[lhs])
             return
         if isinstance(rhs,ivy_ast.EnumeratedSort):
             if lhs not in self.domain.sig.sorts:
@@ -2020,7 +2024,7 @@ def compile_theory(mod,sortname,theoryname,**kwargs):
     
 def compile_theories(mod,**kwargs):
     for name,value in mod.sig.interp.iteritems():
-        if name in mod.sig.sorts and isinstance(value,str):
+        if name in mod.sig.sorts and (isinstance(value,str) or isinstance(value,ivy_logic.RangeSort)):
             theory = th.get_theory_schemata(value)
             ivy_compile_theory_from_string(mod,theory,name,**kwargs)
 

@@ -354,8 +354,11 @@ module tcp_serdes(endpoint,data) = {
 
             // try a blocking send
 
-            // int bytes = send(sock,&buf[0],buf.size(),MSG_NOSIGNAL);
+#ifdef MSG_NOSIGNAL	    
+            int bytes = send(sock,&buf[0],buf.size(),MSG_NOSIGNAL);
+#else
             int bytes = send(sock,&buf[0],buf.size(),0);
+#endif
             // std::cout << "SENT\n";
 
             // if not all bytes sent, channel has failed, close the queue
@@ -561,13 +564,16 @@ var send_queue : queue_t
             // Start lisetning on the socket
             if (listen(s,2) < 0) 
                 { std::cerr << "cannot listen on socket\n"; exit(1); }
+#ifdef SO_NOSIGPIPE
             {
                 int opt = 1;
+		
                 if (setsockopt(s, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof(opt)) == -1) {
                     perror("setsockopt");
                     return -1;
                 }
             }
+#endif
             `rdr`[s] = r;
             install_reader(r);
         >>>

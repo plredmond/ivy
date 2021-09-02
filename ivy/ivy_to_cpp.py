@@ -3584,7 +3584,7 @@ def emit_app(self,header,code,capture_args=None):
             code.append('( {} < {} ? 0 : {} - {})'.format(x,y,x,y))
             return
         if isinstance(itp,il.RangeSort):
-            x = new_temp(header,self.func.sort.rng)
+            x = new_temp(header)
             code_line(header,x + ' = ' + code_eval(header,self.args[0]) + ' {} '.format(self.func.name) + code_eval(header,self.args[1]))
             lb = code_eval(header,itp.lb)
             ub = code_eval(header,itp.ub)

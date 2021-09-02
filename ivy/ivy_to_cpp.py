@@ -4964,6 +4964,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
                 Sleep(final_ms);  // HACK: wait for late responses
 #endif
     __ivy_out << "test_completed" << std::endl;
+    if (runidx == runs-1) exit(0);
     for (unsigned i = 0; i < readers.size(); i++)
         delete readers[i];
     readers.clear();

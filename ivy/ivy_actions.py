@@ -77,6 +77,22 @@ class UnrollContext(ActionContext):
 
 context = ActionContext()
 
+class SymExContext(object):
+    """ Context Manager for parameterized symbolic execution """
+    def __init__(self,params):
+        self.params = params
+    def __enter__(self):
+        global symex_params
+        self.old_params = symex_params
+        symex_params = self.params
+        return self
+    def __exit__(self,exc_type, exc_val, exc_tb):
+        global symex_params
+        symex_params = self.old_params
+        return False # don't block any exceptions
+
+symex_params = []
+    
 class SymbolList(AST):
     def __init__(self,*symbols):
         assert all(isinstance(a,str) or isinstance(a,Symbol) for a in symbols)
@@ -441,7 +457,6 @@ class AssignAction(Action):
 
         lhs_vars = used_variables_ast(lhs)
         if any(v not in lhs_vars for v in used_variables_ast(rhs)):
-            print self
             raise IvyError(self,"multiply assigned: {}".format(lhs.rep))
 
         type_check(domain,rhs)
@@ -1265,6 +1280,18 @@ def apply_mixin(decl,action1,action2):
     if hasattr(action2,'labels'):
         res.labels = action2.labels
     return res
+
+def append_to_action(action1,action2):
+    res = concat_actions(action1,action2)
+    res.lineno = action1.lineno
+    if hasattr(action1,'formal_params'):
+        res.formal_params = action1.formal_params
+    if hasattr(action1,'formal_returns'):
+        res.formal_returns = action1.formal_returns
+    if hasattr(action1,'labels'):
+        res.labels = action1.labels
+    return res
+    
 
 def params_to_str(params):
     params = [(s.drop_prefix('fml:') if s.name.startswith('fml:') else s) for s in params]

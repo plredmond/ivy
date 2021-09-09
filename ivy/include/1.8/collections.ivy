@@ -44,8 +44,7 @@ module array(domain,range) = {
     action append(a:t,v:range) returns (a:t)
 
     # test equality of two arrays
-    action eq(x:t,y:t) returns (res:bool)
-
+#    action eq(x:t,y:t) returns (res:bool)
     # extend an array by another arrary (i.e., concatenate the arrays)
     action extend(a:t,b:t) returns (a:t)
 
@@ -59,6 +58,8 @@ module array(domain,range) = {
     definition begin(A) = 0
     function end(A:t) : domain
     function value(A:t,X:domain) : range
+    function eq(X:t,Y:t) = (end(X) = end(Y) & forall I. 0 <= I & I < end(X) -> value(X,I) = value(Y,I))
+
 
     # Extract an array segment
 
@@ -125,9 +126,9 @@ module array(domain,range) = {
 	    assert value(a,end(old a)) = v
 	}
 
-        after eq {
-            ensure res <-> (end(x) = end(y) & forall I. 0 <= I & I < end(x) -> value(x,I) = value(y,I))
-        }
+#        after eq {
+#            ensure res <-> (end(x) = end(y) & forall I. 0 <= I & I < end(x) -> value(x,I) = value(y,I))
+#        }
 
         theorem extensionality = {
             property end(X) = end(Y) & forall I. 0 <= I & I < end(X) -> value(X,I) = value(Y,I)
@@ -161,9 +162,7 @@ autoinstance array[domain][range] : array(domain,range)
 
 module vector(range) = {
     
-    instance domain : unbounded_sequence
-    
-    instantiate array(domain,range)
+    instantiate array(index,range)
 }
 
 ################################################################################

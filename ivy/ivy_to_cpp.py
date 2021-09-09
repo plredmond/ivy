@@ -3853,7 +3853,7 @@ def emit_quant(variables,body,header,code,exists=False):
             ebnds = []
             get_extensional_bound_exprs(v0,body,exists,ebnds)
             if not ebnds:
-                if not isinstance(berr):
+                if not isinstance(berr,BoundsError):
                     berr = BoundsError(None,"cannot iterate over sort {}".format(v0.sort))
                 berr.throw()
             ebnd = ebnds[0]
@@ -5489,6 +5489,18 @@ opt_outdir = iu.Parameter("outdir","")
 
 emit_main = True
 
+def add_conjs_to_actions():
+    asserts = [ia.AssertAction(conj.formula).set_lineno(conj.lineno) for conj in im.module.labeled_conjs]
+    seq = ia.Sequence(*asserts)
+    im.module.actions = dict((actname,ia.append_to_action(action,seq))
+                             for actname,action in im.module.actions.iteritems())
+    im.module.initializers = [(name,ia.append_to_action(action,seq))
+                              for (name,action) in im.module.initializers]
+    im.module.initial_actions = [ia.append_to_action(action,seq)
+                                 for action in im.module.initial_actions]
+        
+
+
 def main():
     main_int(False)
 
@@ -5602,7 +5614,14 @@ def main_int(is_ivyc):
                             the_iso.with_args = len(the_iso.args)
                             im.module.isolates[isolate] = the_iso
                         
+                    iso.compile_with_invariants.set("true" if target.get()=='test'
+                                                    and not iu.version_le(iu.get_string_version(),"1.7")
+                                                    else "false")
+
                     iso.create_isolate(isolate) # ,ext='ext'
+
+                    if im.module.labeled_conjs:
+                        add_conjs_to_actions()
 
                     # Tricky: cone of influence may eliminate this symbol, but
                     # run-time accesses it.

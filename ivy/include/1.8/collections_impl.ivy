@@ -9,9 +9,9 @@ module array_impl = {
 
 	definition end(a:t) = <<< `a`.size() >>>
 
-        implement eq(x:t,y:t) returns(res:bool) {
-            res := (x = y);
-        }
+#        implement eq(x:t,y:t) returns(res:bool) {
+#            res := (x = y);
+#        }
 
 	implement create(s:domain,y:range) returns (a:t) {
 	    <<<

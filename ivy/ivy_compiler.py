@@ -2146,7 +2146,7 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
             for attribute in decl.attributes:
                 for dfs in decl.defines():
                     name = dfs[0]
-                    mod.attributes[iu.compose_names(name,attribute)] = "yes"
+                    mod.attributes[iu.compose_names(name,attribute)] = decl.common if decl.common is not None and attribute == "common" else "yes"
 #        infer_parameters(decls.decls)
         with TopContext(collect_actions(decls.decls)):
             IvyDomainSetup(mod)(decls)

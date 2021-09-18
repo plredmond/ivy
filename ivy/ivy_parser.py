@@ -156,6 +156,10 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
             idecl = substitute_constants_ast2(idecl,vvsubst)
         else:
             idecl = spaa(decl,subst,dpref)
+        if decl.common is not None:
+            idecl.common = pref.rep if decl.common == 'this' else iu.compose_names(pref.rep,decl.common)
+        else:
+            idecl.common = None
         if isinstance(idecl,ActionDecl):
             for foo in idecl.args:
                 if not hasattr(foo.args[1],'lineno'):
@@ -265,6 +269,8 @@ class Ivy(object):
         if "common" in decl.attributes:
             for df in decl.defines():
                 self.static.add(df[0])
+        if "common" in self.attributes and decl.common == None:
+            decl.common = 'this'
         self.decls.append(decl)
         if isinstance(decl,MacroDecl):
             for d in decl.args:
@@ -1808,7 +1814,7 @@ if not (iu.get_numeric_version() <= [1,1]):
         'top : top EXTRACT objsym optargs EQ LCB top RCB optwith'
         p[0] = p[1]
         create_object(p[0],p[3],p[4],p[7],get_lineno(p,3))
-        ty = ExtractDef
+        ty = ProcessDef
         d = IsolateObjectDecl(ty(*([Atom(p[3],p[4]),Atom(p[3],p[4])]+p[9])))
         d.args[0].with_args = len(p[9])+1
         d.args[0].lineno = get_lineno(p,2)

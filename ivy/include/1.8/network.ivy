@@ -87,6 +87,11 @@ global {
                 relation sent(S:tcp.endpoint,D:tcp.endpoint,T:tag,M:msg_t)
                 function head(S:tcp.endpoint,D:tcp.endpoint) : tag
                 function tail(S:tcp.endpoint,D:tcp.endpoint) : tag
+                    after init {
+                        sent(X,Y,T,M) := false;
+                        head(X,Y) := 0:index;
+                        tail(X,Y) := 0;
+                    }
             }
             
             module socket = {
@@ -99,11 +104,6 @@ global {
 
                 specification {
 
-                    after init {
-                        net.sent(X,Y,T,M) := false;
-                        net.head(X,Y) := 0;
-                        net.tail(X,Y) := 0;
-                    }
                     before send {
                         net.sent(id,dst,net.head(id,dst),msg) := true;
                         net.head(id,dst) := index.next(net.head(id,dst));

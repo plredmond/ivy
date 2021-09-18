@@ -205,14 +205,19 @@ def strip_map_lookup(name,strip_map,with_dot=False):
     name = canon_act(name)
     if iu.compose_names(name,'global_parameter') in im.module.attributes:
         return []
-    if iu.compose_names(name,'common') in im.module.attributes:
-        return []
+#    if iu.compose_names(name,'common') in im.module.attributes:
+#        return []
     if name in im.module.destructor_sorts:
         return []
     if name in im.module.sig.sorts:
         return []
     for prefix in strip_map:
         if (name+iu.ivy_compose_character).startswith(prefix+iu.ivy_compose_character):
+            attr = iu.compose_names(name,'common')
+            if attr in im.module.attributes:
+                common = im.module.attributes[attr]
+                if (common+iu.ivy_compose_character).startswith(prefix+iu.ivy_compose_character):
+                    continue
             return strip_map[prefix]
     return []
 
@@ -247,6 +252,10 @@ def strip_action(ast,strip_map,strip_binding,is_init=False,init_params=[]):
                 lhs_params = strip_map_lookup(sym.name,strip_map)
                 if len(lhs_params) != num_isolate_params:
                     if not (len(lhs_params) == 0 and len(strip_binding) == 0 and is_init):
+                        print (sym.name)
+                        print (sym.sort)
+                        print (lhs_params)
+                        print num_isolate_params
                         raise iu.IvyError(ast,"assignment may be interfering")
     if isinstance(ast,ia.AssignAction) and len(init_params) > 0:
         lhs = ast.args[0]
@@ -718,6 +727,14 @@ def set_privates(mod,isolate,suff=None):
     for isol in mod.isolates.values():
         for v in isol.verified():
             vprivates.add(v.rep)
+    if isinstance(isolate,ivy_ast.ProcessDef):
+        for isol in mod.isolates.values():
+            if isinstance(isolate,ivy_ast.ProcessDef):
+                if isolate.name() != isol.name():
+                    mod.privates.add(isol.name())
+            for v in isol.verified():
+                vprivates.add(v.rep)
+        
             
 def get_props_proved_in_isolate_orig(mod,isolate):
     save_privates = mod.privates
@@ -1156,7 +1173,7 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
     asts = []
     for x in [mod.labeled_axioms,mod.labeled_props,mod.labeled_inits,mod.labeled_conjs]:
         asts += [y.formula for y in x if not isinstance(y.formula,ivy_ast.SchemaBody)]
-    asts += [action for action in new_actions.values()]
+#    asts += [action for action in new_actions.values()]
     for a in mod.actions.values():
         asts.extend(a.formal_params)
         asts.extend(a.formal_returns)
@@ -1164,10 +1181,16 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
         asts.extend(tmp.args[2:])
 #    all_syms = set(lu.used_symbols_asts(asts))
     all_syms = set(map(ivy_logic.normalize_symbol,lu.used_symbols_asts(asts)))
+    for action in new_actions.values():
+        action.get_references(all_syms)
     follow_definitions(mod.definitions,all_syms)
     if opt_keep_destructors.get():
         for sym in list(all_syms):
             collect_relevant_destructors(sym,all_syms,set())
+
+    # erase assignments to unreferenced variables
+
+    new_actions = dict((actname,action.erase_unrefed(all_syms)) for actname,action in new_actions.iteritems())
 
     # check that any dropped axioms do not refer to the isolate's signature
 
@@ -1270,6 +1293,7 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                 if not startswith_eq_some(d,present,mod):
                     for x in lu.used_symbols_ast(p.formula):
                         if ivy_logic.normalize_symbol(x) in all_syms_norm:
+                            print "foo: {} {}".format(p,ds)
                             raise iu.IvyError(p,"property {} depends on abstracted object {}"
                                               .format(pname(p),d))
 

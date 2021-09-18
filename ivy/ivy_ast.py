@@ -545,6 +545,7 @@ class Decl(AST):
     def __init__(self,*args):
         self.args = args
         self.attributes = ()
+        self.common = None
     def __repr__(self):
         res = self.name() + ' ' + ','.join([repr(a) for a in self.args])
         return res
@@ -1121,6 +1122,9 @@ class TrustedIsolateDef(IsolateDef):
     pass
 
 class ExtractDef(IsolateDef):
+    pass
+
+class ProcessDef(ExtractDef):
     pass
 
 class ExportDecl(Decl):    

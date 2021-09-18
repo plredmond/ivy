@@ -52,5 +52,7 @@ module timeout_sec = {
     }
 
     instance impl : timeout_wrapper
+
+    isolate iso = this
 }
 

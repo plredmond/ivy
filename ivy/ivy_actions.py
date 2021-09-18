@@ -7,7 +7,7 @@ from ivy_logic_utils import to_clauses, formula_to_clauses, substitute_constants
     substitute_clause, substitute_ast, used_symbols_clauses, used_symbols_ast, rename_clauses, subst_both_clauses,\
     variables_distinct_ast, is_individual_ast, variables_distinct_list_ast, sym_placeholders, sym_inst, apps_ast,\
     eq_atom, eq_lit, eqs_ast, TseitinContext, formula_to_clauses_tseitin,\
-    used_symbols_asts, symbols_asts, has_enumerated_sort, false_clauses, true_clauses, or_clauses, dual_formula, Clauses, and_clauses, substitute_constants_ast, rename_ast, bool_const, used_variables_ast, unfold_definitions_clauses, skolemize_formula
+    used_symbols_asts, symbols_asts, symbols_ast, has_enumerated_sort, false_clauses, true_clauses, or_clauses, dual_formula, Clauses, and_clauses, substitute_constants_ast, rename_ast, bool_const, used_variables_ast, unfold_definitions_clauses, skolemize_formula
 from ivy_transrel import state_to_action,new, compose_updates, condition_update_on_fmla, hide, join_action, ite_action, \
     subst_action, null_update, exist_quant, hide_state, hide_state_map, constrain_state, bind_olds_action, old
 from ivy_utils import unzip_append, IvyError, IvyUndefined, distinct_obj_renaming, dbg
@@ -279,6 +279,10 @@ class Action(AST):
         return [(pre,[self],post)]
     def modifies(self):
         return []
+    def references(self,refs):
+        for a in self.args:
+            if not isinstance(a,Action):
+                refs.update(symbols_ast(a))
     def set_lineno(self,lineno):
         self.lineno = lineno
         return self
@@ -290,6 +294,16 @@ class Action(AST):
             if isinstance(a,LocalAction):
                 for c in a.args[:-1]:
                     ivy_ast.tterm_type_names(c,names)
+    def get_references(self,refs):
+        self.references(refs)
+        for a in self.args:
+            if isinstance(a,Action):
+                a.get_references(refs)
+    def erase_unrefed(self,refs):
+        args = [a.erase_unrefed(refs) if isinstance(a,Action) else a for a in self.args]
+        res = self.clone(args)
+        self.copy_formals(res)
+        return res
 
 class AssumeAction(Action):
     def __init__(self,*args):
@@ -417,6 +431,18 @@ def destr_asgn_val(lhs,fmlas):
     return  lhs.rep(*([lval]+rest)), new_clauses, mutated
 
 
+def assign_refs(self,refs):
+    def recur(n):
+        if n.rep.name in ivy_module.module.destructor_sorts:
+            refs.add(n.rep)
+            recur(n.args[0])
+            for a in n.args[1:]:
+                refs.update(ilu.symbols_ast(a))
+        else: 
+            for a in n.args:
+                refs.update(symbols_ast(a))
+    recur(self.args[0])
+
 class AssignAction(Action):
     def __init__(self,*args):
         assert len(args) == 2
@@ -431,6 +457,16 @@ class AssignAction(Action):
         while n.rep.name in ivy_module.module.destructor_sorts:
             n = n.args[0]
         return [n.rep]
+    def references(self,refs):
+        refs.update(symbols_ast(self.args[1]))
+        assign_refs(self,refs)
+    def erase_unrefed(self,refs):
+        if self.modifies()[0] not in refs:
+            res = Sequence()
+            ivy_ast.copy_attributes_ast(self,res)
+            self.copy_formals(res)
+            return res
+        return self
     def action_update(self,domain,pvars):
         lhs,rhs = self.args
         n = lhs.rep
@@ -589,6 +625,15 @@ class HavocAction(Action):
         while n.rep.name in ivy_module.module.destructor_sorts:
             n = n.args[0]
         return [n.rep]
+    def references(self,refs):
+        assign_refs(self,refs)
+    def erase_unrefed(self,refs):
+        if self.modifies()[0] not in refs:
+            res = Sequence()
+            ivy_ast.copy_attributes_ast(self,res)
+            self.copy_formals(res)
+            return res
+        return self
     def action_update(self,domain,pvars):
         lhs = self.args[0]
         n = lhs.rep

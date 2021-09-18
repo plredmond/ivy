@@ -684,10 +684,11 @@ def emit_decl(header,symbol):
     else:
         card = len(domain)
         indent(header)
-        header.append("const char *{}_domain[{}]".format(cname,card) + " = {"
+        tname = new_temp_name()
+        header.append("const char *{}_domain[{}]".format(tname,card) + " = {"
                       + ','.join('"{}"'.format(s.name) for s in domain) + "};\n");
         indent(header)
-        header.append('mk_decl("{}",{},{}_domain,"{}");\n'.format(sname,card,cname,rng_name))
+        header.append('mk_decl("{}",{},{}_domain,"{}");\n'.format(sname,card,tname,rng_name))
         
 def emit_sig(header):
     emit_sorts(header)
@@ -825,8 +826,8 @@ def emit_clear_progress(impl,obj=None):
         impl.extend(code)
         close_loop(impl,vs)
 
-def mk_rand(sort,classname=None):
-    bds = sort_bounds(sort)
+def mk_rand(sort,classname=None,obj=None):
+    bds = sort_bounds(sort,obj=obj)
 #    card = sort_card(sort)
     return '('+ctype(sort,classname=classname)+')' + ('(rand() % (({})-({})) + ({}))'.format(bds[1],bds[0],bds[0]) if bds
                                                       else '((rand()%2) ? "a" : "b")' if has_string_interp(sort)
@@ -882,7 +883,7 @@ public:
                         if is_large_type(sym.sort):
                             code_line(impl,'obj.'+varname(sym) + ' = ' + make_thunk(impl,variables(sym.sort.dom),HavocSymbol(sym.sort.rng,sym.name,0)))
                         elif not is_native_sym(sym):
-                            fun = lambda v: (mk_rand(v.sort,classname=classname) if not is_native_sym(v) else None)
+                            fun = lambda v: (mk_rand(v.sort,classname=classname,obj='obj') if not is_native_sym(v) else None)
                             assign_array_from_model(impl,sym,'obj.',fun)
     indent_level -= 1
     impl.append("""
@@ -3660,9 +3661,7 @@ HavocSymbol.emit = emit_havoc_symbol
 temp_ctr = 0
 
 def new_temp(header,sort=None):
-    global temp_ctr
-    name = '__tmp' + str(temp_ctr)
-    temp_ctr += 1
+    name = new_temp_name()
     if sort is None:
         indent(header)
         header.append(('int' if sort == None else ctype(sort)) + ' ' + name + ';\n')
@@ -3670,6 +3669,11 @@ def new_temp(header,sort=None):
         code_line(header,sym_decl(il.Symbol(name,sort)));
     return name
 
+def new_temp_name():
+    global temp_ctr
+    name = '__tmp' + str(temp_ctr)
+    temp_ctr += 1
+    return name
 
 def find_definition(sym):
     for ldf in im.module.definitions:
@@ -5292,6 +5296,7 @@ public:
         unsigned long long card = rng.second - rng.first;
         if (card != (unsigned long long)(-1))
             res = (res % (card+1)) + rng.first;
+        std::cout << "lo = " << rng.first << " hi = " << rng.second << " card = " << card << " res = " << res << std::endl;
         return res;
     }
 

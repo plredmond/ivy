@@ -9,7 +9,11 @@ module unsigned_bit_vector(bits) = {
     
 autoinstance uint[bits] : unsigned_bit_vector(bits)
 
-type nat
-global {
-    interpret nat -> nat
+object nat = {
+    type this
+    global {
+        interpret nat -> nat
+    }
+    function max2(X:this,Y:this) = Y if X <= Y else X
+    function next(X:this) = X + 1
 }

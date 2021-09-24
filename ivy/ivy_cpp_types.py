@@ -104,7 +104,7 @@ z3::expr __to_solver<CLASSNAME>( gen &g, const  z3::expr &v, CLASSNAME &val) {
     return v == g.int_to_z3(v.get_sort(),CLASSNAME::x_to_bv(val));
 }
 template <>
-void __randomize<CLASSNAME>( gen &g, const  z3::expr &apply_expr) {
+void __randomize<CLASSNAME>( gen &g, const  z3::expr &apply_expr, const std::string &sort_name) {
     z3::sort range = apply_expr.get_sort();
     CLASSNAME value;
     if (CLASSNAME::bv_to_x_hash.size() == (1<<BITS)) {
@@ -471,7 +471,7 @@ z3::expr __to_solver<CLASSNAME>( gen &g, const  z3::expr &v, CLASSNAME &val) {
     return conj;
 }
 template <>
-void __randomize<CLASSNAME>( gen &g, const  z3::expr &apply_expr) {
+void __randomize<CLASSNAME>( gen &g, const  z3::expr &apply_expr, const std::string &sort_name) {
     std::ostringstream os;
     os << "__SORTNAME__tmp" << CLASSNAME::temp_counter++;
     std::string temp = os.str();
@@ -487,7 +487,7 @@ void __randomize<CLASSNAME>( gen &g, const  z3::expr &apply_expr) {
            add_impl('        z3::expr X = g.ctx.constant(temp.c_str(),g.sort("{}"));\n'.format(sort.name))
            add_impl('        z3::expr pred = pto(apply_expr,X);\n')
            add_impl('        g.add_alit(pred);\n')
-           add_impl('        __randomize<{}>(g,X);\n'.format(ctype))
+           add_impl('        __randomize<{}>(g,X,"{}");\n'.format(ctype,sort.name))
            add_impl('    }\n')
        add_impl(
 """

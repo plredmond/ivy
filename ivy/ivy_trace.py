@@ -164,9 +164,16 @@ class TraceBase(art.AnalysisGraph):
             if self.sub.sub is not None:
                 self.sub.do_return(action,env)
             else:
+                if isinstance(self.sub.last_action,act.CallAction) and self.sub.returned is None:
+                    self.sub.do_return(action,env)
+                    return
                 self.returned = self.sub
                 self.sub = None
                 self.returned.new_state(env)
+        elif isinstance(self.last_action,act.CallAction) and self.returned is None:
+            self.sub = self.clone()
+            self.handle(action,env)
+            self.do_return(action,env)
             
     def fail(self):
         self.last_action = itp.fail_action(self.last_action)

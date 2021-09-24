@@ -734,7 +734,8 @@ def set_privates(mod,isolate,suff=None):
                     mod.privates.add(isol.name())
             for v in isol.verified():
                 vprivates.add(v.rep)
-        
+   
+                
             
 def get_props_proved_in_isolate_orig(mod,isolate):
     save_privates = mod.privates

@@ -244,6 +244,9 @@ class Ivy(object):
         special_attribute = None
         global_attribute = None
         common_attribute = None
+        # if we are the body of an attribute declaration, keep all of the enclosing attributes
+        if self.attributes and stack:
+            self.attributes = stack[-1].attributes + self.attributes
         # if we are a continuation object, inherent defined symbols from previous declaration
         global parent_object
         if parent_object is not None:
@@ -1903,8 +1906,12 @@ if not (iu.get_numeric_version() <= [1,6]):
         'top : top specimpl LCB top RCB'
         p[0] = p[1]
         stack.pop()
+        # Don't reapply the attributes in the parent
+        temp_attr = p[0].attributes
+        p[0].attributes = ()
         for decl in p[4].decls:
             p[0].declare(decl)
+        p[0].attributes = temp_attr
 
     # def p_top_delegate_callatom(p):
     #     'top : top DELEGATE callatoms ARROW callatom'

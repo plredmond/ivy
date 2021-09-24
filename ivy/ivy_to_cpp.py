@@ -643,7 +643,7 @@ def emit_sorts(header):
                     header.append('mk_int("{}");\n'.format(name))
                     if isinstance(sortname,il.RangeSort):
                         lb,ub = sort_bounds(il.sig.sorts[name],obj='obj')
-                        code_line(header,'int_ranges[sort("{}")] = std::pair<unsigned long long, unsigned long long>({},{}-1)'.format(name,lb,ub))
+                        code_line(header,'int_ranges["{}"] = std::pair<unsigned long long, unsigned long long>({},{}-1)'.format(name,lb,ub))
                     continue
                 if sortname.startswith('bv[') and sortname.endswith(']'):
                     width = int(sortname[3:-1])
@@ -923,14 +923,14 @@ def emit_randomize(header,symbol,classname=None):
         header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
     if sort.rng.name in im.module.sort_destructors or sort.rng.name in im.module.native_types or sort.rng in sort_to_cpptype:
-        code_line(header,'__randomize<'+classname+'::'+varname(sort.rng.name)+'>(*this,apply("'+sname+'"'+''.join(','+int_to_z3(s,'X{}'.format(idx)) for idx,s in enumerate(domain))+'))')
+        code_line(header,'__randomize<'+classname+'::'+varname(sort.rng.name)+'>(*this,apply("'+sname+'"'+''.join(','+int_to_z3(s,'X{}'.format(idx)) for idx,s in enumerate(domain))+'),"'+sort.rng.name+'")')
     else:
         indent(header)
         if il.is_uninterpreted_sort(sort.rng):
             raise iu.IvyError(None,'cannot create test generator because type {} is uninterpreted'.format(sort.rng))
         header.append('randomize("{}"'.format(sname)
                       + ''.join(",X{}".format(idx) for idx in range(len(domain)))
-                      + ");\n")
+                      + ',"'+sort.rng.name+'");\n')
     for idx,dsort in enumerate(domain):
         indent_level -= 1    
 
@@ -2621,35 +2621,35 @@ template <class T> std::string __random_string(){
     return __random_string_class<T>()();
 }
 
-template <class T> void __randomize( gen &g, const  z3::expr &v);
+template <class T> void __randomize( gen &g, const  z3::expr &v, const std::string &sort_name);
 
 template <>
-void __randomize<int>( gen &g, const  z3::expr &v) {
-    g.randomize(v);
+void __randomize<int>( gen &g, const  z3::expr &v, const std::string &sort_name) {
+    g.randomize(v,sort_name);
 }
 
 template <>
-void __randomize<long long>( gen &g, const  z3::expr &v) {
-    g.randomize(v);
+void __randomize<long long>( gen &g, const  z3::expr &v, const std::string &sort_name) {
+    g.randomize(v,sort_name);
 }
 
 template <>
-void __randomize<unsigned long long>( gen &g, const  z3::expr &v) {
-    g.randomize(v);
+void __randomize<unsigned long long>( gen &g, const  z3::expr &v, const std::string &sort_name) {
+    g.randomize(v,sort_name);
 }
 
 template <>
-void __randomize<unsigned>( gen &g, const  z3::expr &v) {
-    g.randomize(v);
+void __randomize<unsigned>( gen &g, const  z3::expr &v, const std::string &sort_name) {
+    g.randomize(v,sort_name);
 }
 
 template <>
-void __randomize<bool>( gen &g, const  z3::expr &v) {
-    g.randomize(v);
+void __randomize<bool>( gen &g, const  z3::expr &v, const std::string &sort_name) {
+    g.randomize(v,sort_name);
 }
 
 template <>
-        void __randomize<__strlit>( gen &g, const  z3::expr &apply_expr) {
+        void __randomize<__strlit>( gen &g, const  z3::expr &apply_expr, const std::string &sort_name) {
     z3::sort range = apply_expr.get_sort();
     __strlit value = (rand() % 2) ? "a" : "b";
     z3::expr val_expr = g.int_to_z3(range,value);
@@ -2682,7 +2682,7 @@ class z3_thunk : public thunk<D,R> {
             impl.append('template <>\n')
             impl.append('z3::expr __to_solver<' + cfsname + '>( gen &g, const  z3::expr &v, ' + cfsname + ' &val);\n')
             impl.append('template <>\n')
-            impl.append('void __randomize<' + cfsname + '>( gen &g, const  z3::expr &v);\n')
+            impl.append('void __randomize<' + cfsname + '>( gen &g, const  z3::expr &v, const std::string &sort_name);\n')
         
     if True or target.get() == "repl":
         for sort_name in sorted(im.module.sort_destructors):
@@ -2706,7 +2706,7 @@ class z3_thunk : public thunk<D,R> {
             impl.append('template <>\n')
             impl.append('z3::expr __to_solver<' + cfsname + '>( gen &g, const  z3::expr &v, ' + cfsname + ' &val);\n')
             impl.append('template <>\n')
-            impl.append('void __randomize<' + cfsname + '>( gen &g, const  z3::expr &v);\n')
+            impl.append('void __randomize<' + cfsname + '>( gen &g, const  z3::expr &v, const std::string &sort_name);\n')
 
     for dom in all_ctuples():
         emit_ctuple_equality(impl,dom,classname)
@@ -3063,7 +3063,7 @@ class z3_thunk : public thunk<D,R> {
                     code_line(impl,'return v==tmp')
                     close_scope(impl)
                     impl.append('template <>\n')
-                    open_scope(impl,line='void  __randomize<' + cfsname + '>( gen &g, const  z3::expr &v)')
+                    open_scope(impl,line='void  __randomize<' + cfsname + '>( gen &g, const  z3::expr &v, const std::string &sort_name)')
                     for idx,sym in enumerate(destrs):
                         # we can't randomize a type that z3 is representing with an uninterpreted sort,
                         # because z3 has no numerals for these sorts. Rather than throwing an error, however,
@@ -3077,7 +3077,7 @@ class z3_thunk : public thunk<D,R> {
                         for v in vs:
                             open_loop(impl,[v])
                         sname = slv.solver_name(sym)
-                        code_line(impl,'__randomize<'+ctypefull(sym.sort.rng,classname=classname)+'>(g,g.apply("'+sname+'",v'+ ''.join(',g.int_to_z3(g.sort("'+v.sort.name+'"),'+varname(v)+')' for v in vs)+'))')
+                        code_line(impl,'__randomize<'+ctypefull(sym.sort.rng,classname=classname)+'>(g,g.apply("'+sname+'",v'+ ''.join(',g.int_to_z3(g.sort("'+v.sort.name+'"),'+varname(v)+')' for v in vs)+'),"'+sym.sort.rng.name+'")')
                         for v in vs:
                             close_loop(impl,[v])
                     close_scope(impl)
@@ -3116,8 +3116,8 @@ class z3_thunk : public thunk<D,R> {
                     code_line(impl,'res = ('+cfsname+')temp')
                     close_scope(impl)
                     impl.append('template <>\n')
-                    open_scope(impl,line='void  __randomize<' + cfsname + '>( gen &g, const  z3::expr &v)')
-                    code_line(impl,'__randomize<int>(g,v)')
+                    open_scope(impl,line='void  __randomize<' + cfsname + '>( gen &g, const  z3::expr &v, const std::string &sort_name)')
+                    code_line(impl,'__randomize<int>(g,v,sort_name)')
                     close_scope(impl)
 
 
@@ -5009,7 +5009,7 @@ public:
 protected:
     hash_map<std::string, z3::sort> enum_sorts;
     hash_map<Z3_sort, z3::func_decl_vector> enum_values;
-    hash_map<Z3_sort, std::pair<unsigned long long, unsigned long long> > int_ranges;
+    hash_map<std::string, std::pair<unsigned long long, unsigned long long> > int_ranges;
     hash_map<std::string, z3::func_decl> decls_by_name;
     hash_map<Z3_symbol,int> enum_to_int;
     std::vector<Z3_symbol> sort_names;
@@ -5221,7 +5221,7 @@ public:
         return ctx.string_val(value);
     }
 
-    std::pair<unsigned long long, unsigned long long> sort_range(const z3::sort &range) {
+    std::pair<unsigned long long, unsigned long long> sort_range(const z3::sort &range, const std::string &sort_name) {
         std::pair<unsigned long long, unsigned long long> res;
         res.first = 0;
         if (range.is_bool())
@@ -5233,8 +5233,8 @@ public:
             else res.second = (1 << size) - 1;
         }
         else if (range.is_int()) {
-            if (int_ranges.find(range) != int_ranges.end())
-                res = int_ranges[range];
+            if (int_ranges.find(sort_name) != int_ranges.end())
+                res = int_ranges[sort_name];
             else res.second = 4;  // bogus -- we need a good way to randomize ints
         }
         else res.second = enum_values.find(range)->second.size() - 1;
@@ -5296,45 +5296,44 @@ public:
         unsigned long long card = rng.second - rng.first;
         if (card != (unsigned long long)(-1))
             res = (res % (card+1)) + rng.first;
-        std::cout << "lo = " << rng.first << " hi = " << rng.second << " card = " << card << " res = " << res << std::endl;
         return res;
     }
 
-    void randomize(const z3::expr &apply_expr) {
+    void randomize(const z3::expr &apply_expr, const std::string &sort_name) {
         z3::sort range = apply_expr.get_sort();
 //        std::cout << apply_expr << " : " << range << std::endl;
-        unsigned long long value = random_range(sort_range(range));
+        unsigned long long value = random_range(sort_range(range,sort_name));
         z3::expr val_expr = int_to_z3(range,value);
         z3::expr pred = apply_expr == val_expr;
         add_alit(pred);
     }
 
-    void randomize(const char *decl_name, unsigned num_args, const int *args) {
+    void randomize(const char *decl_name, unsigned num_args, const int *args, const std::string &sort_name) {
         z3::func_decl decl = decls_by_name.find(decl_name)->second;
         z3::expr apply_expr = mk_apply_expr(decl_name,num_args,args);
         z3::sort range = decl.range();
-        unsigned long long value = random_range(sort_range(range));
+        unsigned long long value = random_range(sort_range(range,sort_name));
         z3::expr val_expr = int_to_z3(range,value);
         z3::expr pred = apply_expr == val_expr;
         add_alit(pred);
     }
 
-    void randomize(const char *decl_name) {
-        randomize(decl_name,0,(int *)0);
+    void randomize(const char *decl_name, const std::string &sort_name) {
+        randomize(decl_name,0,(int *)0,sort_name);
     }
 
-    void randomize(const char *decl_name, int arg0) {
-        randomize(decl_name,1,&arg0);
+    void randomize(const char *decl_name, int arg0, const std::string &sort_name) {
+        randomize(decl_name,1,&arg0,sort_name);
     }
     
-    void randomize(const char *decl_name, int arg0, int arg1) {
+    void randomize(const char *decl_name, int arg0, int arg1, const std::string &sort_name) {
         int args[2] = {arg0,arg1};
-        randomize(decl_name,2,args);
+        randomize(decl_name,2,args,sort_name);
     }
 
-    void randomize(const char *decl_name, int arg0, int arg1, int arg2) {
+    void randomize(const char *decl_name, int arg0, int arg1, int arg2, const std::string &sort_name) {
         int args[3] = {arg0,arg1,arg2};
-        randomize(decl_name,3,args);
+        randomize(decl_name,3,args,sort_name);
     }
 
     void push(){

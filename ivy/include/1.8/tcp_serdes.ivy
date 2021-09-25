@@ -81,8 +81,9 @@ module tcp_serdes(endpoint,data) = {
        bool reported_closed;
        std::list<std::vector<char> > bufs;
     public:
+       `endpoint` self; // only acces while holding lock!
        `endpoint` other; // only acces while holding lock!
-       tcp_queue(`endpoint` other) : closed(false), reported_closed(false), other(other) {}
+       tcp_queue(`endpoint` self, `endpoint` other) : closed(false), reported_closed(false), self(self), other(other) {}
        bool enqueue_swap(std::vector<char> &buf) {
            std::unique_lock<std::mutex> lock(mtx);
            // mutex.lock();
@@ -390,6 +391,11 @@ module tcp_serdes(endpoint,data) = {
             ivy->__lock();
             if (res >= 0) {
                 // std::cout << "CONNECT SUCCEEDED " << sock << std::endl;
+#ifdef MSG_NOSIGNAL	    
+                int bytes = send(sock,&queue->self.port,sizeof(queue->self.port),MSG_NOSIGNAL);
+#else
+                int bytes = send(sock,&queue->self.port,sizeof(queue->self.port),0);
+#endif
                 cb->ccb(sock);
                 connected = true;
             }
@@ -465,6 +471,8 @@ module tcp_serdes(endpoint,data) = {
             `endpoint` other;
 	    other.addr = ntohl(other_addr.sin_addr.s_addr);
 	    other.port = ntohs(other_addr.sin_port);
+
+            int bytes = ::read(new_sock,&other.port,sizeof(other.port));
 
             // Run the "accept" callback. Since it's async, we must lock.
             ivy->__lock();
@@ -609,7 +617,7 @@ var send_queue : queue_t
     # connect creates a socket and then installs a connector task
     # to establish the connection asynchronously.
     
-    action connect(other:endpoint) returns (s:socket) = {
+    action connect(self:endpoint, other:endpoint) returns (s:socket) = {
         <<< impure
             s = make_tcp_socket();
             // std::cout << "SOCKET " << s << std::endl;
@@ -620,7 +628,7 @@ var send_queue : queue_t
 
             tcp_queue *queue;
             if (`send_queue`.find(s) == `send_queue`.end()) {
-                `send_queue`[s] = queue = new tcp_queue(other);
+                `send_queue`[s] = queue = new tcp_queue(self,other);
                  install_thread(new tcp_writer<`data`>(s,queue,`cb`,this));
             } else
                 `send_queue`[s] -> set_open(other);

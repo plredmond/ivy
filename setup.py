@@ -15,7 +15,7 @@ except:
   long_description = None
 
 setup(name='ms_ivy',
-      version='1.8.5',
+      version='1.8.6',
       description='IVy verification tool',
       long_description=long_description,
       url='https://github.com/microsoft/ivy',

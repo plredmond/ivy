@@ -4419,6 +4419,17 @@ def native_reference(atom):
 #        print 'type(atom): {} atom.rep: {} res: {}'.format(type(atom),atom.rep,res)
         return res
     res = varname(atom.rep)
+    s = atom.rep
+    if hasattr(s,'sort') and is_large_type(s.sort) and len(s.sort.dom) > 1:
+        res +=('[' + ctuple(s.sort.dom,classname=native_classname) + '(')
+        first = True
+        for a in atom.args:
+            if not first:
+                res += ','
+            res += varname(a)
+            first = False
+        res += ')]'
+        return res
     for arg in atom.args:
         n = arg.name if hasattr(arg,'name') else arg.rep
         res += '[' + varname(n) + ']'

@@ -161,6 +161,7 @@ module udp_impl(host,pkt,ser,des) = {
 
 >>>
 
+implementation {
 object impl(me:host) = {
 
     # Here we put any new members of the ivy C++ class. If we have allocated a per-instance
@@ -169,14 +170,18 @@ object impl(me:host) = {
 
     # These empty objects are used to hold C++ values.
 
-    object cb = {}          # struct holding the callbacks
+    # object cb = {}          # struct holding the callbacks
 
-    <<< member
+    # <<< member
 
-	udp_callbacks *`cb`;             // the callbacks to ivy
+    #     udp_callbacks *`cb`;             // the callbacks to ivy
 
-    >>>
+    # >>>
 
+    type callback_t
+    interpret callback_t -> <<< primitive udp_callbacks * >>>
+
+    var cb : callback_t
 
     # Here, we put code to go in the initializer. If this is a
     # parameterized instance, then this code will be run in a loop, so we
@@ -276,7 +281,7 @@ object impl(me:host) = {
 #endif
 	>>>
     }
-
+}
 
     # callback on reception of message, to be implemented by user.
 

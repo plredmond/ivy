@@ -369,5 +369,7 @@ module iterable = {
     attribute test = impl
 }
 
-instance index : unbounded_sequence
+global {
+    instance index : unbounded_sequence
+}
 

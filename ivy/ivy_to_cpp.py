@@ -4871,6 +4871,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
     for(int cycle = 0; cycle < test_iters; cycle++) {
 
         double choices = totalweight + readers.size() + timers.size();
+//        double choices = totalweight + 2.0;
         double frnd = choices * (((double)rand())/(((double)RAND_MAX)+1.0));
         if (frnd < totalweight) {
             int idx = 0;
@@ -4967,10 +4968,24 @@ def emit_repl_boilerplate3test(header,impl,classname):
                timers[i]->timeout(timer_min);
         }
         else {
+            int fdc = 0;
             for (unsigned i = 0; i < readers.size(); i++) {
                 reader *r = readers[i];
                 if (FD_ISSET(r->fdes(),&rdfds))
-                    r->read();
+                    fdc++;
+            }
+            int fdi = fdc * (((double)rand())/(((double)RAND_MAX)+1.0));
+            fdc = 0;
+            for (unsigned i = 0; i < readers.size(); i++) {
+                reader *r = readers[i];
+                if (FD_ISSET(r->fdes(),&rdfds)) {
+                    if (fdc == fdi) {
+                        r->read();
+                        break;
+                    }
+                    fdc++;
+
+                }
             }
         }            
     }

@@ -1490,6 +1490,7 @@ module unbounded_queue(range) = {
     function peek : range
     action enqueue(val:range)
     action dequeue returns (res:range)
+    action clear
 
     # common {
     #     instance domain : unbounded_sequence
@@ -1553,6 +1554,9 @@ module unbounded_queue(range) = {
             head := head.next;
 	}
 
+        implement clear {
+            tail := head;
+        }
 #        invariant at_pos(T,M) -> map(T) = M
 #        invariant head_pos = head & tail_pos = tail
                 

@@ -1477,10 +1477,6 @@ def fix_initializers(mod,after_inits):
             name = m.mixer()
             extname = 'ext:'+name
             action = mod.actions[extname] if extname in mod.actions else mod.actions.get(name,None)
-            if action == None or not ia.has_code(action):
-                continue
-            mod.initial_actions.append(action)
-            mod.initializers.append((name,loop_action(action,mod)))
             if name in mod.actions:
                 del mod.actions[name]
             if name in mod.public_actions:
@@ -1489,6 +1485,10 @@ def fix_initializers(mod,after_inits):
                 del mod.actions[extname]
             if extname in mod.public_actions:
                 mod.public_actions.remove(extname)
+            if action == None or not ia.has_code(action):
+                continue
+            mod.initial_actions.append(action)
+            mod.initializers.append((name,loop_action(action,mod)))
             things.add(name)
             things.add(extname)
         ais = set(m.mixer() for m in after_inits)

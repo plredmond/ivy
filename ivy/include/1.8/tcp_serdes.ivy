@@ -437,6 +437,10 @@ module tcp_serdes(endpoint,data) = {
         using tcp_task<data>::ivy;
       public:
 
+        virtual bool background() {
+            return true;
+        }
+
         // The constructor creates a socket to listen on.
 
         tcp_listener(const tcp_callbacks<data> *cb, ivy_class *ivy)
@@ -457,8 +461,6 @@ module tcp_serdes(endpoint,data) = {
         // the the tcp interface specification.
 
         virtual void read() {
-            // std::cout << "ACCEPTING\n";
-
             // Call accept to get an incoming connection request. May block.
             sockaddr_in other_addr;
             socklen_t addrlen = sizeof(other_addr);    

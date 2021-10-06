@@ -7,6 +7,7 @@ import os
 import string
 import time
 import itertools
+import subprocess
 
 def usage():
     print "usage: \n {} {{option=value...}} <file>[.dsc]".format(sys.argv[0])
@@ -23,9 +24,11 @@ def lookup_ip_addr(hostname):
     return '0x7f000001'
 
 def run_in_terminal(cmd,name):
-    xcmd = "xterm -T '{}' -e '{}'&\n".format(name,cmd+'; read -p "--press enter--"')
+#    xcmd = "xterm -T '{}' -e '{}'&\n".format(name,cmd+'; read -p "--press enter--"')
 #    print xcmd
-    os.system(xcmd)
+#    os.system(xcmd)
+    args = ["xterm","-T",name,"-e", cmd+'; read -p "--press enter--"']
+    return subprocess.Popen(args)
     
 def read_params():
     ps = dict()
@@ -41,6 +44,15 @@ def read_params():
 
 def main():
     ps = read_params()
+    have_runs = False
+    runs = 1
+    if 'runs' in ps:
+        runs = int(ps['runs'])
+        have_runs = True
+        if runs == 0:
+            sys.stderr.write("invalid parameter value runs={}".format(ps['runs']))
+            sys.exit(1)
+        del ps['runs']
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
     dscfname = sys.argv[1]
@@ -141,36 +153,52 @@ def main():
             process_count += 1
 
 
-    for process in processes:
-        dim = get_process_dimensions(process)
-        for d in dim:
-            binary = process['binary']
-            cmd = ["`ivy_shell`;",binary if '/' in binary else './' + binary]
-            psc = ps.copy()
-            for p,v in zip(process['indices'],d):
-                psc[p['name']] = str(v)
-            for param in process['params']:
-                if param['name'] in psc:
-                    val = psc[param['name']]
-                    if 'default' in param:
-                        cmd.append('{}={}'.format(param['name'],val))
+    logfile = dscfname[:-4]+'.log'
+    for run in range(runs):
+        popens = []
+        for process in processes:
+            dim = get_process_dimensions(process)
+            for d in dim:
+                binary = process['binary']
+                cmd = ["`ivy_shell`;",binary if '/' in binary else './' + binary]
+                psc = ps.copy()
+                for p,v in zip(process['indices'],d):
+                    psc[p['name']] = str(v)
+                for param in process['params']:
+                    if param['name'] in psc:
+                        val = psc[param['name']]
+                        if 'default' in param:
+                            cmd.append('{}={}'.format(param['name'],val))
+                        else:
+                            cmd.append('{}'.format(val))
+                if 'test_params' in descriptor:
+                    for param in descriptor['test_params']:
+                        if param in ps:
+                            cmd.append('{}={}'.format(param,ps[param]))
+                if have_runs:
+                    cmd.append("seed={}".format(run))
+                print ' '.join(cmd)
+                pname = process['name']
+                if pname == 'this':
+                    pname = dscfname[:-4]
+                wname = pname + ('('+','.join(map(str,d))+')' if d else '')
+                if process_count > 1:
+                    popens.append(run_in_terminal(' '.join(cmd),wname))
+                    time.sleep(0.5)
+                else:
+                    if have_runs:
+                        with open(logfile,"w") as file:
+                            popens.append(subprocess.Popen(' '.join(cmd),shell=True,stdout=file))
                     else:
-                        cmd.append('{}'.format(val))
-            if 'test_params' in descriptor:
-                for param in descriptor['test_params']:
-                    if param in ps:
-                        cmd.append('{}={}'.format(param,ps[param]))
-            print ' '.join(cmd)
-            pname = process['name']
-            if pname == 'this':
-                pname = dscfname[:-4]
-            wname = pname + ('('+','.join(map(str,d))+')' if d else '')
-            if process_count > 1:
-                run_in_terminal(' '.join(cmd),wname)
-                time.sleep(0.5)
-            else:
-                os.system(' '.join(cmd))
-            
+                        popens.append(subprocess.Popen(' '.join(cmd),shell=True))
+                        
+        retcodes = []
+        for popen in popens:
+            retcodes.append(popen.wait())
+        if any(rc != 0 for rc in retcodes):
+            if runs > 1:
+                sys.stderr.write("test failed. see log in {}\n".format(logfile))
+            exit(1)
         
 if __name__ == "__main__":
     main()

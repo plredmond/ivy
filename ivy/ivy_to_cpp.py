@@ -1996,6 +1996,7 @@ public:
     virtual void read() = 0;
     virtual void bind() {}
     virtual bool running() {return fdes() >= 0;}
+    virtual bool background() {return false;}
     virtual ~reader() {}
 };
 
@@ -4868,11 +4869,19 @@ def emit_repl_boilerplate3test(header,impl,classname):
     LARGE_INTEGER freq;
     QueryPerformanceFrequency(&freq);
 #endif
+    double frnd = 0.0;
+    bool do_over = false;
     for(int cycle = 0; cycle < test_iters; cycle++) {
 
-        double choices = totalweight + readers.size() + timers.size();
-//        double choices = totalweight + 2.0;
-        double frnd = choices * (((double)rand())/(((double)RAND_MAX)+1.0));
+//        std::cout << "totalweight = " << totalweight << std::endl;
+//        double choices = totalweight + readers.size() + timers.size();
+        double choices = totalweight + 5.0;
+        if (do_over) {
+           do_over = false;
+        }  else {
+            frnd = choices * (((double)rand())/(((double)RAND_MAX)+1.0));
+        }
+        // std::cout << "frnd = " << frnd << std::endl;
         if (frnd < totalweight) {
             int idx = 0;
             double sum = 0.0;
@@ -4929,7 +4938,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
 #ifdef _WIN32
         int timer_min = 15;
 #else
-        int timer_min = 1;
+        int timer_min = 5;
 #endif
 
         struct timeval timeout;
@@ -4956,7 +4965,7 @@ def emit_repl_boilerplate3test(header,impl,classname):
 #endif
         
         if (foo == 0){
-            // std::cout << "TIMEOUT\\n";            
+           // std::cout << "TIMEOUT\\n";            
            cycle--;
            for (unsigned i = 0; i < timers.size(); i++){
                if (timer_min >= timers[i]->ms_delay()) {
@@ -4974,13 +4983,19 @@ def emit_repl_boilerplate3test(header,impl,classname):
                 if (FD_ISSET(r->fdes(),&rdfds))
                     fdc++;
             }
+            // std::cout << "fdc = " << fdc << std::endl;
             int fdi = fdc * (((double)rand())/(((double)RAND_MAX)+1.0));
             fdc = 0;
             for (unsigned i = 0; i < readers.size(); i++) {
                 reader *r = readers[i];
                 if (FD_ISSET(r->fdes(),&rdfds)) {
                     if (fdc == fdi) {
+                        // std::cout << "reader = " << i << std::endl;
                         r->read();
+                        if (r->background()) {
+                           cycle--;
+                           do_over = true;
+                        }
                         break;
                     }
                     fdc++;
@@ -4994,7 +5009,14 @@ def emit_repl_boilerplate3test(header,impl,classname):
                 Sleep(final_ms);  // HACK: wait for late responses
 #endif
     __ivy_out << "test_completed" << std::endl;
-    if (runidx == runs-1) exit(0);
+    if (runidx == runs-1) {
+        struct timespec ts;
+        int ms = 50;
+        ts.tv_sec = ms/1000;
+        ts.tv_nsec = (ms % 1000) * 1000000;
+        nanosleep(&ts,NULL);
+        exit(0);
+    }
     for (unsigned i = 0; i < readers.size(); i++)
         delete readers[i];
     readers.clear();
@@ -5667,7 +5689,7 @@ def main_int(is_ivyc):
                         basename = mod_name
                         if len(isolates) > 1:
                             basename = basename + '_' + isolate
-                        classname = varname(basename)
+                        classname = varname(basename).replace('-','_')
                         with ivy_cpp.CppContext():
                             header,impl = module_to_cpp_class(classname,basename)
             #        print header

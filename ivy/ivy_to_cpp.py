@@ -3588,7 +3588,7 @@ def emit_app(self,header,code,capture_args=None):
         if self.func.name == 'cast':
             if len(self.args) == 1:
                 atype = ctypefull(self.args[0].sort)
-                if atype == 'int':
+                if atype in ['int','long long','unsigned long long']:
                     if isinstance(itp,il.RangeSort):
                         x = new_temp(header)
                         code_line(header,x + ' = ' + code_eval(header,self.args[0]))

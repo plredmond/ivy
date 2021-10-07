@@ -15,5 +15,6 @@ object nat = {
         interpret nat -> nat
     }
     function max2(X:this,Y:this) = Y if X <= Y else X
+    function mod(X:this,Y:this) = X - X / Y * X
     function next(X:this) = X + 1
 }

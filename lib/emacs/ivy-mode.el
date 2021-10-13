@@ -135,6 +135,8 @@
     "named"
     "global"
     "process"
+    "field"
+    "subclass"
 ))
 
 (defconst ivy-types '("bool" "int" "bv"))

@@ -4102,24 +4102,72 @@ def emit_assign_large(self,header):
 
     code_line(header,varname(self.args[0].rep)+' = ' + make_thunk(thunks,vs,expr))
 
+
+def open_bounded_loops(variables,body,exists=True):
+    header = []
+    while variables:
+        v0 = variables[0]
+        idx = v0.name
+        variables = variables[1:]
+        berr = get_bounds(header,v0,variables,body,exists)
+        if not isinstance(berr,BoundsError) and is_any_integer_type(v0.sort):
+            lo,hi = berr
+            ct = ctype(v0.sort)
+            ct = 'int' if ct == 'bool' else ct if ct in int_ctypes else 'int'
+            header.append('for (' + ct + ' ' + idx + ' = ' + lo + '; ' + idx + ' < ' + hi + '; ' + idx + '++) {\n')
+        else:
+            ebnds = []
+            get_extensional_bound_exprs(v0,body,exists,ebnds)
+            if not ebnds:
+                if not isinstance(berr,BoundsError):
+                    berr = BoundsError(None,"cannot iterate over sort {}".format(v0.sort))
+                return berr
+            ebnd = ebnds[0]
+            header.append('for(auto it={}.memo.begin(),en={}.memo.end(); it != en; ++it)if (it->second) {{\n'.format(varname(ebnd.rep),varname(ebnd.rep)))
+            for pos,v in enumerate(ebnd.args):
+                if v == v0 or v in variables:
+                    ct = ctype(v.sort)
+                    ct = 'auto'
+                    if len(ebnd.args) > 1:
+                        header.append('    ' + ct + ' ' + v.name + ' = it->first.arg' + str(pos) + ';\n')
+                    else:
+                        header.append('    ' + ct + ' ' + v.name + ' = it->first;\n')
+            variables = [v for v in variables if v not in ebnd.args]
+    return header
+
+def close_bounded_loops(header,loops):
+    for i in loops:
+        if i.endswith('{\n'):
+            header.append('}\n')
+
+
 def emit_assign(self,header):
     global indent_level
     with ivy_ast.ASTContext(self):
 #        if is_large_type(self.args[0].rep.sort) and lu.free_variables(self.args[0]):
-        if is_large_lhs(self.args[0]):
-            emit_assign_large(self,header)
-            return
+#        if is_large_lhs(self.args[0]):
+#            
+#            emit_assign_large(self,header)
+#            return
         vs = list(lu.free_variables(self.args[0]))
-        for v in vs:
-            check_iterable_sort(v.sort)
+#        for v in vs:
+#            check_iterable_sort(v.sort)
         if len(vs) == 0:
             emit_assign_simple(self,header)
+            return
+        bexpr = il.And()
+        if il.is_ite(self.args[1]) and self.args[0] == self.args[1].args[2]:
+            if self.modifies()[0] not in ilu.symbols_ast(self.args[1].args[0]):
+                bexpr = self.args[1].args[0]
+        loops = open_bounded_loops(vs,bexpr)
+        if isinstance(loops,BoundsError):
+            emit_assign_large(self,header)
             return
         sort = self.args[1].sort
         tsort = il.FunctionSort(*([v.sort for v in vs] + [sort]))
         sym = il.Symbol(new_temp(header,sort=tsort),tsort)
         lhs = sym(*vs) if vs else sym
-        open_loop(header,vs)
+        header.extend(loops)
 #        global temp_ctr
 #        tmp = '__tmp' + str(temp_ctr)
 #        temp_ctr += 1
@@ -4143,27 +4191,18 @@ def emit_assign(self,header):
         self.args[1].emit(header,code)
         code.append(';\n')    
         header.extend(code)
-        close_loop(header,vs)
+        close_bounded_loops(header,loops)
 #        for idx in vs:
 #            indent_level -= 1
 #            indent(header)
 #            header.append('}\n')
-        for idx in vs:
-            indent(header)
-            vn = varname(idx.name)
-            lb,ub = sort_bounds(idx.sort)
-            #        dcard = sort_card(dsort)
-            header.append('for (int ' + vn + ' = ' + lb + '; ' + vn + ' < ' + ub + '; ' + vn + '++) {\n')
-            indent_level += 1
+        header.extend(loops)
         code = []
         indent(code)
         self.args[0].emit(header,code)
         code.append(' = ' + code_eval(header,lhs) + ';\n')
         header.extend(code)
-        for idx in vs:
-            indent_level -= 1
-            indent(header)
-            header.append('}\n')
+        close_bounded_loops(header,loops)
     
 ia.AssignAction.emit = emit_assign
 

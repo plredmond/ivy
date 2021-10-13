@@ -568,6 +568,19 @@ def p_top_class_symbol_eq_lcb_top_rcb(p):
     p[8].decls = [p[8].decls[-1]] + p[8].decls[:-1]
     create_object(p[0],p[3],p[4],p[8],get_lineno(p,3),p[7])
 
+def p_top_subclass_symbol_eq_lcb_top_rcb(p):
+    'top : top SUBCLASS objsym OF atype EQ LCB optdotdotdot top RCB objectend'
+    p[0] = p[1]
+    scnst = Atom(This())
+    scnst.lineno = get_lineno(p,2)
+    tdfn = TypeDef(scnst,UninterpretedSort())
+    tdfn.lineno = get_lineno(p,2)
+    p[9].declare(TypeDecl(tdfn))
+    vdfn = VariantDef(scnst,Atom(p[5]))
+    p[9].declare(VariantDecl(vdfn))
+    p[9].decls = p[9].decls[-2:] + p[9].decls[:-2]
+    create_object(p[0],p[3],[],p[9],get_lineno(p,3),p[8])
+
 def p_optsemi(p):
     'optsemi : '
     p[0] = None
@@ -1814,7 +1827,7 @@ if not (iu.get_numeric_version() <= [1,1]):
         d.lineno = get_lineno(p,3)
         p[0].declare(d)
     def p_top_opttrusted_extract_callatom_eq_lcb_top_rcb_optwith(p):
-        'top : top EXTRACT objsym optargs EQ LCB top RCB optwith'
+        'top : top EXTRACT objsym objectargs EQ LCB top RCB optwith'
         p[0] = p[1]
         create_object(p[0],p[3],p[4],p[7],get_lineno(p,3))
         ty = ProcessDef
@@ -1824,7 +1837,8 @@ if not (iu.get_numeric_version() <= [1,1]):
         d.lineno = get_lineno(p,2)
         p[0].declare(d)
     def p_top_extract_callatom_eq_callatoms(p):
-        'top : top EXTRACT objsym optargs EQ callatoms'
+        'top : top EXTRACT objsym objectargs EQ callatoms'
+        stack[-1].params = []
         global parent_object
         parent_object = None
         d = IsolateDecl(ExtractDef(*([Atom(p[3],p[4])] + p[6])))

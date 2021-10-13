@@ -293,9 +293,46 @@ global {
                         net.len(src,id) := thing2.end;
                     }
                 }
+                implementation {
+
+                    instance intf : tcp_serdes(tcp.endpoint,msg_t)
+                    var sock :intf.socket
+                    relation connected_to(X:tcp.endpoint)
+                    function dst_socket(X:tcp.endpoint) : intf.socket
+                    function socket_src(X:intf.socket) : tcp.endpoint
+                    
+                    after init {
+                        sock := intf.open(id);
+                    }
+
+                    implement send {
+                        if ~connected_to(dst) {
+                            var dst_sock := intf.connect(id,dst);
+                            dst_socket(dst) := dst_sock;
+                            connected_to(dst) := true;
+                        }
+                        var ok := intf.send(dst_socket(dst),msg);
+                        # If send fails, it means the TCP connection
+                        # closed. We can't recover from this because
+                        # we don't know which messages were received,
+                        # so we can't maintain message order.
+                    }
+
+                    implement intf.accept(s:intf.socket, src:tcp.endpoint) { 
+                        socket_src(s) := src;
+                    }
+
+                    implement intf.recv(s:intf.socket, msg:msg_t) {
+                        call recv(socket_src(s), msg:msg_t);
+                    }
+                }
                 trusted isolate iso = this
+                
+                attribute test = impl
             }
             trusted isolate iso = this
+
+            attribute test = impl
         }
     }
 

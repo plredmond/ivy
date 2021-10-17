@@ -27,7 +27,7 @@ def run_in_terminal(cmd,name):
 #    xcmd = "xterm -T '{}' -e '{}'&\n".format(name,cmd+'; read -p "--press enter--"')
 #    print xcmd
 #    os.system(xcmd)
-    args = ["xterm","-T",name,"-e", cmd+'; read -p "--press enter--"']
+    args = ["xterm","-fn",'-adobe-courier-bold-r-normal--18-*-*-*-m-*-iso10646-1',"-T",name,"-e", cmd+'; read -p "--press enter--"']
     return subprocess.Popen(args)
     
 def read_params():

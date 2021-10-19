@@ -1293,7 +1293,6 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
                 if not startswith_eq_some(d,present,mod):
                     for x in lu.used_symbols_ast(p.formula):
                         if ivy_logic.normalize_symbol(x) in all_syms_norm:
-                            print "foo: {} {}".format(p,ds)
                             raise iu.IvyError(p,"property {} depends on abstracted object {}"
                                               .format(pname(p),d))
 
@@ -1640,7 +1639,10 @@ def create_isolate(iso,mod = None,**kwargs):
                 call.formal_returns = action.formal_returns
                 call.lineno = action.lineno
                 mod.actions[impname] = call
-                mod.actions[extname] = action
+                thing = ia.Sequence()
+                action.copy_formals(thing)
+                thing.lineno = action.lineno
+                mod.actions[extname] = thing
                 if name in orig_imports or not(iso and iso in mod.isolates
                                                and isinstance(mod.isolates[iso],ivy_ast.ExtractDef)):
                     newimps.append(ivy_ast.ImportDef(ivy_ast.Atom(extname),ivy_ast.Atom('')))

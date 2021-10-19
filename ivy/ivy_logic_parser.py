@@ -16,17 +16,26 @@ def p_SYMBOL_PRESYMBOL(p):
     'SYMBOL : PRESYMBOL'
     p[0] = p[1]
 
-def p_SYMBOL_SYMBOL_LB_SYMBOL_RB(p):
-    'SYMBOL : SYMBOL LB SYMBOL RB'
+def p_SYMBOL_SYMBOL_LB_SYMsubscr_RB(p):
+    'SYMBOL : SYMBOL LB SYMsubscr RB'
     p[0] = p[1] + p[2] + p[3] + p[4]
-
-def p_SYMBOL_SYMBOL_LB_THIS_RB(p):
-    'SYMBOL : SYMBOL LB THIS RB'
-    p[0] = p[1] + p[2] + 'this' + p[4]
 
 def p_LABEL_LB_SYMBOL_RB(p):
     'LABEL : LB SYMBOL RB'
     p[0] = p[1] + p[2] + p[3]
+
+def p_SYMsubscr_SYMBOL(p):
+    'SYMsubscr : SYMBOL'
+    p[0] = p[1]
+
+def p_SYMsubscr_THIS(p):
+    'SYMsubscr : THIS'
+    p[0] = 'this'
+
+def p_SYMsubscr_SYMsubscr_dot_symbol(p):
+    'SYMsubscr : SYMsubscr DOT SYMBOL'
+    p[0] = p[1] + '.' + p[3]
+
 
 def p_atype_symbol(p):
     'atype : SYMBOL'

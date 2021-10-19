@@ -280,6 +280,7 @@ class Ivy(object):
                 self.macros[d.defines()] = d
         if isinstance(decl,ActionDecl):
             for d in decl.args:
+                d.attributes = decl.attributes
                 self.actions[d.defines()] = d
         if isinstance(decl,ModuleDecl):
             for d in decl.args:
@@ -502,12 +503,43 @@ def p_modulestart(p):
 def p_moduleend(p):
     'moduleend :'
     p[0] = None
-   
-def p_top_module_atom_eq_lcb_top_rcb(p):
-    'top : top MODULE modulestart atom EQ LCB top RCB moduleend'
+
+def p_modcat(p):
+    'modcat : '
+    p[0] = None
+
+def p_modcat_object(p):
+    'modcat : OBJECT'
+    p[0] = "object"
+
+def p_modcat_isolate(p):
+    'modcat : ISOLATE'
+    p[0] = "isolate"    
+    
+def p_opteq(p):
+    'opteq :'
+    p[0] = None
+
+def p_opteq_eq(p):
+    'opteq : EQ'
     p[0] = p[1]
-    d = Definition(app_to_atom(p[4]),p[7])
+
+def p_top_module_atom_eq_lcb_top_rcb(p):
+    'top : top MODULE modulestart modcat atom optwith EQ LCB top RCB moduleend'
+    p[0] = p[1]
+    d = Definition(app_to_atom(p[5]),p[9])
     p[0].declare(ModuleDecl(d))
+    if p[4] == "isolate":
+        this = This()
+        this.lineno = get_lineno(p,2)
+        iso = Atom("iso",[])
+        iso.lineno = get_lineno(p,2)
+        d = IsolateDecl(IsolateDef(*([iso,this]+p[6])))
+        d.args[0].with_args = len(p[6])
+        d.args[0].lineno = get_lineno(p,2)
+        d.attributes = ("common",)
+        d.lineno = get_lineno(p,2)
+        p[9].declare(d)
     stack.pop()
     stack[-1].is_module=False
 
@@ -828,6 +860,8 @@ def p_symdecl_field_tterms(p):
     arg0 = Variable('SELF',This())
     arg0.lineno = get_lineno(p,1)
     tterms = [x.clone([arg0]+x.args) for x in p[2]]
+    for x,y in zip(p[2],tterms):
+        y.lineno = x.lineno
     p[0] = DestructorDecl(*tterms)
 
 if not(iu.get_numeric_version() <= [1,6]):
@@ -1703,6 +1737,8 @@ def handle_mixin(kind,mixer,mixee,ivy):
 def infer_action_params(actname,formals,returns):
     mixee,num_params = stack_action_lookup(actname)
     if not mixee:
+        return formals,returns
+    if ("common" in mixee.attributes) != ("common" in stack[-1].attributes):
         return formals,returns
     mformals,mreturns = mixee.formals()
     formals.extend(mformals[num_params+len(formals):])

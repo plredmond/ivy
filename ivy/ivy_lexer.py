@@ -74,6 +74,7 @@ reserved = all_reserved = {
    'false' : 'FALSE',
    'fresh' : 'FRESH',
    'module' : 'MODULE',
+   'template' : 'MODULE',
    'object' : 'OBJECT',
    'class' : 'CLASS',
    'type' : 'TYPE',
@@ -265,7 +266,7 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,7]:
-            for s in ['global','common','debug','field','for','process','subclass']:
+            for s in ['global','common','debug','field','for','process','subclass','template']:
                 if s in reserved:
                     del reserved[s]
         else:

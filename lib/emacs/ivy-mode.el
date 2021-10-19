@@ -137,6 +137,7 @@
     "process"
     "field"
     "subclass"
+    "template"
 ))
 
 (defconst ivy-types '("bool" "int" "bv"))

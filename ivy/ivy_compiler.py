@@ -255,6 +255,9 @@ def compile_inline_call(self,args,methodcall=False):
         return_values = [sort_infer_covariant(a,cmpl_sort(p.sort)) for a,p in zip(return_values,returns)]
     with ASTContext(self):
         if len(params) != len(args):
+            # print "self: {}".format(self);
+            # print "params: {}".format(map(str,params))
+            # print "args: {}".format(map(str,args))
             raise iu.IvyError(self,"wrong number of input parameters (got {}, expecting {})".format(len(args),len(params)))
         args = [sort_infer_contravariant(a,cmpl_sort(p.sort)) for a,p in zip(args,params)]
 
@@ -2147,7 +2150,7 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
                 for dfs in decl.defines():
                     name = dfs[0]
                     mod.attributes[iu.compose_names(name,attribute)] = decl.common if decl.common is not None and attribute == "common" else "yes"
-#        infer_parameters(decls.decls)
+        #        infer_parameters(decls.decls)
         with TopContext(collect_actions(decls.decls)):
             IvyDomainSetup(mod)(decls)
             IvyConjectureSetup(mod)(decls)

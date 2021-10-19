@@ -1452,6 +1452,7 @@ def is_interpreted_sort(s):
     return (isinstance(s,UninterpretedSort) or isinstance(s,EnumeratedSort)) and s.name in sig.interp
 
 def sort_interp(s):
+    foo = canonize_sort(s)
     return sig.interp.get(canonize_sort(s).name,None)
 
 def is_numeral(term):

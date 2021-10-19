@@ -3159,6 +3159,8 @@ class z3_thunk : public thunk<D,R> {
 #                    impl.append('    {} p__'.format(ctypefull(p.sort,classname=classname))+varname(p)+';\n')
                     impl.append('    {};\n'.format(sym_decl(p.prefix('p__'),classname=classname)))
                     if d is not None:
+                        if il.is_function_sort(p.sort):
+                            raise iu.IvyError(None,"can't handle default values for function-sorted parameter {}".format(p))
                         emit_value_parser(impl,p,'"{}"'.format(d.rep.replace('"','\\"')),classname,lineno=d.lineno)
                 impl.append("""
     int seed = 1;

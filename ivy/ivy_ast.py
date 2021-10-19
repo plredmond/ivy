@@ -1087,7 +1087,7 @@ class IsolateDecl(Decl):
     def name(self):
         return 'isolate'
     def defines(self):
-        return [(c.name(),lineno(c)) for c in self.args]
+        return [(c.name(),lineno(c)) for c in self.args if not isinstance(c.args[0],This)]
     
 class IsolateObjectDecl(IsolateDecl):    
     def defines(self):

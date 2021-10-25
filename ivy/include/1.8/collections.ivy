@@ -1249,11 +1249,11 @@ module ordered_map(key,value) = {
 
     # Mapping relation R is injective
 
-    conjecture maps(X,Y) & maps(X,Z) -> Y = Z
+    # conjecture maps(X,Y) & maps(X,Z) -> Y = Z
 
     # Maps implies contains
 
-    conjecture maps(X,Y) -> contains(X)
+    # conjecture maps(X,Y) -> contains(X)
 
     instance impl : map_wrapper(key,value)
 

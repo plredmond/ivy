@@ -154,6 +154,7 @@ def main():
 
 
     logfile = dscfname[:-4]+'.log'
+    counts = {}
     for run in range(runs):
         popens = []
         for process in processes:
@@ -195,6 +196,22 @@ def main():
         retcodes = []
         for popen in popens:
             retcodes.append(popen.wait())
+
+        if have_runs:
+            try :
+                with open(logfile) as file:
+                    for x in file.readlines():
+                        if x.startswith('< '):
+                            x = x[2:]
+                            if '(' in x:
+                                x = x[:x.find('(')]
+                            c = counts.get(x,0)
+                            counts[x] = c + 1
+                with open(logfile,"a") as file:
+                    file.write('{}\n'.format(counts))
+            except:
+                print "error: cannot find log file: {}".format(logfile)
+                
         if any(rc != 0 for rc in retcodes):
             if runs > 1:
                 sys.stderr.write("test failed. see log in {}\n".format(logfile))

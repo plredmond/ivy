@@ -530,7 +530,7 @@ def p_top_module_atom_eq_lcb_top_rcb(p):
     d = Definition(app_to_atom(p[5]),p[9])
     p[0].declare(ModuleDecl(d))
     if p[4] == "isolate":
-        this = This()
+        this = Atom(This())
         this.lineno = get_lineno(p,2)
         iso = Atom("iso",[])
         iso.lineno = get_lineno(p,2)

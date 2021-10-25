@@ -145,11 +145,11 @@
 (defconst ivy-events '())
 (defconst ivy-functions '())
 
-(defconst ivy-keywords-regexp (regexp-opt ivy-keywords 'words))
-(defconst ivy-type-regexp (regexp-opt ivy-types 'words))
-(defconst ivy-constant-regexp (regexp-opt ivy-constants 'words))
-(defconst ivy-event-regexp (regexp-opt ivy-events 'words))
-(defconst ivy-functions-regexp (regexp-opt ivy-functions 'words))
+(defconst ivy-keywords-regexp (concat (rx symbol-start) (regexp-opt ivy-keywords 'words) (rx symbol-end)))
+(defconst ivy-type-regexp (concat (rx symbol-start) (regexp-opt ivy-types 'words) (rx symbol-end)))
+(defconst ivy-constant-regexp (concat (rx symbol-start) (regexp-opt ivy-constants 'words) (rx symbol-end)))
+(defconst ivy-event-regexp (concat (rx symbol-start) (regexp-opt ivy-events 'words) (rx symbol-end)))
+(defconst ivy-functions-regexp (concat (rx symbol-start) (regexp-opt ivy-functions 'words) (rx symbol-end)))
 
 (defconst ivy-font-lock-keywords
   `((,ivy-type-regexp . font-lock-type-face)

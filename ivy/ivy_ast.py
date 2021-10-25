@@ -5,10 +5,21 @@
 Ivy abstract syntax trees.
 """
 
-from ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name, ivy_compose_character
+from ivy_utils import flatten, gen_to_set, UniqueRenamer, compose_names, split_name, IvyError, base_name, ivy_compose_character, LocationTuple
 import ivy_utils as iu
 import ivy_logic
 import re
+
+reference_lineno = None
+
+def set_reference_lineno(lineno):
+    global reference_lineno
+    reference_lineno = lineno
+
+def lineno_add_ref(lineno):
+    if reference_lineno is None:
+        return lineno
+    return LocationTuple([reference_lineno.filename, reference_lineno.line, lineno])
 
 class AST(object):
     """
@@ -19,7 +30,9 @@ class AST(object):
     def clone(self,args):
        res = type(self)(*args)
        if hasattr(self,'lineno'):
-           res.lineno = self.lineno
+#           if reference_lineno:
+#               print 'cloning'.format(self)
+           res.lineno = lineno_add_ref(self.lineno)
        return res
     def sln(self,lineno):
         self.lineno = lineno
@@ -30,7 +43,7 @@ class NoneAST(AST):
 
 def copy_attrs(ast1,ast2):
     if hasattr(ast1,'lineno'):
-        ast2.lineno = ast1.lineno
+        ast2.lineno = lineno_add_ref(ast1.lineno)
     
 class Symbol(AST):
     def __init__(self,rep,sort):
@@ -374,7 +387,7 @@ class Variable(Term):
     def resort(self,sort):
         res = Variable(self.rep,sort)
         if hasattr(self,'lineno'):
-            res.lineno = self.lineno
+            res.lineno = lineno_add_ref(self.lineno)
         return res
 
 
@@ -1638,7 +1651,7 @@ def ast_rewrite(x,rewrite):
             atom = type(x)(ast_rewrite(x.rep,rewrite),ast_rewrite(x.args,rewrite))
         else:
             atom = type(x)(rewrite.rewrite_name(x.rep),ast_rewrite(x.args,rewrite))
-        copy_attributes_ast(x,atom)
+        copy_attributes_ast_ref(x,atom)
         if hasattr(x,'sort'):
             atom.sort = rewrite_sort(rewrite,x.sort)
         if isinstance(x.rep, NamedBinder) or base_name_differs(x.rep,atom.rep):
@@ -1697,6 +1710,13 @@ def add_parameters_ast(ast,params):
 def copy_attributes_ast(x,y):
     if hasattr(x,'lineno'):
         y.lineno = x.lineno
+    if hasattr(x,'sort'):
+        y.sort = x.sort
+    
+def copy_attributes_ast_ref(x,y):
+    if hasattr(x,'lineno'):
+#        print 'ast: {} {}'.format(y,reference_lineno)
+        y.lineno = lineno_add_ref(x.lineno)
     if hasattr(x,'sort'):
         y.sort = x.sort
     

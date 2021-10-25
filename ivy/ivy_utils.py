@@ -258,7 +258,12 @@ class LocationTuple(tuple):
     @property
     def line(self):
         return self[1]
+    @property
+    def reference(self):
+        return self[2] if len(self) > 2 else None
     def __str__(self):
+        if self.reference:
+            return str(self.reference)
         if platform.system() == 'Windows':
             res =  (((str(self.filename)) if self.filename else '')
                     + ('(' + str(self.line) + ')') if self.line else '')
@@ -288,7 +293,14 @@ class IvyError(Exception):
             print str(self)
             assert False
     def __str__(self):
-        return str(self.lineno) + 'error: ' + self.msg
+        def recur(lineno):
+            if isinstance(lineno,LocationTuple) and lineno.reference:
+                res = recur(lineno.reference)
+                ref = LocationTuple([lineno.filename,lineno.line])
+                return res + '\n' + str(ref) + 'error: instantiated here'
+            else:
+                return str(lineno) + 'error: ' + self.msg
+        return recur(self.lineno)
     def __repr__(self):
         return str(self)
 

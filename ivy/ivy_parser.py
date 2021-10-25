@@ -123,7 +123,7 @@ def stack_action_lookup(name,params=0):
             return ivy.actions[name],params
     return None,0
 
-def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
+def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
     save = ivy.attributes
     ivy.attributes = tuple(x for x in ivy.attributes if x == "common")
     static = module.static.copy()
@@ -135,7 +135,14 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None):
             subst = subst.copy()
             p,c = iu.parent_child_name(modname)
             subst[c] = pref.rep
-        return subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=static)
+#        print 'instmod: {} {}'.format(pref,lineno)
+        if lineno is not None:
+            set_reference_lineno(lineno)
+        res = subst_prefix_atoms_ast(decl,subst,pref,module.defined,static=static)
+#        print 'instmod done'
+        if lineno is not None:
+            set_reference_lineno(None)
+        return res
     for decl in module.decls:
         dpref = pref.clone([]) if pref is not None and "common" in decl.attributes else pref
         dvsubst = dict() if "common" in decl.attributes else vsubst
@@ -198,7 +205,10 @@ def do_insts(ivy,insts):
                 if v.rep not in pvars:
                     raise iu.IvyError(instantiation,"variable {} is unbound".format(v))
             module = defn.args[1]
-            inst_mod(ivy,module,pref,subst,vsubst,modname=inst.relname)
+            inst_mod(ivy,module,pref,subst,vsubst,modname=inst.relname,
+                     lineno=instantiation.lineno if hasattr(instantiation,"lineno") else
+                     inst.lineno if hasattr(instantiation,"lineno") else None )
+
             if pref is None:
                 ivy.objects.update(module.objects)
         else:
@@ -854,6 +864,7 @@ def p_symdecl_constantdecl(p):
 def p_symdecl_destructor_tterms(p):
     'symdecl : DESTRUCTOR tterms'
     p[0] = DestructorDecl(*p[2])
+    p[0].lineno = get_lineno(p,1)
 
 def p_symdecl_field_tterms(p):
     'symdecl : FIELD tterms'
@@ -863,19 +874,23 @@ def p_symdecl_field_tterms(p):
     for x,y in zip(p[2],tterms):
         y.lineno = x.lineno
     p[0] = DestructorDecl(*tterms)
+    p[0].lineno = get_lineno(p,1)
 
 if not(iu.get_numeric_version() <= [1,6]):
     def p_symdecl_constructor_tterms(p):
         'symdecl : CONSTRUCTOR tterms'
         p[0] = ConstructorDecl(*p[2])
+        p[0].lineno = get_lineno(p,1)
 
 def p_constantdecl_constant_tterms(p):
     'constantdecl : INDIV tterms'
     p[0] = ConstantDecl(*p[2])
+    p[0].lineno = get_lineno(p,1)
 
 def p_constantdecl_var_tterms(p):
     'constantdecl : VAR tterms'
     p[0] = ConstantDecl(*p[2])
+    p[0].lineno = get_lineno(p,1)
 
 def p_param_tterm(p):
     'parameter : tterm'
@@ -3006,6 +3021,8 @@ def expand_autoinstances(ivy):
                         subst = dict(zip(parms,refparms))
                         rhs = inst.args[1].clone([Atom(subst.get(a.rep,a.rep),[]) for a in inst.args[1].args])
                         newinst = Instantiation(lhs,rhs)
+                        if hasattr(decl,"lineno"):
+                            newinst.lineno = decl.lineno
                         do_insts(ivy,[newinst])
             ivy.decls.append(decl)                    
 

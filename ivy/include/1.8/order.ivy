@@ -26,7 +26,7 @@ module unbounded_sequence = {
     relation succ(X:t,Y:t)
 
     function max2(X:t,Y:t) = Y if X <= Y else X
-    function mod(X:this,Y:this) = X - X / Y * X
+    function mod(X:this,Y:this) = X - X / Y * Y
 
     object spec = {
 

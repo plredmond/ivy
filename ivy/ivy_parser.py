@@ -879,6 +879,11 @@ def p_symdecl_field_tterms(p):
 if not(iu.get_numeric_version() <= [1,6]):
     def p_symdecl_constructor_tterms(p):
         'symdecl : CONSTRUCTOR tterms'
+        for t in p[2]:
+            if not hasattr(t,'sort'):
+                this = This()
+                this.lineno = get_lineno(p,1)
+                t.sort = this
         p[0] = ConstructorDecl(*p[2])
         p[0].lineno = get_lineno(p,1)
 
@@ -2418,6 +2423,19 @@ else:
         'somefmla : fmla'
         p[0] = p[1]
 
+    def p_somefmla_fmla_assign_fmla(p):
+        'somefmla : fmla ASSIGN fmla'
+        if not (isinstance(p[1],(App,Atom)) and len(p[1].args) == 0):
+            report_error(ParseError(p[2].lineno,p[2].value,"syntax error"))
+        lsyms = [p[1].prefix('loc:')]
+        lsyms[0].sort = p[1].sort
+        subst = dict((x.rep,y.rep) for x,y in zip([p[1]],lsyms))
+        fmla = App('*>',p[3],p[1])
+        fmla.lineno = get_lineno(p,2)
+        fmla = subst_prefix_atoms_ast(fmla,subst,None,None)
+        p[0] = Some(*(lsyms+[fmla]))
+        p[0].lineno = get_lineno(p,2)
+
     def p_bounds_params_dot(p):
         'bounds : params DOT'
         p[0] = p[1]
@@ -2470,7 +2488,7 @@ else:
         p[2] = check_non_temporal(p[2])
         p[0] = IfAction(p[2],fix_if_part(p[2],p[3]),p[5])
         p[0].lineno = get_lineno(p,1)
-
+        
     def p_invariants(p):
         'invariants : '
         p[0] = []

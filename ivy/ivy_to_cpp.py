@@ -3468,11 +3468,18 @@ def emit_constant(self,header,code):
             code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
             return
         if is_native_sym(self):
-            code.append('__lit<'+varname(self.sort)+'>(' + self.name + ')')
+            vv = self.name if not self.is_numeral() else ('"' + self.name + '"') 
+            code.append('__lit<'+varname(self.sort)+'>(' + vv + ')')
             return
         if has_string_interp(self.sort) and self.name[0] != '"' :
+            if self.name == '0':
+                code.append('""')
+                return
             raise iu.IvyError(None,'Cannot compile numeral {} of string sort {}'.format(self,self.sort))
         if self.sort.name in im.module.sort_destructors:
+            if self.name == '0':
+                code.append(new_temp(header,sort=self.sort))
+                return
             raise iu.IvyError(None,"cannot compile symbol {} of sort {}".format(self.name,self.sort))
         if self.sort.name in il.sig.interp and il.sig.interp[self.sort.name].startswith('bv['):
             sname,sparms = parse_int_params(il.sig.interp[self.sort.name])
@@ -4255,75 +4262,76 @@ def emit_call(self,header,ignore_vars=False):
     # tricky: a call can have variables on the lhs. we lower this to
     # a call with temporary return actual followed by assignment
     # tricker: in a parameterized initializer, the rhs may also have variables.
+    with ivy_ast.ASTContext(self):
     # we iterate over these.
-    if not ignore_vars and len(self.args) == 2 and list(ilu.variables_ast(self.args[1])):
-        vs = list(iu.unique(ilu.variables_ast(self.args[0])))
-        sort = self.args[1].sort
-        if vs:
-            sort = il.FunctionSort(*([v.sort for v in vs] + [sort]))
-        sym = il.Symbol(new_temp(header,sort=sort),sort)
-        lhs = sym(*vs) if vs else sym
-        open_loop(header,vs)
-        emit_call(self.clone([self.args[0],lhs]),header,ignore_vars=True)
-        close_loop(header,vs)
-        ac = ia.AssignAction(self.args[1],lhs)
-        if hasattr(self,'lineno'):
-            ac.lineno = self.lineno
-        emit_assign(ac,header)
-        return
-    if target.get() in ["gen","test"]:
-        indent(header)
-        header.append('___ivy_stack.push_back(' + str(self.unique_id) + ');\n')
-    code = []
-    indent(code)
-    retvals = []
-    args = list(self.args[0].args)
-    nargs = len(args)
-    name = self.args[0].rep
-    action = im.module.actions[name]
-    fmls = list(action.formal_params)
-    if len(self.args) >= 2:
-        pt,rt = get_param_types(name,action)
-        for rpos in range(len(rt)):
-            rv = self.args[1 + rpos]
-            pos = rt[rpos].pos if isinstance(rt[rpos],ReturnRefType) else None
-            if pos is not None:
-                if pos < nargs:
-                    iparg = self.args[0].args[pos]
-                    if (iparg != rv or
-                        any(j != pos and may_alias(arg,iparg) for j,arg in enumerate(self.args[0].args))):
-                        retval = new_temp(header,rv.sort)
-                        code.append(retval + ' = ')
-                        self.args[0].args[pos].emit(header,code)
-                        code.append('; ')
-                        retvals.append((rv,retval))
-                        args = [il.Symbol(retval,self.args[1].sort) if idx == pos else a for idx,a in enumerate(args)]
-                else:
-                    args.append(self.args[1+rpos])
-                    fmls.append(rv)
-        if not isinstance(rt[0],ReturnRefType):
-            self.args[1].emit(header,code)
-            code.append(' = ')
-    code.append(varname(str(self.args[0].rep)) + '(')
-    first = True
-    for p,fml in zip(args,fmls):
-        if not first:
-            code.append(', ')
-        lsort,rsort = fml.sort,p.sort
-        if im.module.is_variant(lsort,rsort):
-            code.append(sort_to_cpptype[lsort].upcast(im.module.variant_index(lsort,rsort),code_eval(header,p)))
-        else:
-            p.emit(header,code)
-        first = False
-    code.append(');\n')    
-    for (rv,retval) in retvals:
-        indent(code) 
-        rv.emit(header,code)
-        code.append(' = ' + retval + ';\n')
-    header.extend(code)
-    if target.get() in ["gen","test"]:
-        indent(header)
-        header.append('___ivy_stack.pop_back();\n')
+        if not ignore_vars and len(self.args) == 2 and list(ilu.variables_ast(self.args[1])):
+            vs = list(iu.unique(ilu.variables_ast(self.args[0])))
+            sort = self.args[1].sort
+            if vs:
+                sort = il.FunctionSort(*([v.sort for v in vs] + [sort]))
+            sym = il.Symbol(new_temp(header,sort=sort),sort)
+            lhs = sym(*vs) if vs else sym
+            open_loop(header,vs)
+            emit_call(self.clone([self.args[0],lhs]),header,ignore_vars=True)
+            close_loop(header,vs)
+            ac = ia.AssignAction(self.args[1],lhs)
+            if hasattr(self,'lineno'):
+                ac.lineno = self.lineno
+            emit_assign(ac,header)
+            return
+        if target.get() in ["gen","test"]:
+            indent(header)
+            header.append('___ivy_stack.push_back(' + str(self.unique_id) + ');\n')
+        code = []
+        indent(code)
+        retvals = []
+        args = list(self.args[0].args)
+        nargs = len(args)
+        name = self.args[0].rep
+        action = im.module.actions[name]
+        fmls = list(action.formal_params)
+        if len(self.args) >= 2:
+            pt,rt = get_param_types(name,action)
+            for rpos in range(len(rt)):
+                rv = self.args[1 + rpos]
+                pos = rt[rpos].pos if isinstance(rt[rpos],ReturnRefType) else None
+                if pos is not None:
+                    if pos < nargs:
+                        iparg = self.args[0].args[pos]
+                        if (iparg != rv or
+                            any(j != pos and may_alias(arg,iparg) for j,arg in enumerate(self.args[0].args))):
+                            retval = new_temp(header,rv.sort)
+                            code.append(retval + ' = ')
+                            self.args[0].args[pos].emit(header,code)
+                            code.append('; ')
+                            retvals.append((rv,retval))
+                            args = [il.Symbol(retval,self.args[1].sort) if idx == pos else a for idx,a in enumerate(args)]
+                    else:
+                        args.append(self.args[1+rpos])
+                        fmls.append(rv)
+            if not isinstance(rt[0],ReturnRefType):
+                self.args[1].emit(header,code)
+                code.append(' = ')
+        code.append(varname(str(self.args[0].rep)) + '(')
+        first = True
+        for p,fml in zip(args,fmls):
+            if not first:
+                code.append(', ')
+            lsort,rsort = fml.sort,p.sort
+            if im.module.is_variant(lsort,rsort):
+                code.append(sort_to_cpptype[lsort].upcast(im.module.variant_index(lsort,rsort),code_eval(header,p)))
+            else:
+                p.emit(header,code)
+            first = False
+        code.append(');\n')    
+        for (rv,retval) in retvals:
+            indent(code) 
+            rv.emit(header,code)
+            code.append(' = ' + retval + ';\n')
+        header.extend(code)
+        if target.get() in ["gen","test"]:
+            indent(header)
+            header.append('___ivy_stack.pop_back();\n')
 
 ia.CallAction.emit = emit_call
 

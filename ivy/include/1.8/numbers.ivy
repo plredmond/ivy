@@ -5,6 +5,18 @@ module unsigned_bit_vector(bits) = {
     global {
         interpret this -> bv[bits]
     }
+    action random returns (res:this)
+    implementation {
+        implement random {
+            <<<
+            res = 0;
+            for (int b = `bits`; b > 0; b -= 15) {
+                int q = ( b < 15 ) ? b : 15;
+                res = (res << q) | (::random() & ~(-1 << q));
+            }
+            >>>
+        }
+    }
 }
     
 autoinstance uint[bits] : unsigned_bit_vector(bits)
@@ -17,4 +29,17 @@ object nat = {
     function max2(X:this,Y:this) = Y if X <= Y else X
     function mod(X:this,Y:this) = X - X / Y * Y
     function next(X:this) = X + 1
+    action random (upper:this) returns (res:this)  # not perfectly uniform!
+    implementation {
+        implement random {
+            <<<
+            res = 0;
+            for (int b = 64; b > 0; b -= 15) {
+                int q = ( b < 15 ) ? b : 15;
+                res = (res << q) | (::random() & ~(-1 << q));
+            }
+            res = res % upper;
+            >>>
+        }
+    }
 }

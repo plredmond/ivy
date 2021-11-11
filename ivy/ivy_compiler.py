@@ -1114,7 +1114,20 @@ class IvyDomainSetup(IvyDeclInterp):
         sym = self.individual(v)
         rng = sym.sort.rng
         self.domain.constructor_sorts[sym.name] = rng
+        sortname = rng.name
+        if sortname in self.domain.sort_destructors:
+            destrs = self.domain.sort_destructors[sortname]
+            if not any(len(f.sort.dom) > 1 for f in destrs):
+                dom = sym.sort.dom
+                if len(dom) == 0 and len(destrs) > 0:
+                    new_dom = [f.sort.rng for n,f in enumerate(destrs)]
+                    ivy_logic.remove_symbol(sym)
+                    ivy_logic.add_symbol(sym.name,ivy_logic.FunctionSort(*(new_dom + [sym.sort.rng])))
+                    sym = ivy_logic.find_symbol(sym.name)
         self.domain.sort_constructors[rng.name].append(sym)
+
+
+
     def add_definition(self,ldf):
         defs = self.domain.native_definitions if isinstance(ldf.formula.args[1],ivy_ast.NativeExpr) else self.domain.labeled_props
         lhsvs = list(lu.variables_ast(ldf.formula.args[0]))
@@ -1874,6 +1887,26 @@ def create_constructor_schemata(mod):
                 raise iu.IvyError(cons,"Cannot define constructor {} for type {} because {} is not a structure type".format(cons,sortname,sortname))
     
         
+def fix_constructors(mod):
+    for sortname,destrs in mod.sort_destructors.iteritems():
+        if any(len(f.sort.dom) > 1 for f in destrs):
+            continue # TODO: higher-order constructors!
+        sort = ivy_logic.find_sort(sortname)
+        #sort = destrs[0].sort.dom[0]
+        Y = ivy_logic.Variable('Y',sort)
+
+        new_cons = []
+        for cons in mod.sort_constructors[sortname]:
+            dom = cons.sort.dom
+            if len(dom) == 0 and len(destrs) > 0:
+                new_dom = [f.sort.rng for n,f in enumerate(destrs)]
+                xvars = [ivy_logic.Variable('X'+str(n),f.sort.rng) for n,f in enumerate(destrs)]
+                ivy_logic.remove_symbol(cons)
+                ivy_logic.add_symbol(cons.name,ivy_logic.FunctionSort(*(new_dom + [cons.sort.rng])))
+                cons = ivy_logic.find_symbol(cons.name)
+            new_cons.append(cons)
+        mod.sort_constructors[sortname] = new_cons
+    
 def apply_assert_proof(prover,self,pf):
     cond = self.args[0]
     goal = ivy_ast.LabeledFormula(None,cond)
@@ -1945,7 +1978,7 @@ def check_properties(mod):
             fmla = fmla.body
             fmla = lu.substitute_ast(fmla,{v.name:name})
             fmla = ivy_logic.drop_universals(fmla)
-            prop = prop.clone([prop.label,fmla])
+            prop = prop.clone_with_fresh_id([prop.label,fmla])
         return prop
             
     import ivy_proof
@@ -2153,6 +2186,7 @@ def ivy_compile(decls,mod=None,create_isolate=True,**kwargs):
         #        infer_parameters(decls.decls)
         with TopContext(collect_actions(decls.decls)):
             IvyDomainSetup(mod)(decls)
+            fix_constructors(mod)
             IvyConjectureSetup(mod)(decls)
             IvyARGSetup(mod)(decls)
         mod.macros = decls.macros

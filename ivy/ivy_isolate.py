@@ -1957,10 +1957,15 @@ def get_isolate_lfs(mod,iso,lfs,verified=True,present=True):
     lf_map = dict((lf.label.rep,lf) for lf in lfs)
     memo = set()
     lfs = []
+    explicit = set()
+    for pres in iso.present():
+        explicit.add(pres.rep)
     def fun(name):
         if name in lf_map:
             if name not in memo:
-                lfs.append(lf_map[name])
+                lf = lf_map[name]
+                if name in explicit or not (hasattr(lf,'explicit') and lf.explicit==True):
+                    lfs.append(lf)
             memo.add(name)
     iter_isolate(mod,iso,fun,verified,present)
     return lfs

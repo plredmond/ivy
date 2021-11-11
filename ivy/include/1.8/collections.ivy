@@ -1018,15 +1018,15 @@ module ordered_set(key) = {
 
 module map_wrapper(key,value) = {
 
-    object s = {}
 
     <<< header
 	#include <map>
     >>>
 
-    <<< member
-	std::map<`key.t`,`value`> `s`;
-    >>>
+    type repr_t
+    interpret repr_t -> <<< primitive std::map<`key.t`,`value`> >>>
+    var s : repr_t
+    
 
     <<< init
     >>>
@@ -1258,7 +1258,8 @@ module ordered_map(key,value) = {
     instance impl : map_wrapper(key,value)
 
     trusted isolate iso = impl,spec
-
+    attribute test=impl
+    
 }
 
 
@@ -1396,6 +1397,7 @@ module keyval(index,key,data) = {
         }
     }
     isolate iso = this with index
+    attribute test=impl
 }
 
 # This module allows you to extract and use segments of an array

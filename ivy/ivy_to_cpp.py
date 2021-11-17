@@ -3550,7 +3550,8 @@ def emit_bv_op(self,header,code):
         self.args[-1].emit(header,code)
         code.append(' >> {}) & {})'.format(fparams[0],2**(fparams[1]-fparams[0]+1)-1))
         return
-    code.append(' {} '.format(bv_ops.get(self.func.name,self.func.name)))
+    if self.func.name != 'cast':
+        code.append(' {} '.format(bv_ops.get(self.func.name,self.func.name)))
     self.args[-1].emit(header,code)
     code.append(') & {})'.format((1 << sparms[0])-1))
 
@@ -3578,12 +3579,12 @@ def emit_app(self,header,code,capture_args=None):
     if il.is_macro(self):
         return il.expand_macro(self).emit(header,code)
     # handle interpreted ops
-    if slv.solver_name(self.func) == None:
-        if self.func.name in il.sig.interp:
+    if slv.solver_name(self.func) == None or self.func.name == 'cast':
+        if self.func.name in il.sig.interp and self.func.name != 'cast':
             op = il.sig.interp[self.func.name]
             emit_special_op(self,op,header,code)
             return
-        if is_bv_term(self):
+        if is_bv_term(self) and self.func.name != 'cast':
             emit_bv_op(self,header,code)
             return
         itp = il.sig.interp.get(self.func.sort.rng.name,None)
@@ -3597,7 +3598,7 @@ def emit_app(self,header,code,capture_args=None):
         if self.func.name == 'cast':
             if len(self.args) == 1:
                 atype = ctypefull(self.args[0].sort)
-                if atype in ['int','long long','unsigned long long']:
+                if atype in ['int','long long','unsigned long long','unsigned']:
                     if isinstance(itp,il.RangeSort):
                         x = new_temp(header)
                         code_line(header,x + ' = ' + code_eval(header,self.args[0]))
@@ -3612,6 +3613,9 @@ def emit_app(self,header,code,capture_args=None):
                         x = new_temp(header)
                         code_line(header,x + ' = ' + code_eval(header,self.args[0]))
                         code.append('( {} < 0 ? 0 : {})'.format(x,x))
+                        return
+                    if is_bv_term(self):
+                        emit_bv_op(self,header,code)
                         return
             raise iu.IvyError(None,"symbol has no interpretation: {}".format(il.typed_symbol(self.func)))
         if isinstance(itp,il.RangeSort):

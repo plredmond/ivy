@@ -1782,7 +1782,7 @@ def substitute_constants_ast2(ast,subs):
             return res
         return ast
     else:
-        if isinstance(ast,str):
+        if isinstance(ast,str) or ast is None:
             return ast
         new_args = [substitute_constants_ast2(x,subs) for x in ast.args]
         res = ast.clone(new_args)

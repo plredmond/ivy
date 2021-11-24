@@ -164,7 +164,7 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
         else:
             idecl = spaa(decl,subst,dpref)
         if decl.common is not None:
-            idecl.common = pref.rep if decl.common == 'this' else iu.compose_names(pref.rep,decl.common)
+            idecl.common = (pref.rep if decl.common == 'this' else iu.compose_names(pref.rep,decl.common)) if pref is not None else decl.common
         else:
             idecl.common = None
         if isinstance(idecl,ActionDecl):

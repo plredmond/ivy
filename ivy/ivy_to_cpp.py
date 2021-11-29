@@ -2748,6 +2748,8 @@ class z3_thunk : public thunk<D,R> {
     }
 """)
 
+    global declared_ctuples
+    declared_ctuples = set()
     with ivy_cpp.CppClassName(classname):
         declare_all_ctuples(header)
         declare_all_ctuples_hash(header,classname)
@@ -5888,7 +5890,8 @@ def main_int(is_ivyc):
                             descriptor['name'] = str(isolate)
                             if isolate in im.module.isolates:
                                 the_iso = im.module.isolates[isolate]
-                                descriptor['indices'] = describe_params(the_iso.params(),[None for x in the_iso.params()])
+                                params = [p.to_const('iso:') if isinstance(p,ivy_ast.Variable) else p for p in the_iso.params()]
+                                descriptor['indices'] = describe_params(params,[None for x in the_iso.params()])
                             descriptor['params'] = describe_params(im.module.params,im.module.param_defaults)
                             processes.append(descriptor)
         if target.get() in ['repl','test']:

@@ -124,6 +124,8 @@ def stack_action_lookup(name,params=0):
     return None,0
 
 def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
+    if pref is not None and pref.rep in vsubst:
+        raise iu.IvyError(pref,'instance parameter names must differ from instance name')
     save = ivy.attributes
     ivy.attributes = tuple(x for x in ivy.attributes if x == "common")
     static = module.static.copy()

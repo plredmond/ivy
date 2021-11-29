@@ -1096,7 +1096,8 @@ module map_wrapper(key,value) = {
 	<<<
 	    std::map<`key.t`,`value`>::iterator __it = `it`.is_end ? `s`.end() : `s`.upper_bound(`it`.val);
 	    `res`.is_end = false;
-            `res`.val = (--__it)->first;
+            if (__it != `s`.begin())
+                `res`.val = (--__it)->first;
 	>>>
 	
     }

@@ -431,7 +431,7 @@ def ctypefull(sort,classname=None):
     return ctype_remaining_cases(sort,classname)
 
 def native_type_full(self):
-    return self.args[0].inst(native_reference,self.args[1:])    
+    return self.args[0].inst(native_reference_in_type,self.args[1:])    
 
 large_thresh = 1024
 
@@ -1347,7 +1347,7 @@ def create_thunk(impl,actname,action,classname):
     impl.append(': __ivy(__ivy)' + ''.join(',' + varname(p) + '(' + varname(p) + ')' for p in params) + '{}\n')
     impl.append('    ' + action_return_type(action) + ' ')
     emit_param_decls(impl,'operator()',inputs,classname=classname);
-    impl.append(' const {\n        __ivy->' + varname(actname)
+    impl.append(' const {{\n        {}__ivy->'.format('return ' if action_return_type != 'void' else '') + varname(actname)
                 + '(' + ','.join(varname(p.name) for p in action.formal_params) + ');\n    }\n};\n')
 
 def native_typeof(arg):
@@ -4510,6 +4510,12 @@ def native_reference(atom):
         n = arg.name if hasattr(arg,'name') else arg.rep
         res += '[' + varname(n) + ']'
     return res
+
+def native_reference_in_type(arg):
+    if isinstance(arg,ivy_ast.Atom):
+        if arg.rep in im.module.actions:
+            return thunk_name(arg.rep)
+    return native_reference(arg)
 
 
 def emit_native_action(self,header):

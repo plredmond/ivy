@@ -572,6 +572,8 @@ AssignAction.cmpl = compile_assign
 def compile_call(self):
     assert top_context
     ctx = ExprContext(lineno = self.lineno)
+    if not hasattr(self.args[0],'rep'):
+        raise IvyError(self,'call to non-action')
     name = self.args[0].rep
     if name not in top_context.actions:
         with ctx:

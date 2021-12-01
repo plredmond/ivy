@@ -1990,11 +1990,11 @@ def check_properties(mod):
         if prop.temporal:
             mod.labeled_props.append(prop)
         elif prop.id in pmap:
-#            print 'checking {}...'.format(prop.label)
             subgoals = prover.admit_proposition(prop,pmap[prop.id])
-            prop = named_trans(prop)
-            prover.axioms[-1] = prop
-            prover.schemata[prop.name] = prop
+            if not isinstance(prop.formula,ivy_logic.Definition):
+                prop = named_trans(prop)
+                prover.axioms[-1] = prop
+                prover.schemata[prop.name] = prop
             if len(subgoals) == 0:
                 if not isinstance(prop.formula,ivy_ast.SchemaBody):
                     if isinstance(prop.formula,ivy_logic.Definition):

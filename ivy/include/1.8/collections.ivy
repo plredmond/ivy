@@ -1662,6 +1662,28 @@ module unbounded_queue(range) = {
     
 }
 
+# Lexical orders on arrays
+
+module lexord(base,index,arr) = {
+    type comparison = {lt,eq,gt}
+    function compare_base(X:base,Y:base) =
+        lt if X < Y else (eq if X = Y else gt)
+    function compare_step(C:comparison,X:base,Y:base) =
+        compare_base(X,Y) if C=eq else C
+    function compare_foo(C:comparison,X:arr,Y:arr,I:index) =
+    (compare_base(X.value(I),Y.value(I)) if I < X.end & I < Y.end
+    else (lt if I < Y.end else gt)) if C=eq else C
+    function lexord_rec(X:arr,Y:arr,I:index) : comparison
+    definition lexord_rec(x:arr,y:arr,i:index) =
+        eq if i <= 0
+        else compare_foo(lexord_rec(x,y,i-1),x,y,i-1)
+    proof {
+        apply rec[index]
+    }
+    function less(X:arr,Y:arr) : bool
+    definition less(x:arr,y:arr) =
+        lexord_rec(x,y,index.max2(x.end,y.end)) = lt
+}
 
     
     

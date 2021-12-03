@@ -950,6 +950,7 @@ module set_wrapper(key) = {
 
     implement erase(lo:key.iter.t,hi:key.iter.t) {
 	<<<
+	    if (!`lo`.is_end && (`hi`.is_end || `less`(`lo`.val,`hi`.val)))
               `s`->erase(`lo`.is_end ? `s`->end() : `s`->lower_bound(`lo`.val),
    	                 `hi`.is_end ? `s`->end() : `s`->lower_bound(`hi`.val));
 
@@ -1056,7 +1057,7 @@ module ordered_set(key) = {
     
     relation s(K:key)
 
-    instantiate succ : map(key,key,0) # ghost
+#    instantiate succ : map(key,key,0) # ghost
 
     # object spec = {
     #     after init {
@@ -1104,7 +1105,7 @@ module ordered_set(key) = {
     # conjecture s(K) & succ.map(K,L) & L ~= 0 -> ~(L <= K) & s(L)
     # conjecture s(K) & succ.map(K,L) & ~(M <= K) & (L = 0 | ~(L <= M)) -> ~s(M)
 
-    instance impl : set_wrapper(key)
+    instance internal : set_wrapper(key)
 
 }
 

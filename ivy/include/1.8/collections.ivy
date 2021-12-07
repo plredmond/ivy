@@ -1420,7 +1420,8 @@ autoinstance ordered_map[key][value] : ordered_map(key,value)
 
 module keyval(index,key,data) = {
 
-    type t 
+    type this
+    alias t=this 
 
     function end(A:t) : index.t
     relation key_at(A:t, I:index.t, X:key)
@@ -1430,7 +1431,11 @@ module keyval(index,key,data) = {
     action get_key(s:t, i:index.t) returns (k:key)
     action get_value(s:t, i:index.t) returns (d:data)
     action append_pair(s:t, k:key, d:data) returns (s:t)
-
+    action get(s:t,k:key,d:data) returns (d:data)
+    action find(s:t,k:key) returns (i:index.t)
+    action remove(s:t,k:key) returns (s:t)
+    action set(s:t,k:key,d:data) returns (s:t)
+    
     object spec = {
 
         property key_at(A,I,X) -> 0 <= I & I < end(A)
@@ -1488,6 +1493,46 @@ module keyval(index,key,data) = {
             p.p_key := k;
             p.p_value := d;
             repr(s) := repr(s).append(p)
+        }
+        implement get {
+            var i := repr(s).begin;
+            var end := repr(s).end;
+            while i < end {
+                var v := repr(s).value(i);
+                if v.p_key = k {
+                    d := v.p_value;
+                }
+                i := i.next;
+            }
+        }
+        implement find {
+            i := repr(s).begin;
+            var end := repr(s).end;
+            while i < end & repr(s).value(i).p_key ~= k {
+                i := i.next;
+            }
+        }
+        
+        implement remove {
+            var i := s.find(k);
+            var end := repr(s).end;
+            if i < end {
+                repr(s) := repr(s).set(i,repr(s).value(index.prev(repr(s).end)));
+                repr(s) := repr(s).pop_back();
+            }
+        }
+
+        implement set {
+            var p : pair;
+            p.p_key := k;
+            p.p_value := d;
+            var i := s.find(k);
+            var end := repr(s).end;
+            if i < end {
+                repr(s) := repr(s).set(i,p);
+            } else {
+                repr(s) := repr(s).append(p)
+            }
         }
     }
     isolate iso = this with index

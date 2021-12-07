@@ -1654,8 +1654,14 @@ def create_isolate(iso,mod = None,**kwargs):
 #                    extra_with.append(ivy_ast.Atom(extname))
                 if iso and iso in mod.isolates and name in orig_imports:
                     ps = mod.isolates[iso].params()
-                    extra_strip[impname] = [a.rep for a in ps]
-                    extra_strip[extname] = [a.rep for a in ps]
+                    def fixit(p):
+                        if isinstance(p,ivy_ast.Variable):
+                            v = ivy_ast.App('iso:'+p.rep)
+                            v.sort = p.sort
+                            return v
+                        return p
+                    extra_strip[impname] = [fixit(a).rep for a in ps]
+                    extra_strip[extname] = [fixit(a).rep for a in ps]
             mod.imports = newimps
 
         mixers = set()

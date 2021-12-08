@@ -1704,7 +1704,7 @@ def check_definitions(mod):
     #     print prop
     # print "props:"
     # for prop in mod.labeled_props:
-    #     print prop
+    #    print prop
 
 
     defs = dict()

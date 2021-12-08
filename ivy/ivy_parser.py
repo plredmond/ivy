@@ -124,6 +124,7 @@ def stack_action_lookup(name,params=0):
     return None,0
 
 def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
+    set_always_clone_with_fresh_id(True)
     if pref is not None and pref.rep in vsubst:
         raise iu.IvyError(pref,'instance parameter names must differ from instance name')
     save = ivy.attributes
@@ -185,6 +186,7 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
         else:
             ivy.declare(idecl)
     ivy.attributes = save
+    set_always_clone_with_fresh_id(False)
 
 def do_insts(ivy,insts):
     others = []

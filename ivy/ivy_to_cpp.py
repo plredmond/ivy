@@ -469,9 +469,9 @@ native_expr_full = native_type_full
 thunk_counter = 0
 
 
-def expr_to_z3(expr):
+def expr_to_z3(expr,prefix=''):
     fmla = '(assert ' + slv.formula_to_z3(expr).sexpr().replace('|!1','!1|').replace('\\|','').replace('\n',' "\n"') + ')'
-    return 'z3::expr(g.ctx,Z3_parse_smtlib2_string(ctx, "{}", sort_names.size(), &sort_names[0], &sorts[0], decl_names.size(), &decl_names[0], &decls[0]))'.format(fmla)
+    return 'z3::expr(g.ctx,Z3_parse_smtlib2_string({}ctx, "{}", {}sort_names.size(), &{}sort_names[0], &{}sorts[0], {}decl_names.size(), &{}decl_names[0], &{}decls[0]))'.format(prefix,fmla,prefix,prefix,prefix,prefix,prefix,prefix)
 
 
 
@@ -501,6 +501,8 @@ def make_thunk(impl,vs,expr):
     thunk_counter += 1
     thunk_class = 'z3_thunk' if target.get() in ["gen","test"] else 'thunk'
     open_scope(impl,line='struct {} : {}<{},{}>'.format(name,thunk_class,D,R))
+    if target.get() in ["gen","test"]:
+        code_line(impl,'int __ident')
     syms = set()
     gather_referenced_symbols(expr,syms)
     env = [sym for sym in syms if sym not in is_derived]
@@ -518,9 +520,13 @@ def make_thunk(impl,vs,expr):
     open_scope(impl,line='{}({}) {} {}'.format(name,','.join(sym_decl(sym,classname=the_classname) for sym in env)
                                              ,':' if envnames else ''
                                              ,','.join('{}({})'.format(n,n) for n in envnames))),
+    if target.get() in ["gen","test"]:
+        code_line(impl,'__ident = z3_thunk_counter')
+        code_line(impl,'z3_thunk_counter++')
     close_scope(impl)
     open_scope(impl,line='{} operator()(const {} &arg)'.format(R,D))
     subst = {vs[0].name:il.Symbol('arg',vs[0].sort)} if len(vs)==1 else dict((v.name,il.Symbol('arg@@arg{}'.format(idx),v.sort)) for idx,v in enumerate(vs))
+    orig_expr = expr
     expr = ilu.substitute_ast(expr,subst)
     code_line(impl,'return ' + code_eval(impl,expr))
     close_scope(impl)
@@ -529,9 +535,7 @@ def make_thunk(impl,vs,expr):
         if is_primitive_sort(expr.sort) or False and isinstance(expr,HavocSymbol) or skip_z3:
             code_line(impl,'return g.ctx.bool_val(true)')
         else:
-            if lu.free_variables(expr):
-                raise iu.IvyError(None,"cannot compile {}".format(expr))
-            if all(is_numeric_or_enumerated_constant(s) for s in ilu.used_symbols_ast(expr)):
+            if not lu.free_variables(expr) and all(is_numeric_or_enumerated_constant(s) for s in ilu.used_symbols_ast(expr)):
                 if expr.sort in sort_to_cpptype or hasattr(expr.sort,'name') and (expr.sort.name in im.module.sort_destructors or
                                                                                   expr.sort.name in im.module.native_types):
                     code_line(impl,'z3::expr res = __to_solver(g,v,{})'.format(code_eval(impl,expr)))
@@ -539,7 +543,36 @@ def make_thunk(impl,vs,expr):
                     cty = '__strlit' if has_string_interp(expr.sort) else 'int'
                     code_line(impl,'z3::expr res = v == g.int_to_z3(g.sort("{}"),({})({}))'.format(expr.sort.name,cty,code_eval(impl,expr)))
             else:
-                raise iu.IvyError(None,"cannot compile {}".format(expr))
+                code_line(impl,'std::ostringstream __ss')
+                code_line(impl,'__ss << __ident')
+                def make_symbol(sym):
+                    sym_name = 'loc_'+varname(sym.name) 
+                    code_line(impl,'std::string {} = std::string("__loc_") + __ss.str() + std::string("__") + "{}"'.format(sym_name,sym.name))
+                    open_scope(impl,line='if (g.decls_by_name.find({}) == g.decls_by_name.end())'.format(sym_name))
+                    emit_decl(impl,sym,sym_name=sym_name+'.c_str()',prefix='g.')
+                    close_scope(impl)
+                    return sym_name
+                vsyms = [il.Symbol(name+'_arg_{}'.format(idx),v.sort) for idx,v in enumerate(vs)]
+                for v in vsyms:
+                    open_scope(impl,line='if (g.decls_by_name.find("{}") == g.decls_by_name.end())'.format(v.name))
+                    emit_decl(impl,v,prefix='g.')
+                    close_scope(impl)
+                subst = dict((x.name,y) for x,y in zip(vs,vsyms))
+                orig_expr = ilu.substitute_ast(orig_expr,subst)
+                def solver_add(impl,text):
+                    code_line(impl,'res = res && {}'.format(text))
+                code_line(impl,'z3::expr res = g.ctx.bool_val(true)')
+                for sym in env:
+                    locv = make_symbol(sym)
+                    emit_set(impl,sym,solver_add=solver_add,csname=locv+'.c_str()',cvalue=varname(sym),prefix='g.') 
+                code_line(impl, 'z3::expr the_expr = {}.arg(0)'.format(expr_to_z3(il.Equals(orig_expr,orig_expr),prefix='g.')))
+                code_line(impl,'z3::expr_vector src(g.ctx)')
+                code_line(impl,'z3::expr_vector dst(g.ctx)')
+                for idx,v in enumerate(vs):
+                    code_line(impl,'src.push_back(g.ctx.constant("{}",g.sort("{}")));'.format(vsyms[idx].name,v.sort.name))
+                    code_line(impl,'dst.push_back(v.arg({}));'.format(idx))
+                code_line(impl,'res = res && v == the_expr.substitute(src,dst)')
+                code_line(impl,'std::cout << "res = " << res << std::endl')
             code_line(impl,'return res')
         close_scope(impl)
     close_scope(impl,semi=True)
@@ -669,7 +702,7 @@ def emit_sorts(header):
         indent(header)
         header.append('mk_enum("{}",{},{}_values);\n'.format(name,card,cname))
 
-def emit_decl(header,symbol):
+def emit_decl(header,symbol,sym_name=None,prefix=''):
     name = symbol.name
     sname = slv.solver_name(symbol)
     if sname == None:  # this means the symbol is interpreted in some theory
@@ -680,7 +713,10 @@ def emit_decl(header,symbol):
     domain = sort_domain(sort)
     if len(domain) == 0:
         indent(header)
-        header.append('mk_const("{}","{}");\n'.format(sname,rng_name))
+        if sym_name is not None:
+            header.append('{}mk_const({},"{}");\n'.format(prefix,sym_name,rng_name))
+        else:            
+            header.append('{}mk_const("{}","{}");\n'.format(prefix,sname,rng_name))
     else:
         card = len(domain)
         indent(header)
@@ -688,7 +724,10 @@ def emit_decl(header,symbol):
         header.append("const char *{}_domain[{}]".format(tname,card) + " = {"
                       + ','.join('"{}"'.format(s.name) for s in domain) + "};\n");
         indent(header)
-        header.append('mk_decl("{}",{},{}_domain,"{}");\n'.format(sname,card,tname,rng_name))
+        if sym_name is not None:
+            header.append('{}mk_decl({},{},{}_domain,"{}");\n'.format(prefix,sym_name,card,tname,rng_name))
+        else:
+            header.append('{}mk_decl("{}",{},{}_domain,"{}");\n'.format(prefix,sname,card,tname,rng_name))
         
 def emit_sig(header):
     emit_sorts(header)
@@ -713,7 +752,10 @@ def emit_eval(header,symbol,obj=None,classname=None,lhs=None):
     sort = symbol.sort
     domain = sort_domain(sort)
     for idx,dsort in enumerate(domain):
-        lb,ub = sort_bounds(dsort,obj=obj)
+        bds = sort_bounds(dsort,obj=obj)
+        if bds is None:
+            return
+        lb,ub = bds
 #        dcard = sort_card(dsort)
         indent(header)
         header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
@@ -733,32 +775,34 @@ def emit_eval(header,symbol,obj=None,classname=None,lhs=None):
 def var_to_z3_val(v):
     return int_to_z3(v.sort,varname(v))
 
-def emit_set_field(header,symbol,lhs,rhs,nvars=0):
+def solver_add_default(header,text):
+    code_line(header,'slvr.add({})'.format(text))
+
+def emit_set_field(header,symbol,lhs,rhs,nvars=0,solver_add=solver_add_default):
     global indent_level
     name = symbol.name
-    sname = slv.solver_name(symbol)
+    sname = '"' + slv.solver_name(symbol) + '"'
     cname = varname(name)
     sort = symbol.sort
     domain = sort.dom[1:]
     vs = variables(domain,start=nvars)
     open_loop(header,vs)
-    lhs1 = 'apply("'+sname+'"'+''.join(','+s for s in ([lhs]+map(var_to_z3_val,vs))) + ')'
+    lhs1 = 'apply('+sname+''.join(','+s for s in ([lhs]+map(var_to_z3_val,vs))) + ')'
     rhs1 = rhs + ''.join('[{}]'.format(varname(v)) for v in vs) + '.' + memname(symbol)
     if sort.rng.name in im.module.sort_destructors:
         destrs = im.module.sort_destructors[sort.rng.name]
         for destr in destrs:
-            emit_set_field(header,destr,lhs1,rhs1,nvars+len(vs))
+            emit_set_field(header,destr,lhs1,rhs1,nvars+len(vs),solver_add)
     else:
 #        code_line(header,'slvr.add('+lhs1+'=='+int_to_z3(sort.rng,rhs1)+')')
-        code_line(header,'slvr.add(__to_solver(*this,'+lhs1+','+rhs1+'))')
+        solver_add(header,'__to_solver(*this,'+lhs1+','+rhs1+')')
     close_loop(header,vs)
 
-
-def emit_set(header,symbol): 
+def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None,prefix=''): 
     global indent_level
     name = symbol.name
-    sname = slv.solver_name(symbol)
-    cname = varname(name)
+    sname = '"' + slv.solver_name(symbol) + '"' if csname is None else csname 
+    cname = varname(name) if cvalue is None else cvalue
     sort = symbol.sort
     domain = sort_domain(sort)
     if sort.rng.name in im.module.sort_destructors and not is_large_type(sort):
@@ -767,9 +811,9 @@ def emit_set(header,symbol):
         for destr in destrs:
             vs = variables(domain)
             open_loop(header,vs)
-            lhs = 'apply("'+sname+'"'+''.join(','+s for s in map(var_to_z3_val,vs)) + ')'
-            rhs = 'obj.' + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
-            emit_set_field(header,destr,lhs,rhs,len(vs))
+            lhs = prefix+'apply('+sname+''.join(','+s for s in map(var_to_z3_val,vs)) + ')'
+            rhs = prefix+'obj.' + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
+            emit_set_field(header,destr,lhs,rhs,len(vs),solver_add)
             close_loop(header,vs)
         return
     if is_large_type(sort):
@@ -779,23 +823,22 @@ def emit_set(header,symbol):
         code_line(header,'std::vector<z3::expr> __quants;');
         for v in vs:
             code_line(header,'__quants.push_back(ctx.constant("{}",sort("{}")));'.format(varname(v),v.sort.name));
-        code_line(header,'slvr.add(forall({},__to_solver(*this,apply("{}",{}),obj.{})))'.format("__quants",sname,cvars,cname))
+        solver_add(header,'forall({},__to_solver(*this,{}apply({},{}),{}obj.{}))'.format("__quants",sname,prefix,cvars,prefix,cname))
         close_scope(header)
         return
     for idx,dsort in enumerate(domain):
-        lb,ub = sort_bounds(dsort,obj='obj')
+        lb,ub = sort_bounds(dsort,obj=prefix+'obj')
 #        dcard = sort_card(dsort)
         indent(header)
         header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
-    indent(header)
-    header.append('slvr.add(__to_solver(*this,apply("{}"'.format(sname)
+    solver_add(header,'__to_solver(*this,apply({}'.format(sname)
                   + ''.join(','+int_to_z3(domain[idx],'X{}'.format(idx)) for idx in range(len(domain)))
-                  + '),obj.{}'.format(cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
-                  + '));\n')
-    # header.append('set("{}"'.format(sname)
+                  + '),{}obj.{}'.format(prefix,cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
+                  + ')')
+    # header.append('set({}'.format(sname)
     #               + ''.join(",X{}".format(idx) for idx in range(len(domain)))
-    #               + ",obj.{}".format(cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
+    #               + ",{}obj.{}".format(prefix,cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
     #               + ");\n")
     for idx,dsort in enumerate(domain):
         indent_level -= 1    
@@ -917,7 +960,10 @@ def emit_randomize(header,symbol,classname=None):
     sort = symbol.sort
     domain = sort_domain(sort)
     for idx,dsort in enumerate(domain):
-        lb,ub = sort_bounds(dsort,obj='obj')
+        bds = sort_bounds(dsort,obj='obj')
+        if bds is None:
+            return
+        lb,ub = bds
 #        dcard = sort_card(dsort)
         indent(header)
         header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
@@ -2658,6 +2704,8 @@ template <>
     g.add_alit(pred);
 }
 
+static int z3_thunk_counter = 0;
+
 template<typename D, typename R>
 class z3_thunk : public thunk<D,R> {
     public:
@@ -4115,6 +4163,7 @@ def emit_assign_large(self,header):
     expr = il.Ite(il.And(*eqs),self.args[1],self.args[0].rep(*vs)) if eqs else self.args[1]
     global thunks
 
+    print 'expr: {}'.format(expr)
     code_line(header,varname(self.args[0].rep)+' = ' + make_thunk(thunks,vs,expr))
 
 
@@ -5135,7 +5184,6 @@ public:
     z3::solver slvr;
     z3::model model;
 
-protected:
     hash_map<std::string, z3::sort> enum_sorts;
     hash_map<Z3_sort, z3::func_decl_vector> enum_values;
     hash_map<std::string, std::pair<unsigned long long, unsigned long long> > int_ranges;

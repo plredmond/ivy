@@ -553,25 +553,42 @@ def make_thunk(impl,vs,expr):
                     close_scope(impl)
                     return sym_name
                 vsyms = [il.Symbol(name+'_arg_{}'.format(idx),v.sort) for idx,v in enumerate(vs)]
-                for v in vsyms:
+                envsyms = [il.Symbol(name+'_env_{}'.format(idx),v.sort) for idx,v in enumerate(env)]
+                for v in vsyms+envsyms:
                     open_scope(impl,line='if (g.decls_by_name.find("{}") == g.decls_by_name.end())'.format(v.name))
                     emit_decl(impl,v,prefix='g.')
                     close_scope(impl)
                 subst = dict((x.name,y) for x,y in zip(vs,vsyms))
+                print 'subst:{}'.format(subst)
                 orig_expr = ilu.substitute_ast(orig_expr,subst)
+                subst = dict(zip(env,envsyms))
+                orig_expr = ilu.rename_ast(orig_expr,subst)
                 def solver_add(impl,text):
                     code_line(impl,'res = res && {}'.format(text))
                 code_line(impl,'z3::expr res = g.ctx.bool_val(true)')
-                for sym in env:
-                    locv = make_symbol(sym)
-                    emit_set(impl,sym,solver_add=solver_add,csname=locv+'.c_str()',cvalue=varname(sym),prefix='g.') 
-                code_line(impl, 'z3::expr the_expr = {}.arg(0)'.format(expr_to_z3(il.Equals(orig_expr,orig_expr),prefix='g.')))
                 code_line(impl,'z3::expr_vector src(g.ctx)')
                 code_line(impl,'z3::expr_vector dst(g.ctx)')
+                for sym,envsym in zip(env,envsyms):
+                    locv = make_symbol(sym)
+                    emit_set(impl,sym,solver_add=solver_add,csname=locv+'.c_str()',cvalue=varname(sym),prefix='g.',obj='',gen='g') 
+                    code_line(impl,'src.push_back(g.ctx.constant("{}",g.sort("{}")));'.format(envsym.name,sym.sort.name))
+                    code_line(impl,'dst.push_back(g.ctx.constant({}.c_str(),g.sort("{}")));'.format(locv,sym.sort.name))
+
+
+                code_line(impl,'std::cout << "check 1" << std::endl')
+#                code_line(impl,'g.ctx.check_error()')
+                code_line(impl, 'z3::expr the_expr = {}.arg(0)'.format(expr_to_z3(il.Equals(orig_expr,orig_expr),prefix='g.')))
+
+                code_line(impl,'std::cout << "check 2" << std::endl')
+                code_line(impl,'g.ctx.check_error()')
                 for idx,v in enumerate(vs):
                     code_line(impl,'src.push_back(g.ctx.constant("{}",g.sort("{}")));'.format(vsyms[idx].name,v.sort.name))
                     code_line(impl,'dst.push_back(v.arg({}));'.format(idx))
+                code_line(impl,'std::cout << "check 3" << std::endl')
+                code_line(impl,'g.ctx.check_error()')
                 code_line(impl,'res = res && v == the_expr.substitute(src,dst)')
+                code_line(impl,'std::cout << "check 4" << std::endl')
+                code_line(impl,'g.ctx.check_error()')
                 code_line(impl,'std::cout << "res = " << res << std::endl')
             code_line(impl,'return res')
         close_scope(impl)
@@ -798,7 +815,8 @@ def emit_set_field(header,symbol,lhs,rhs,nvars=0,solver_add=solver_add_default):
         solver_add(header,'__to_solver(*this,'+lhs1+','+rhs1+')')
     close_loop(header,vs)
 
-def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None,prefix=''): 
+def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None,prefix='',obj='obj.',gen='*this'): 
+    print 'prefix: {}'.format(prefix)
     global indent_level
     name = symbol.name
     sname = '"' + slv.solver_name(symbol) + '"' if csname is None else csname 
@@ -812,7 +830,7 @@ def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None
             vs = variables(domain)
             open_loop(header,vs)
             lhs = prefix+'apply('+sname+''.join(','+s for s in map(var_to_z3_val,vs)) + ')'
-            rhs = prefix+'obj.' + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
+            rhs = prefix+ obj + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
             emit_set_field(header,destr,lhs,rhs,len(vs),solver_add)
             close_loop(header,vs)
         return
@@ -823,18 +841,18 @@ def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None
         code_line(header,'std::vector<z3::expr> __quants;');
         for v in vs:
             code_line(header,'__quants.push_back(ctx.constant("{}",sort("{}")));'.format(varname(v),v.sort.name));
-        solver_add(header,'forall({},__to_solver(*this,{}apply({},{}),{}obj.{}))'.format("__quants",sname,prefix,cvars,prefix,cname))
+        solver_add(header,'forall({},__to_solver({},{}apply({},{}),{}{}))'.format("__quants",gen,prefix,sname,cvars,obj,cname))
         close_scope(header)
         return
     for idx,dsort in enumerate(domain):
-        lb,ub = sort_bounds(dsort,obj=prefix+'obj')
+        lb,ub = sort_bounds(dsort,obj='obj')
 #        dcard = sort_card(dsort)
         indent(header)
         header.append("for (int X{} = {}; X{} < {}; X{}++)\n".format(idx,lb,idx,ub,idx))
         indent_level += 1
-    solver_add(header,'__to_solver(*this,apply({}'.format(sname)
+    solver_add(header,'__to_solver({},{}apply({}'.format(gen,prefix,sname)
                   + ''.join(','+int_to_z3(domain[idx],'X{}'.format(idx)) for idx in range(len(domain)))
-                  + '),{}obj.{}'.format(prefix,cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
+                  + '),{}{}'.format(obj,cname)+ ''.join("[X{}]".format(idx) for idx in range(len(domain)))
                   + ')')
     # header.append('set({}'.format(sname)
     #               + ''.join(",X{}".format(idx) for idx in range(len(domain)))

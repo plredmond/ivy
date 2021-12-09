@@ -131,7 +131,7 @@ def inst_mod(ivy,module,pref,subst,vsubst,modname=None,lineno=None):
     ivy.attributes = tuple(x for x in ivy.attributes if x == "common")
     static = module.static.copy()
     for name,dfs in module.defined.iteritems():
-        if any(df[1] is TypeDecl for df in dfs):
+        if any((df[1] is TypeDecl) or (df[1] is DestructorDecl) for df in dfs):
             static.add(name)
     def spaa(decl,subst,pref):
         if modname is not None and pref is not None and isinstance(decl,ModuleDecl):

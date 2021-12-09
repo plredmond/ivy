@@ -969,6 +969,8 @@ class FreshConstantDecl(ConstantDecl):
 class DestructorDecl(ConstantDecl):
     def name(self):
         return 'destructor'
+    def defines(self):
+        return [(c.rep,lineno(c),DestructorDecl) for c in self.args if c.rep not in iu.polymorphic_symbols]
 
 class ConstructorDecl(ConstantDecl):
     def name(self):

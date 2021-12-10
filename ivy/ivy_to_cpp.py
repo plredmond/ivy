@@ -559,37 +559,36 @@ def make_thunk(impl,vs,expr):
                     emit_decl(impl,v,prefix='g.')
                     close_scope(impl)
                 subst = dict((x.name,y) for x,y in zip(vs,vsyms))
-                print 'subst:{}'.format(subst)
                 orig_expr = ilu.substitute_ast(orig_expr,subst)
                 subst = dict(zip(env,envsyms))
                 orig_expr = ilu.rename_ast(orig_expr,subst)
+#                def solver_add(impl,text):
+#                    code_line(impl,'res = res && {}'.format(text))
                 def solver_add(impl,text):
-                    code_line(impl,'res = res && {}'.format(text))
+                    code_line(impl,'g.slvr.add({})'.format(text))
                 code_line(impl,'z3::expr res = g.ctx.bool_val(true)')
-                code_line(impl,'z3::expr_vector src(g.ctx)')
-                code_line(impl,'z3::expr_vector dst(g.ctx)')
+                code_line(impl,'hash_map<std::string,std::string> rn')
                 for sym,envsym in zip(env,envsyms):
                     locv = make_symbol(sym)
                     emit_set(impl,sym,solver_add=solver_add,csname=locv+'.c_str()',cvalue=varname(sym),prefix='g.',obj='',gen='g') 
-                    code_line(impl,'src.push_back(g.ctx.constant("{}",g.sort("{}")));'.format(envsym.name,sym.sort.name))
-                    code_line(impl,'dst.push_back(g.ctx.constant({}.c_str(),g.sort("{}")));'.format(locv,sym.sort.name))
-
-
-                code_line(impl,'std::cout << "check 1" << std::endl')
+                    code_line(impl,'rn["{}"]={}.c_str()'.format(envsym.name,locv))
+#                code_line(impl,'std::cout << "check 1" << std::endl')
 #                code_line(impl,'g.ctx.check_error()')
                 code_line(impl, 'z3::expr the_expr = {}.arg(0)'.format(expr_to_z3(il.Equals(orig_expr,orig_expr),prefix='g.')))
-
-                code_line(impl,'std::cout << "check 2" << std::endl')
+                code_line(impl, 'the_expr = __z3_rename(the_expr,rn)')
+#                code_line(impl,'std::cout << "check 2" << std::endl')
                 code_line(impl,'g.ctx.check_error()')
+                code_line(impl,'z3::expr_vector src(g.ctx)')
+                code_line(impl,'z3::expr_vector dst(g.ctx)')
                 for idx,v in enumerate(vs):
                     code_line(impl,'src.push_back(g.ctx.constant("{}",g.sort("{}")));'.format(vsyms[idx].name,v.sort.name))
                     code_line(impl,'dst.push_back(v.arg({}));'.format(idx))
-                code_line(impl,'std::cout << "check 3" << std::endl')
+#                code_line(impl,'std::cout << "check 3" << std::endl')
                 code_line(impl,'g.ctx.check_error()')
                 code_line(impl,'res = res && v == the_expr.substitute(src,dst)')
-                code_line(impl,'std::cout << "check 4" << std::endl')
+#                code_line(impl,'std::cout << "check 4" << std::endl')
                 code_line(impl,'g.ctx.check_error()')
-                code_line(impl,'std::cout << "res = " << res << std::endl')
+#                code_line(impl,'std::cout << "res = " << res << std::endl')
             code_line(impl,'return res')
         close_scope(impl)
     close_scope(impl,semi=True)
@@ -795,7 +794,7 @@ def var_to_z3_val(v):
 def solver_add_default(header,text):
     code_line(header,'slvr.add({})'.format(text))
 
-def emit_set_field(header,symbol,lhs,rhs,nvars=0,solver_add=solver_add_default):
+def emit_set_field(header,symbol,lhs,rhs,nvars=0,solver_add=solver_add_default,prefix='',obj='obj.',gen='*this'):
     global indent_level
     name = symbol.name
     sname = '"' + slv.solver_name(symbol) + '"'
@@ -804,19 +803,18 @@ def emit_set_field(header,symbol,lhs,rhs,nvars=0,solver_add=solver_add_default):
     domain = sort.dom[1:]
     vs = variables(domain,start=nvars)
     open_loop(header,vs)
-    lhs1 = 'apply('+sname+''.join(','+s for s in ([lhs]+map(var_to_z3_val,vs))) + ')'
+    lhs1 = prefix+'apply('+sname+''.join(','+s for s in ([lhs]+map(var_to_z3_val,vs))) + ')'
     rhs1 = rhs + ''.join('[{}]'.format(varname(v)) for v in vs) + '.' + memname(symbol)
     if sort.rng.name in im.module.sort_destructors:
         destrs = im.module.sort_destructors[sort.rng.name]
         for destr in destrs:
-            emit_set_field(header,destr,lhs1,rhs1,nvars+len(vs),solver_add)
+            emit_set_field(header,destr,lhs1,rhs1,nvars+len(vs),solver_add,prefix,obj,gen)
     else:
 #        code_line(header,'slvr.add('+lhs1+'=='+int_to_z3(sort.rng,rhs1)+')')
-        solver_add(header,'__to_solver(*this,'+lhs1+','+rhs1+')')
+        solver_add(header,'__to_solver({},'.format(gen)+lhs1+','+rhs1+')')
     close_loop(header,vs)
 
 def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None,prefix='',obj='obj.',gen='*this'): 
-    print 'prefix: {}'.format(prefix)
     global indent_level
     name = symbol.name
     sname = '"' + slv.solver_name(symbol) + '"' if csname is None else csname 
@@ -830,17 +828,17 @@ def emit_set(header,symbol,solver_add=solver_add_default,csname=None,cvalue=None
             vs = variables(domain)
             open_loop(header,vs)
             lhs = prefix+'apply('+sname+''.join(','+s for s in map(var_to_z3_val,vs)) + ')'
-            rhs = prefix+ obj + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
-            emit_set_field(header,destr,lhs,rhs,len(vs),solver_add)
+            rhs = obj + varname(symbol) + ''.join('[{}]'.format(varname(v)) for v in vs)
+            emit_set_field(header,destr,lhs,rhs,len(vs),solver_add,prefix,obj,gen)
             close_loop(header,vs)
         return
     if is_large_type(sort):
         vs = variables(sort.dom)
-        cvars = ','.join('ctx.constant("{}",sort("{}"))'.format(varname(v),v.sort.name) for v in vs)
+        cvars = ','.join('{}ctx.constant("{}",{}sort("{}"))'.format(prefix,varname(v),prefix,v.sort.name) for v in vs)
         open_scope(header)
         code_line(header,'std::vector<z3::expr> __quants;');
         for v in vs:
-            code_line(header,'__quants.push_back(ctx.constant("{}",sort("{}")));'.format(varname(v),v.sort.name));
+            code_line(header,'__quants.push_back({}ctx.constant("{}",{}sort("{}")));'.format(prefix,varname(v),prefix,v.sort.name));
         solver_add(header,'forall({},__to_solver({},{}apply({},{}),{}{}))'.format("__quants",gen,prefix,sname,cvars,obj,cname))
         close_scope(header)
         return
@@ -2730,6 +2728,50 @@ class z3_thunk : public thunk<D,R> {
        virtual z3::expr to_z3(gen &g, const  z3::expr &v) = 0;
 };
 
+z3::expr __z3_rename(const z3::expr &e, hash_map<std::string,std::string> &rn) {
+    if (e.is_app()) {
+        z3::func_decl decl = e.decl();
+        z3::expr_vector args(e.ctx());
+        unsigned arity = e.num_args();
+        for (unsigned i = 0; i < arity; i++) {
+            args.push_back(__z3_rename(e.arg(i),rn));
+        }
+        if (decl.name().kind() == Z3_STRING_SYMBOL) {
+            std::string fun = decl.name().str();
+            if (rn.find(fun) != rn.end()) {
+                std::string newfun = rn[fun];
+                std::vector<z3::sort> domain;
+                for (unsigned i = 0; i < arity; i++) {
+                    domain.push_back(decl.domain(i));
+                }
+                z3::sort range = e.decl().range();
+                decl = e.ctx().function(newfun.c_str(),arity,&domain[0],range);
+            }
+        }
+        return decl(args);
+    } else if (e.is_quantifier()) {
+        z3::expr body = __z3_rename(e.body(),rn);
+        unsigned nb = Z3_get_quantifier_num_bound(e.ctx(),e);
+        std::vector<Z3_symbol> bnames;
+        std::vector<Z3_sort> bsorts;
+        for (unsigned i = 0; i < nb; i++) {
+            bnames.push_back(Z3_get_quantifier_bound_name(e.ctx(),e,i));
+            bsorts.push_back(Z3_get_quantifier_bound_sort(e.ctx(),e,i));
+        }
+        Z3_ast q = Z3_mk_quantifier(e.ctx(),
+                                    Z3_is_quantifier_forall(e.ctx(),e),
+                                    Z3_get_quantifier_weight(e.ctx(),e),
+                                    0,
+                                    0,
+                                    nb,
+                                    &bsorts[0],
+                                    &bnames[0],
+                                    body);
+        return z3::expr(e.ctx(),q);
+    }
+    return(e);
+}
+
 """)
 
     for sort_name in [s for s in sorted(il.sig.sorts) if isinstance(il.sig.sorts[s],il.EnumeratedSort)]:
@@ -4181,7 +4223,6 @@ def emit_assign_large(self,header):
     expr = il.Ite(il.And(*eqs),self.args[1],self.args[0].rep(*vs)) if eqs else self.args[1]
     global thunks
 
-    print 'expr: {}'.format(expr)
     code_line(header,varname(self.args[0].rep)+' = ' + make_thunk(thunks,vs,expr))
 
 

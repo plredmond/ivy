@@ -18,6 +18,7 @@ jobs:
           architecture: x64
 
       - run: sudo apt-get -y install python python-pip g++ cmake python-ply python-pygraphviz git python-tk tix pkg-config libssl-dev
+      - run: pip install wheel
       - run: python build_submodules.py
       - run: python setup.py bdist_wheel --plat-name manylinux1_x86_64
       - run: ls -l dist

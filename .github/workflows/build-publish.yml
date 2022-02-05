@@ -1,0 +1,24 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build - Ubuntu latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 2.7
+          architecture: x64
+
+      - run: sudo apt-get -y install python python-pip g++ cmake python-ply python-pygraphviz git python-tk tix pkg-config libssl-dev
+      - run: python build_submodules.py
+      - run: python setup.py bdist_wheel --plat-name manylinux1_x86_64
+      - run: ls -l dist
+      

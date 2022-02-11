@@ -3586,7 +3586,7 @@ def emit_constant(self,header,code):
             code.append('( {} < {} ? {} : {} < {} ? {} : {})'.format(x,lb,lb,ub,x,ub,x))
             return
         if is_native_sym(self):
-            vv = self.name if not self.is_numeral() else ('"' + self.name + '"') 
+            vv = self.name if self.is_literal_string() else ('"' + self.name + '"') 
             code.append('__lit<'+varname(self.sort)+'>(' + vv + ')')
             return
         if has_string_interp(self.sort) and self.name[0] != '"' :

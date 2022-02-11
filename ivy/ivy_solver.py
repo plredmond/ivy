@@ -383,7 +383,6 @@ def term_to_z3(term):
             sksym = term.rep + ':' + term.sort.name if sorted else term.rep
             res = z3_constants.get(sksym)
             if res is not None: return res
-#            print str(term.sort)
             sig = lookup_native(term.sort,sorts,"sort") if sorted else S
             if sig == None:
                 sig = term.sort.to_z3()

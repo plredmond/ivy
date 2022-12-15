@@ -8,5 +8,5 @@ def run(name,opts,res):
         child.expect('foo.timeout')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False

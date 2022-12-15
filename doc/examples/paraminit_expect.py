@@ -10,7 +10,7 @@ def run(name,opts,res):
         child.expect(r'= 0')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False
     finally:
         child.close()

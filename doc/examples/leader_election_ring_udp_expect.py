@@ -11,7 +11,7 @@ def run(name,opts,res):
         child[0].expect(r'< serv.elect')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False
     finally:
         for idx in range(2):

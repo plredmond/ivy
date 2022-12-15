@@ -9,7 +9,7 @@ def run(name,opts,res):
         child.sendline('foo.get_bit')
         child.expect(r'= 1')
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False
     finally:
         child.close()
@@ -21,7 +21,7 @@ def run(name,opts,res):
         child.expect(r'= 0')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False
     finally:
         child.close()

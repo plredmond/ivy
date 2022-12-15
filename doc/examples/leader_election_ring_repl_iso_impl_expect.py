@@ -19,5 +19,5 @@ def run(name,opts,res):
         child.expect(r'serv.elect\(1\)')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False

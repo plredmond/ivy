@@ -25,5 +25,5 @@ def run(name,opts,res):
         child.expect('65535')
         return True
     except pexpect.EOF:
-        print child.before
+        print(child.before)
         return False

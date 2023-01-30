@@ -105,6 +105,7 @@ def get_lineno(p,n):
     return iu.Location(iu.filename,p.lineno(n))
 
 def report_error(error):
+#    assert False,error
     error_list.append(error)
 
 def stack_lookup(name):
@@ -331,6 +332,9 @@ class Ivy(object):
         return None
 
     def set_object_defined(self,name,defined):
+#        print ('name: {}, defined: {}'.format(name,defined))
+        if defined is not None:
+            defined = defaultdict(list,((k,v.copy()) for k,v in defined.items()))
 #        print 'set_object_defined: {}'.format(name)
         if name in self.defined:
 #            print 'prev: {}'.format(self.defined[name])
@@ -2078,9 +2082,9 @@ def p_top_interpret_symbol_arrow_lcb_symbol_moresymbols_rcb(p):
 
 def parse_nativequote(p,n):
     string = p[n][3:-3] # drop the quotation marks
-    fields = str.split('`')
+    fields = string.split('`')
     bqs = [(Atom(This()) if s == 'this' else Atom(s))  for idx,s in enumerate(fields) if idx % 2 == 1]
-    text = "`".join([(s if idx % 2 == 0 else str(idx/2)) for idx,s in enumerate(fields)])
+    text = "`".join([(s if idx % 2 == 0 else str(idx//2)) for idx,s in enumerate(fields)])
     eols = [sum(1 for c in s if c == '\n') for idx,s in enumerate(fields) if idx % 2 == 0]
     seols = 0
     loc = get_lineno(p,n)

@@ -2,7 +2,7 @@ import pexpect
 import sys
 
 def run(name,opts,res):
-    child = [pexpect.spawn('./{} {}'.format(name,idx)) for idx in range(2)]
+    child = [pexpect.spawnu('./{} {}'.format(name,idx)) for idx in range(2)]
     for idx in range(2):
         child[idx].logfile = sys.stdout
     try:
@@ -15,4 +15,7 @@ def run(name,opts,res):
         return False
     finally:
         for idx in range(2):
-            child[idx].close()
+            try:
+                child[idx].close()
+            except:
+                pass

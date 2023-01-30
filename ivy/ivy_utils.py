@@ -626,6 +626,8 @@ def skip_subscript(name,pos):
 
 
 def split_name(name):
+    if name.startswith('"'):
+        return [name]
     res = []
     old = 0
     pos = skip_symbol(name,old)

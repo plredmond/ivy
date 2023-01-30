@@ -1279,7 +1279,9 @@ class NativeDef(AST):
         return 'native'
     def __str__(self):
         res = ('[' + str(self.args[0]) + '] ') if self.args[0] else ''
-        res += native_to_string(self.args[1:])
+        for  s in self.args[1:]:
+            res += ' ' + str(s)
+        # res += native_to_string(self.args[1:])
         return res
 
 class NativeDecl(Decl):

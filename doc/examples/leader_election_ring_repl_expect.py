@@ -2,7 +2,7 @@ import pexpect
 import sys
 
 def run(name,opts,res):
-    child = pexpect.spawn('./{}'.format(name))
+    child = pexpect.spawnu('./{}'.format(name))
     child.logfile = sys.stdout
     try:
         child.expect('>')

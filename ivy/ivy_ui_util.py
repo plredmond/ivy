@@ -84,8 +84,8 @@ def center_window(toplevel):
     w = toplevel.winfo_screenwidth()
     h = toplevel.winfo_screenheight()
     size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
-    x = w/2 - size[0]/2
-    y = h/2 - size[1]/2
+    x = w//2 - size[0]//2
+    y = h//2 - size[1]//2
     toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
 def center_window_on_window(toplevel,win):
@@ -94,11 +94,11 @@ def center_window_on_window(toplevel,win):
     wg = win.geometry().split('+')
     wx,wy = list(map(int,wg[1:3]))
     wxs,wys = list(map(int,wg[0].split('x')))
-    xc = wx + wxs/2
-    yc = wy + wys/2
+    xc = wx + wxs//2
+    yc = wy + wys//2
     size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
-    x = xc - size[0]/2
-    y = yc - size[1]/2
+    x = xc - size[0]//2
+    y = yc - size[1]//2
     toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
 
 def destroy_then_aux(dlg,command):

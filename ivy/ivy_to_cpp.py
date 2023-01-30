@@ -108,7 +108,7 @@ def get_indent(line):
         if char == ' ':
             lindent += 1
         elif char == '\t':
-            lindent = (lindent + 8) / 8 * 8
+            lindent = (lindent + 8) // 8 * 8
         else:
             break
     return lindent
@@ -1445,9 +1445,6 @@ def native_to_str(native,reference=False,code=None):
         return native_typeof if fields[idx-1].endswith('%') else native_z3name if fields[idx-1].endswith('"') else f
     def dm(s):
         return s[:-1] if s.endswith('%') else s
-    print ('native: {}'.format(native))
-    print ('code: {}'.format(code))
-    print ('fields: {}'.format(fields))
     fields = [(nfun(idx)(native.args[int(s)+2]) if idx % 2 == 1 else dm(s)) for idx,s in enumerate(fields)]
     return ''.join(fields)
 

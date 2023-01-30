@@ -81,7 +81,7 @@ class Aiger(object):
         return res
 
     def notl(self,arg):
-        return 2*(arg/2) + (1 - arg%2)
+        return 2*(arg//2) + (1 - arg%2)
     
     def orl(self,*args):
         return self.notl(self.andl(*list(map(self.notl,args))))
@@ -441,7 +441,7 @@ class Encoder(object):
         ycom = self.notl(y)
         res,cy = self.encode_plus_int(sort,x,ycom,self.sub.true())
         if il.is_range_sort(sort):
-            res = self.ite(cy,res,binenc(0,len(x)))
+            res = self.ite(cy,res,self.binenc(0,len(x)))
         return res
 
     def encode_times(self,sort,x,y):
@@ -469,8 +469,8 @@ class Encoder(object):
         res = []
         for i in range(0,len(x)):
             thing = thing[1:] + [x[i]]
-            le = encode_le(y,thing)
-            thing = self.encode_ite(sort,ls,self.encode_minus(sort,thing,y),thing)
+            le = self.encode_le(y,thing)
+            thing = self.encode_ite(sort,le,self.encode_minus(sort,thing,y),thing)
             res.append(le)
         return res
 
@@ -494,7 +494,7 @@ class Encoder(object):
         elif il.is_boolean_sort(interp):
             val = bits[0]
         else:
-            assert False,'variable has unexpected sort: {} {}'.format(v,s.sort)
+            assert False,'variable has unexpected sort: {} {}'.format(v,v.sort)
         return val
         
 
@@ -883,7 +883,7 @@ class Qelim(object):
             values = itertools.product(*consts)
             maps = [dict(list(zip(expr.variables,v))) for v in values]
             insts = [self.qe(il.substitute(expr.body,m),sort_constants) for m in maps]
-            if is_finite_sort(x.sort):
+            if all(is_finite_sort(x.sort) for x in expr.variables):
                 thing = (il.And if il.is_forall(expr) else il.Or)(*insts)
                 return thing
             else:
@@ -1699,7 +1699,7 @@ def check_isolate(method="mc"):
 
     # output aiger to temp file
 
-    with tempfile.NamedTemporaryFile(suffix='.aag',delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode='wt', suffix='.aag',delete=False) as f:
         name = f.name
 #        print 'file name: {}'.format(name)
         f.write(str(aiger))
@@ -1741,7 +1741,7 @@ def check_isolate(method="mc"):
         texts.append(text)
         if len(text) < 256:
             break
-    alltext = ''.join(texts)
+    alltext = ''.join(x.decode("utf-8") for x in texts)
     if verbose:
         print(80*'-')
     

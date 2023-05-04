@@ -8,6 +8,7 @@ from . import ivy_utils as utl
 from . import ivy_logic_utils as lut
 from . import ivy_logic as lg
 from . import ivy_utils as iu
+from . import ivy_ui
 from . import ivy_module as im
 from . import ivy_alpha
 from . import ivy_art
@@ -74,8 +75,16 @@ def show_counterexample(ag,state,bmc_res):
 def gui_art(other_art):
     from . import tk_ui as ui
 #    iu.set_parameters({'mode':'induction'})
-    iu.set_parameters({'ui':'cti'})
+#    iu.set_parameters({'ui':'cti'})
     gui = ui.new_ui()
+    if ivy_ui.default_ui.get() == "art":
+        print ("initializers: {}".format(im.module.initializers))
+        other_art = ivy_art.AnalysisGraph()
+        other_art.add_initial_state()
+        if 'initialize' in im.module.actions:
+            init_action = im.module.actions['initialize']
+            print ("initialize: {}".format(init_action))
+            ag.execute(init_action, None, None, 'initialize')
     agui = gui.add(other_art)
     gui.tk.update_idletasks() # so that dialog is on top of main window
     gui.tk.mainloop()

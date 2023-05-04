@@ -243,6 +243,8 @@ def dot_layout(cy_elements,edge_labels=False,subgraph_boxes=False,node_gt=None):
     global y_origin
     y_origin = 0.0
     for n in g.nodes():
+        if 'pos' not in n.attr:
+            continue
         top = float(n.attr['pos'].split(',')[1]) + float(n.attr['height'])/2
         if top > y_origin:
             y_origin = top

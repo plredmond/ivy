@@ -35,7 +35,7 @@ from .ivy_logic_utils import symbols_clauses, used_symbols_clauses, rename_claus
     relations_clauses, eq_lit, condition_clauses, or_clauses, ite_clauses, and_clauses, false_clauses, true_clauses,\
     formula_to_clauses, clauses_to_formula, formula_to_clauses_tseitin, is_ground_clause, \
     relations_clause, Clauses, sym_inst, negate_clauses, negate
-from .ivy_solver import unsat_core, clauses_imply, clauses_imply_formula, clauses_sat, clauses_case, get_model_clauses, clauses_model_to_clauses, get_small_model
+from .ivy_solver import unsat_core, clauses_imply, clauses_imply_formula, clauses_sat, clauses_case, get_model_clauses, clauses_model_to_clauses, get_small_model, binary_interpolant
 from . import ivy_logic
 from . import ivy_logic_utils as lu
 from . import ivy_utils as iu
@@ -499,10 +499,16 @@ def reverse_image(post_state,axioms,update):
     return res
 
 def interpolant(clauses1,clauses2,axioms,interpreted):
-#    print "interpolant clauses1={} clauses2={}".format(clauses1,clauses2)
+    print ("interpolant clauses1={} clauses2={}".format(clauses1,clauses2))
 #    print "axioms = {}".format(axioms)
     foo = and_clauses(clauses1,axioms)
     clauses2 = simplify_clauses(clauses2)
+
+    itp = binary_interpolant(foo,clauses2)
+    print ("itp = {}".format(itp))
+    return None if itp is None else (clauses1,itp)
+        
+
     core = unsat_core(clauses2,foo)
     if core == None:
         return None

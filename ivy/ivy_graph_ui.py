@@ -275,6 +275,7 @@ class GraphWidget(object):
         if self.parent != None and self.g.parent_state != None:
             self.checkpoint(set_backtrack_point=True)
             g = self.g
+            print ("type(g) =  {}|".format(type(g)))
             p = self.parent.reverse_update_concrete_clauses(g.parent_state, g.constraints)
             if p == None:
                 self.ui_parent.ok_dialog("Cannot reverse.")
@@ -406,7 +407,7 @@ class GraphWidget(object):
                 text = str(clauses_to_formula(interp))
                 self.ui_parent.text_dialog(msg,text,on_cancel=None)
                 goal = lu.reskolemize_clauses(core,self.g.parent_state.domain.skolemizer())
-                g.constraints = goal
+                g.set_facts(goal)
                 g.set_state(goal)
                 self.update()
             else:
@@ -423,12 +424,15 @@ class GraphWidget(object):
             if hasattr(g,'reverse_result'):
                 dgm = ivy_interp.diagram(self.g.parent_state,
                                          self.g.reverse_result[1],
-                                         extra_axioms = self.g.reverse_result[0])
+                                         extra_axioms = self.g.reverse_result[0],
+                                         upward_close=False, weaken=False)
             else:
-                dgm = ivy_interp.diagram(self.g.parent_state,self.g.state)
+                dgm = ivy_interp.diagram(self.g.parent_state,self.g.state,upward_close=False, weaken=False)
             if dgm != None:
                 goal = lu.reskolemize_clauses(dgm,self.g.parent_state.domain.skolemizer())
-                g.constraints = goal
+                print (type(g))
+                print (g.constraints)
+                g.set_facts(goal.fmlas)
                 g.set_state(goal)
                 self.update()
             else:

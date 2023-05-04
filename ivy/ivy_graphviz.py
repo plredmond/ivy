@@ -133,6 +133,7 @@ class AGraph(object):
         txt,_ = process.communicate()
         exit_code = process.wait()
 #        txt = self.g.create(prog=prog,format='dot')
+        txt = txt.decode("utf-8")
         self.g =  pydot.dot_parser.parse_dot_data(txt)[0]
         fix_parsed_graph(self.g)
     def nodes(self):

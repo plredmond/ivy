@@ -334,14 +334,14 @@ def case_conjecture(state,clauses):
         state.conjs.append(interp)
     return ri
 
-def diagram(state,clauses,implied=false_clauses(),extra_axioms=None,weaken=True):
+def diagram(state,clauses,implied=false_clauses(),extra_axioms=None,weaken=True,upward_close=True):
     """ Return the diagram of a single model of clauses in state or
     None if clauses are unsat.
     """
     axioms = state.domain.background_theory(state.in_scope)
     if extra_axioms:
         axioms = and_clauses(axioms,extra_axioms)
-    under = clauses_model_to_diagram(clauses,is_skolem,implied,axioms=axioms,weaken=weaken)
+    under = clauses_model_to_diagram(clauses,is_skolem,implied,axioms=axioms,weaken=weaken,upward_close=upward_close)
     return under
 
 def underapproximate_state(state,implied=[[]]):

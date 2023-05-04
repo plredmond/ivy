@@ -307,6 +307,24 @@ class RelAlg3(RelAlg2):
         self.prim_cache[id] = cubes
         self.prim_list.append(z3lit) # so id not lost
         return cubes
+
+def predicate_alpha(state):
+    print ("running predicate alpha")
+    slvr = new_solver()
+    clauses = and_clauses(state.clauses,state.domain.background_theory())
+    add_clauses(slvr, clauses)
+    res = Clauses()
+    for pred in state.domain.abstraction_predicates:
+        slvr.push()
+        add_clauses(slvr,dual_clauses(pred))
+        cr = slvr.check()
+        "predicate: {} result {}".format(pred,cr)
+        if slvr.check() == z3.unsat:
+            res = and_clauses(res,pred)
+        slvr.pop()
+    state.clauses = res
+        
+
     
         
 if __name__ == "__main__":

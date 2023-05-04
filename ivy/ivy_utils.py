@@ -714,7 +714,7 @@ use_numerals = BooleanParameter("use_numerals",True)
 use_new_ui = BooleanParameter("new_ui",False)
 catch = BooleanParameter("catch",True)
 
-default_ui = Parameter("ui","art")
+default_ui = Parameter("ui","cti")
 
 def get_default_ui_module():
     defui = default_ui.get()

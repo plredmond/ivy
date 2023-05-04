@@ -101,9 +101,10 @@ class AnalysisGraph(object):
 
     def add_initial_state(self, ic = None, abstractor = None):
         if ic == None:
-            ic = im.init_cond
+            ic = self.domain.init_cond
         s = self.domain.new_state(ic)
         if self.domain.initializers:
+            print("foo")
             action = ivy_actions.Sequence(*[a for n,a in self.domain.initializers])
             action = ivy_actions.env_action(action,'init')
             s = action_app(action,s)
@@ -130,7 +131,6 @@ class AnalysisGraph(object):
                         s.label = n
             else:
                 self.add_initial_state(self.domain.init_cond,abstractor)
-
 
     def state_actions(self,state):
         if hasattr(state,'label') and state.label != None:

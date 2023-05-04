@@ -40,6 +40,7 @@ class Module(object):
         self.theorems = dict()
         self.instantiations = []
         self.concept_spaces = []
+        self.abstraction_predicates = []
         self.labeled_conjs = []  # conjectures
         self.hierarchy = defaultdict(set)
         self.actions = {}

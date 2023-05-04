@@ -83,6 +83,10 @@ def my_minus(*args):
     return args[0] - args[1]
 
 def my_eq(x,y):
+    if z3.is_true(y):
+        return x
+    if z3.is_false(y):
+        return z3.Not(x)
     ctx = z3.main_ctx()
 #    print "my_eq: {} = {}".format(x,y)
     return z3.BoolRef(z3.Z3_mk_eq(ctx.ref(), x.as_ast(), y.as_ast()), ctx)
@@ -549,18 +553,31 @@ def clauses_to_z3(clauses):
 
 def formula_to_z3_int(fmla):
 #    print "formula_to_z3_int: {} : {}".format(fmla,type(fmla))
+    if isinstance(fmla,ivy_logic.Definition or ivy_logic.is_eq(fmla) or isinstance(fmla,ivy_logic.Iff)):
+        if ivy_logic.is_true(fmla.args[1]):
+            return formula_to_z3_int(fmla.args[0])
+        if ivy_logic.is_false(fmla.args[1]):
+            return z3.Not(formula_to_z3_int(fmla.args[0]))
     if ivy_logic.is_atom(fmla):
         return atom_to_z3(fmla)
     if isinstance(fmla,ivy_logic.Definition) and ivy_logic.is_enumerated(fmla.args[0]) and not use_z3_enums:
         return encode_equality(*fmla.args)
     args = [formula_to_z3_int(arg) for arg in fmla.args]
     if isinstance(fmla,ivy_logic.And):
+        if len(args) == 0:
+            return z3.BoolVal(True)
         return z3.And(args)
     if isinstance(fmla,ivy_logic.Or):
+        if len(args) == 0:
+            return z3.BoolVal(False)
         return z3.Or(args)
     if isinstance(fmla,ivy_logic.Not):
         return z3.Not(args[0])
-    if isinstance(fmla,ivy_logic.Definition):
+    if isinstance(fmla,ivy_logic.Definition or ivy_logic.is_eq(fmla) or isinstance(fmla,ivy_logic.Iff)):
+        if ivy_logic.is_true(fmla.args[1]):
+            return args[0]
+        if ivy_logic.is_false(fmla.args[1]):
+            return z3.Not(args[0])
         z3_body = my_eq(args[0],args[1])
         return z3_body
         assert all(ivy_logic.is_variable(v) for v in fmla.args[0].args)
@@ -632,6 +649,17 @@ def unsat_core(clauses1, clauses2, implies = None, unlikely=lambda x:False):
 #    print "unsat_core res = {}".format(res)
     return Clauses(res,list(clauses1.defs))
 
+def binary_interpolant(clauses2, clauses1):
+    print ("binary_interpolant clauses1 = {}, clauses2 = {}".format(clauses1,clauses2))
+#    assert clauses1.defs == []
+    print ("clauses1: {}".format(clauses_to_z3(clauses1)))
+    print ("clauses2: {}".format(clauses_to_z3(clauses2)))
+    try:
+        z3itp = z3.binary_interpolant(clauses_to_z3(clauses2),clauses_to_z3(clauses1))
+        return Clauses([z3_to_formula(z3itp)])
+    except Exception as e:
+        print ("exception: {}".format(e))
+        return None
 
 def cube_to_z3(cube):
     if len(cube) == 0:
@@ -1375,7 +1403,7 @@ def filter_redundant_facts(clauses,axioms):
 
 
 
-def clauses_model_to_diagram(clauses1,ignore = None, implied = None,model = None,axioms=None,weaken=True,numerals=True):
+def clauses_model_to_diagram(clauses1,ignore = None, implied = None,model = None,axioms=None,weaken=True,numerals=True,upward_close=True):
     """ Return a diagram of a model of clauses1 or None.  The function "ignore", if
     provided, returns true for symbols that should be ignored in the
     diagram.
@@ -1438,6 +1466,11 @@ def clauses_model_to_diagram(clauses1,ignore = None, implied = None,model = None
     ign = lambda x,ignore=ignore: (ignore(x) and not x in repset)
     res = Clauses([cl for cl in res.fmlas if not any(ign(c) for c in used_symbols_ast(cl))])
 #    print "clauses_model_to_diagram res = {}".format(res)
+    if not upward_close:
+        uc = Clauses([ivy_logic.Or(*[ivy_logic.Equals(ivy_logic.Variable('X',c.get_sort()),reps[c.rep])
+                   for c in h.sort_universe(s)]) for s in h.sorts()])
+        res = and_clauses(res,uc)
+#    uc = Clauses([Or(*[Equals(Variable('X',s),v) for v in state.universe[s]]) for s in state.universe])
     return res
 
 def relation_model_to_clauses(h,r,n):
@@ -1563,6 +1596,51 @@ def substitute(t, *m):
         _to[i]   = m[i][1].as_ast()
     return z3_to_expr_ref(z3.Z3_substitute(t.ctx.ref(), t.as_ast(), num, _from, _to), t.ctx)
 
+def z3sort_to_sort(z3sort):
+    if z3sort.kind() == z3.Z3_BOOL_SORT:
+        return ivy_logic.BooleanSort()
+    return ivy_logic.ConstantSort(z3sort.name())
+
+def z3decl_to_symbol(z3decl):
+    if z3.is_func_decl(z3decl):
+        arity = z3decl.arity()
+        rng = z3sort_to_sort(z3decl.range())
+        dom = [z3sort_to_sort(z3decl.domain(i)) for i in range(arity)]
+        name = z3decl.name().split(':')[0]
+        if arity == 0:
+            return ivy_logic.Symbol(name,rng)
+        return ivy_logic.Symbol(name,ivy_logic.FunctionSort(*(dom + [rng])))
+    
+
+def z3_to_formula(z3expr,vars = []):
+    if z3.is_app(z3expr):
+        arity = z3expr.num_args()
+        z3args = [z3expr.arg(i) for i in range(arity)]
+        args = [z3_to_formula(x,vars) for x in z3args]
+        if z3.is_and(z3expr):
+            return ivy_logic.And(*args)
+        if z3.is_or(z3expr):
+            return ivy_logic.Or(*args)
+        if z3.is_not(z3expr):
+            return ivy_logic.Not(*args)
+        if z3.is_eq(z3expr):
+            return ivy_logic.Equals(*args)
+        sym = z3decl_to_symbol(z3expr.decl())
+        print ("sym: {}".format(sym))
+        print ("args: {}".format(args))
+        return sym if arity == 0 else sym(*args)
+    def fix_var_name(name):
+        return ('V'+name[1:]) if name.startswith('%') else name
+    if z3.is_quantifier(z3expr):
+        vs = [ivy_logic.Variable(fix_var_name(z3expr.var_name(i).split(':')[0]),z3sort_to_sort(z3expr.var_sort(i)))
+              for i in range(z3expr.num_vars())]
+        body = z3_to_formula(z3expr.body(),vars = list(reversed(vs))+vars)
+        quant = ivy_logic.ForAll if z3expr.is_forall() else ivy_logic.Exists
+        return quant(vs,body)
+    if z3.is_var(z3expr):
+        return vars[z3.get_var_index(z3expr)]
+    print ("cannot parse: {}".format(z3expr))
+    
 
 if __name__ == '__main__':
     # clauses = ivy_logic.to_clauses("[[~n(V,_y)],[~n(V1,V),~n(V2,V),=(V1,V2)]]")

@@ -38,7 +38,7 @@ if not (iu.get_numeric_version() <= [1,2]):
     else:
         precedence = (
             ('left', 'SEMI'),
-            ('left', 'GLOBALLY', 'EVENTUALLY'),
+            ('left', 'GLOBALLY', 'EVENTUALLY','WHENFIRST','WHENLAST','WHENNEXT','WHENPREV'),
             ('left', 'IF'),
             ('left', 'ELSE'),
             ('left', 'OR'),

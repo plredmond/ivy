@@ -358,6 +358,8 @@ def check_fcs_in_state(mod,ag,post,fcs):
                 action,annot = thing
             act.match_annotation(action,annot,handler)
             handler.end()
+            if hasattr(mod,"trace_hook"):
+                handler = mod.trace_hook(handler)
             ff = failed[0]
             handler.is_cti = (lut.formula_to_clauses(ff.lf.formula) if isinstance(ff,ConjChecker)
                               else None)
@@ -413,7 +415,7 @@ def apply_conj_proofs(mod):
 
 
 
-def check_isolate():
+def check_isolate(trace_hook = None):
     mod = im.module
     if mod.isolate_proof is not None:
         pc = ivy_proof.ProofChecker(mod.labeled_axioms+mod.assumed_invariants,mod.definitions,mod.schemata)
@@ -670,6 +672,8 @@ def check_subgoals(goals,method=None):
                             else:
                                 print("PASS\n")
                     else:
+                        if hasattr(goal,"trace_hook"):
+                            mod.trace_hook = goal.trace_hook
                         check_isolate()
                 
 def mc_tactic(prover,goals,proof):

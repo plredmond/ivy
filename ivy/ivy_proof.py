@@ -1402,6 +1402,34 @@ def compile_with_goal_vocab(expr,goal):
 #    the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
     return compile_expr_vocab_ext(expr,the_goal_vocab)
 
+def compile_definition_goal_vocab(df,goal):
+    vocab = goal_vocab(goal)
+    free = goal_free(goal)
+    lf = df.args[0]
+    lhs = lf.formula.args[0]
+    ts = il.TopFunctionSort(len(lhs.args))
+    newsym = il.Symbol(lhs.rep,ts)
+    with il.WithSymbols([newsym]):
+        vars = lf.formula.args[0].args
+        body = ia.Atom('=',lf.formula.args)
+        fmla = ia.Forall(vars,body) if vars else body
+        elf = lf.clone([lf.label,fmla])
+        lf = compile_expr_vocab(elf,vocab)
+        thing = lf.formula.body if vars else lf.formula 
+        sym = thing.args[0].rep
+        deps = list(lu.symbols_ast(thing.args[1]))
+        if sym in deps:
+            raise NoMatch(lf,"no proof given for recursive definition")
+        # TODO: allow proofs of recursive definitions
+        cd = ia.ConstantDecl(sym)
+        cd.lineno = lf.lineno
+        lf.definition = True
+        goal = goal_add_prem(goal,cd,lf.lineno)
+        goal = goal_add_prem(goal,lf,lf.lineno)
+        if sym in vocab.sorts or sym in vocab.symbols or sym in free:
+            raise Redefinition(df,"redefinition of {}".format(sym))
+        return goal
+
 def match_from_defn(defn):
     vs = set()
     defn = defn.formula

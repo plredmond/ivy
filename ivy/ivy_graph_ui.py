@@ -35,6 +35,7 @@ class GraphWidget(object):
         return [("menu","Action",
                  [("button","Undo",self.undo),
                   ("button","Redo",self.redo),
+                  ("button","PDR step",self.pdr_step),
                   ("button","Concrete",self.concrete),
                   ("button","Gather",self.gather),
                   ("button","Reverse",self.reverse),
@@ -288,6 +289,19 @@ class GraphWidget(object):
             g.reverse_result = (parent_state.clauses,clauses)
             self.update()
 
+    def pdr_step(self):
+        self.reverse();
+        g = self.g
+        if g.reverse_result[1].is_false():
+            self.backtrack()
+            self.recalculate()
+            if self.graph_stack.can_undo() and hasattr(self.g,'reverse_result'):
+                self.backtrack()
+            else:
+                self.ui_parent.ok_dialog("PDR terminated")
+        else:
+            self.diagram()
+            
     # Recalculate the current state
 
     def recalculate(self):
@@ -422,10 +436,15 @@ class GraphWidget(object):
             self.checkpoint()
             g = self.g
             if hasattr(g,'reverse_result'):
+                print ("have reverse result")
                 dgm = ivy_interp.diagram(self.g.parent_state,
                                          self.g.reverse_result[1],
                                          extra_axioms = self.g.reverse_result[0],
                                          upward_close=False, weaken=False)
+                if dgm is None:
+                    self.ui_parent.ok_dialog("The current state is vacuous. Backtracking.")
+                    self.backtrack()
+                    self.diagram()
             else:
                 dgm = ivy_interp.diagram(self.g.parent_state,self.g.state,upward_close=False, weaken=False)
             if dgm != None:

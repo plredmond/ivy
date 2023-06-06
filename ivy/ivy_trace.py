@@ -37,8 +37,13 @@ class TraceBase(art.AnalysisGraph):
         self.sub = None
         self.returned = None
         self.hidden_symbols = lambda sym: False
+        self.renaming = None
         self.is_full_trace = False
         
+    def rename(self,map):
+        self.renaming = map
+        return self
+
     def is_skolem(self,sym):
         res = itr.is_skolem(sym) and not (sym.name.startswith('__') and sym.name[2:3].isupper())
         # if not res and self.top_level:
@@ -64,10 +69,13 @@ class TraceBase(art.AnalysisGraph):
             self.add(state)
 
 
-    def label_from_action(self,action):
+    def label_from_action(self,action,renaming=None):
         if hasattr(action,'label'):
             return action.label + '\n'
 #        lineno = str(action.lineno) if hasattr(action,'lineno') else ''
+        if renaming is not None and not isinstance(action,itp.fail_action):
+            action = lut.rename_ast(action,renaming)
+            action = lut.reduce_named_binders(action)
         return iu.pretty(str(action),max_lines=4)
 
     def eval_in_state(self,state,param):
@@ -76,7 +84,8 @@ class TraceBase(art.AnalysisGraph):
                 return c.args[1]
         return None
 
-    def to_lines(self,lines,hash,indent,hidden,failed=False):
+    def to_lines(self,lines,hash,indent,hidden,failed=False,renaming=None):
+        renaming = renaming or self.renaming
         for idx,state in enumerate(self.states):
             if hasattr(state,'expr') and state.expr is not None:
                 expr = state.expr
@@ -84,7 +93,7 @@ class TraceBase(art.AnalysisGraph):
                 if option_detailed.get():
                     if not hasattr(action,'label') and hasattr(action,'lineno'):
                         lines.append(str(action.lineno) + '\n')
-                    newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(action).split('\n')]
+                    newlines = [indent * '    ' + x + '\n' for x in self.label_from_action(action,renaming).split('\n')]
                     lines.extend(newlines)
                 else:
                     if isinstance(action,itp.fail_action):
@@ -147,7 +156,7 @@ class TraceBase(art.AnalysisGraph):
                 if hasattr(expr,'subgraph'):
                     if option_detailed.get():
                         lines.append(indent * '    ' + '{\n')
-                    expr.subgraph.to_lines(lines,hash,indent+1,hidden,failed=failed)
+                    expr.subgraph.to_lines(lines,hash,indent+1,hidden,failed=failed,renaming=renaming)
                     if option_detailed.get():
                         lines.append(indent * '    ' + '}\n')
                 if option_detailed.get():
@@ -159,6 +168,9 @@ class TraceBase(art.AnalysisGraph):
                 for c in state.clauses.fmlas:
                     if hidden(c.args[0].rep):
                         continue
+                    if renaming is not None:
+                        c = lut.rename_ast(c,renaming)
+                    c = lut.reduce_named_binders(c)
                     s1,s2 = list(map(str,c.args))
                     if not(s1 in hash and hash[s1] == s2): # or state is self.states[0]:
                         hash[s1] = s2

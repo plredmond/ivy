@@ -654,7 +654,15 @@ def binary_interpolant(clauses2, clauses1):
 #    assert clauses1.defs == []
     print ("clauses1: {}".format(clauses_to_z3(clauses1)))
     print ("clauses2: {}".format(clauses_to_z3(clauses2)))
+    s = new_solver()
+    add_clauses(s,clauses2);
+    add_clauses(s,clauses1);
+    f = open("ivy.smt2","w")
+    f.write(s.to_smt2())
+    f.close()
+    
     try:
+        print ("computing interpolant")
         z3itp = z3.binary_interpolant(clauses_to_z3(clauses2),clauses_to_z3(clauses1))
         return Clauses([z3_to_formula(z3itp)])
     except Exception as e:
@@ -1626,8 +1634,6 @@ def z3_to_formula(z3expr,vars = []):
         if z3.is_eq(z3expr):
             return ivy_logic.Equals(*args)
         sym = z3decl_to_symbol(z3expr.decl())
-        print ("sym: {}".format(sym))
-        print ("args: {}".format(args))
         return sym if arity == 0 else sym(*args)
     def fix_var_name(name):
         return ('V'+name[1:]) if name.startswith('%') else name

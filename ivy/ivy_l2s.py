@@ -55,6 +55,7 @@ from . import ivy_actions as iact
 from . import logic as lg
 from . import ivy_logic as ilg
 from . import ivy_logic_utils as ilu
+from . import logic_util as lu
 from . import ivy_utils as iu
 from . import ivy_temporal as itm
 from . import ivy_proof as ipr
@@ -68,11 +69,11 @@ def forall(vs, body):
     return lg.ForAll(vs, body) if len(vs) > 0 else body
 
 
-def l2s_tactic(prover,goals,proof,full=False):
+def l2s_tactic(prover,goals,proof,tactic_name="l2s"):
     vocab = ipr.goal_vocab(goals[0])
     with ilg.WithSymbols(vocab.symbols):
         with ilg.WithSorts(vocab.sorts):
-            return l2s_tactic_int(prover,goals,proof,full)
+            return l2s_tactic_int(prover,goals,proof,tactic_name)
 
 # This version includes all the auxiliary state, not just what is
 # referred to in the invariant. It is intended to model checking, where
@@ -80,8 +81,12 @@ def l2s_tactic(prover,goals,proof,full=False):
 # auxiliary symbols.
 
 def l2s_tactic_full(prover,goals,proof):
-    goals = l2s_tactic(prover,goals,proof,full=True)
+    goals = l2s_tactic(prover,goals,proof,"l2s_full")
     goals[0].trace_hook = trace_hook
+    return goals
+
+def l2s_tactic_auto(prover,goals,proof):
+    goals = l2s_tactic(prover,goals,proof,"l2s_auto")
     return goals
 
 # This hides the auxiliary variables in an error trace. Also, we
@@ -98,7 +103,8 @@ def trace_hook(tr):
     print("failed to find loop start!")
     return tr
     
-def l2s_tactic_int(prover,goals,proof,full):
+def l2s_tactic_int(prover,goals,proof,tactic_name):
+    full = tactic_name == "l2s_full"
     mod = im.module
     goal = goals[0]                  # pick up the first proof goal
     lineno = iu.Location("nowhere",0)
@@ -121,6 +127,11 @@ def l2s_tactic_int(prover,goals,proof,full):
     if temporal_prems:
         fmla = ilg.Implies(ilg.And(*[x.formula for x in temporal_prems]),fmla)
 
+    # Split the tactic parameters into invariants and definitions
+
+    tactic_invars = [inv for inv in proof.tactic_decls if not isinstance(inv,ivy_ast.DerivedDecl)]
+    tactic_defns = [inv for inv in proof.tactic_decls if isinstance(inv,ivy_ast.DerivedDecl)]
+
     # TRICKY: We postpone compiling formulas in the tactic until now, so
     # that tactics can introduce their own symbols. But, this means that the
     # tactic has to be given an appropriate environment label for any temporal
@@ -131,8 +142,13 @@ def l2s_tactic_int(prover,goals,proof,full):
 #    proof_label = proof.labels[0]
     proof_label = None
 #    print 'proof label: {}'.format(proof_label)
-    invars = [ilg.label_temporal(ipr.compile_with_goal_vocab(inv,goal),proof_label) for inv in proof.tactic_decls]
+    invars = [ilg.label_temporal(ipr.compile_with_goal_vocab(inv,goal),proof_label) for inv in tactic_invars]
 #    invars = [ilg.label_temporal(inv.compile(),proof_label) for inv in proof.tactic_decls]
+
+    # compiled definitions into goal
+
+    for defn in tactic_defns:
+        goal = ipr.compile_definition_goal_vocab(defn,goal) 
 
     l2s_waiting = lg.Const('l2s_waiting', lg.Boolean)
     l2s_frozen = lg.Const('l2s_frozen', lg.Boolean)
@@ -144,6 +160,169 @@ def l2s_tactic_int(prover,goals,proof,full):
     l2s_g = lambda vs, t, environ: lg.NamedBinder('l2s_g', vs, environ, t)
     old_l2s_g = lambda vs, t, environ: lg.NamedBinder('_old_l2s_g', vs, environ, t)
 
+    finite_sorts = set()
+    for name,sort in ilg.sig.sorts.items():
+        if thy.get_sort_theory(sort).is_finite() or name in mod.finite_sorts:
+            finite_sorts.add(name)
+    uninterpreted_sorts = [s for s in list(ilg.sig.sorts.values()) if type(s) is lg.UninterpretedSort and s.name not in finite_sorts]
+
+    # Add invariants for l2s_auto tactic
+
+    if tactic_name == "l2s_auto":
+        def get_aux_defn(name):
+            for prem in ipr.goal_prems(goal):
+                if not isinstance(prem,ivy_ast.ConstantDecl) and hasattr(prem,"definition") and prem.definition:
+                    tmp = prem.formula;
+                    if isinstance(tmp,lg.ForAll):
+                        tmp = tmp.body
+                    if tmp.args[0].rep.name == name:
+                        return tmp
+            raise iu.IvyError(proof,"tactic ls_auto requires a definition of " + name)
+
+        work_created = get_aux_defn("work_created")
+        work_needed = get_aux_defn("work_needed")
+        work_done = get_aux_defn("work_done")
+        work_start = get_aux_defn("work_start")
+        work_progress = get_aux_defn("work_progress")
+
+        # work_created, work_needed and work_done must have same sort
+        if work_created.args[0].rep.sort != work_needed.args[0].rep.sort:
+            raise iu.IvyError(proof,"work_created and work_needed must have same signature")
+        if work_created.args[0].rep.sort != work_done.args[0].rep.sort:
+            raise iu.IvyError(proof,"work_created and work_done must have same signature")
+
+        # says that all elements used in defn are in l2s_d
+
+        def all_d(defn):
+            cons = [l2s_d(var.sort)(var) for var in defn.args[0].args]
+            return lg.Implies(defn.args[1],lg.And(*cons))
+
+        # says that all elements used in defn are in l2s_a
+
+        def all_a(defn):
+            cons = [l2s_a(var.sort)(var) for var in defn.args[0].args]
+            return lg.Implies(defn.args[1],lg.And(*cons))
+
+        def all_created(defn):
+            subs = dict(zip(defn.args[0].args,work_created.args[0].args))
+            return lg.Implies(lu.substitute(defn.args[1],subs),work_created.args[1])
+
+        def not_all_done(defn):
+            subs = dict(zip(defn.args[0].args,work_done.args[0].args))
+            tmp = lg.Implies(lu.substitute(defn.args[1],subs),work_done.args[1])
+            return lg.Not(lg.ForAll(work_done.args[0].args,tmp))
+
+        # invariant l2s_needed_when_start
+        #
+        # This says that if we have seen the start condition
+        # then every element in the work_needed set is in work_created. 
+
+        waiting_for_start = l2s_w((),work_start.args[1])
+        # tmp = lg.Implies(lg.And(l2s_waiting,lg.Not(waiting_for_start)),all_d(work_needed))
+        tmp = lg.Implies(lg.Or(lg.Not(l2s_waiting),lg.Not(waiting_for_start)),all_created(work_needed))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_needed_when_start"),tmp).sln(proof.lineno))
+
+        # invariant l2s_not_all_done
+        #
+        # This says that if we have seen the start condition, there is always some work left to do.
+        
+        # tmp = lg.Implies(lg.Or(lg.Not(l2s_waiting),lg.Not(waiting_for_start)),not_all_done(work_needed))
+        tmp = not_all_done(work_needed)
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_not_all_done"),tmp).sln(proof.lineno))
+
+        # invariant ls2_created
+        #
+        # This invariant says that every element in the work_created predicate is in l2s_d
+        # 
+
+        tmp = all_d(work_created)
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_created"),tmp).sln(proof.lineno))
+
+        # invariant l2s_needed_are_frozen
+
+        tmp = lg.Implies(lg.Not(l2s_waiting),all_a(work_needed))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_needed_are_frozen"),tmp).sln(proof.lineno))
+        
+
+        # invariant done_implies_created
+
+        subs = dict(zip(work_done.args[0].args,work_created.args[0].args))
+        tmp = lg.Implies(lu.substitute(work_done.args[1],subs),work_created.args[1])
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_done_implies_created"),tmp).sln(proof.lineno))
+
+        # invariant done_implies_needed
+
+        subs = dict(zip(work_done.args[0].args,work_needed.args[0].args))
+        tmp = lg.Implies(lu.substitute(work_done.args[1],subs),work_needed.args[1])
+        tmp = lg.Implies(lg.Or(lg.Not(l2s_waiting),lg.Not(waiting_for_start)),tmp)
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_done_implies_needed"),tmp).sln(proof.lineno))
+
+        # invariant l2s_work_preserved
+
+        done_args = work_done.args[0].args
+        was_done = l2s_s(done_args,work_done.args[1])(*done_args)
+        tmp = lg.Implies(lg.And(l2s_saved,was_done),work_done.args[1])
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_work_preserved"),tmp).sln(proof.lineno))
+
+        # invariant l2s_progress_made
+
+        waiting_for_progress = l2s_w((),work_progress.args[1])
+        tmp = lg.Implies(lg.And(l2s_saved,
+                                 lg.Not(waiting_for_progress)),
+                          lg.Exists(done_args,lg.And(lg.Not(was_done),work_done.args[1])))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_progress_made"),tmp).sln(proof.lineno))
+
+        def init_globally(prop,res,pos=True):
+            if pos and isinstance(prop,lg.Globally):
+                res.append(prop)
+                init_globally(prop.args[0],res,pos)
+            elif not pos and isinstance(prop,lg.Eventually):
+                arg = prop.args[0]
+                res.append(lg.Not(prop))
+                init_globally(prop.args[0],res,pos)
+            elif pos and isinstance(prop,lg.Eventually):
+                arg = prop.args[0]
+                res.append(lg.Implies(lg.Not(prop),
+                                      lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w((),prop.args[0])))))
+            elif not pos and isinstance(prop,lg.Implies):
+                init_globally(prop.args[0],res,not pos)
+                init_globally(prop.args[1],res,pos)
+            elif pos and isinstance(prop,lg.And):
+                for arg in prop.args:
+                    init_globally(arg,res,pos)
+            elif not pos and isinstance(prop,lg.Or):
+                for arg in prop.args:
+                    init_globally(arg,res,pos)
+            elif isinstance(prop,lg.Not):
+                init_globally(prop.args[0],res,not pos)
+
+        ninvs = []
+        init_globally(fmla,ninvs,False)
+        for i,ninv in enumerate(ninvs):
+            invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_globally_"+str(i)),ninv).sln(proof.lineno))
+
+        tmp = lg.Or(l2s_waiting,l2s_frozen,l2s_saved)
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_status_0"),tmp).sln(proof.lineno))
+            
+        tmp = lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_frozen))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_status_1"),tmp).sln(proof.lineno))
+
+        tmp = lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_saved))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_status_2"),tmp).sln(proof.lineno))
+
+        tmp = lg.Or(lg.Not(l2s_frozen),lg.Not(l2s_saved))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_status_3"),tmp).sln(proof.lineno))
+        
+        tmp = lg.And(*list(l2s_d(s)(c)
+                           for s in uninterpreted_sorts
+                           for c in list(ilg.sig.symbols.values()) if c.sort == s))
+        invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_consts_d"),tmp).sln(proof.lineno))
+
+        for inv in invars:
+            print('invariant {}'.format(inv))
+
+
+        
     # Desugar the invariants.
     #
     # $was. phi(V)  -->   l2s_saved & ($l2s_s V.phi(V))(V)
@@ -172,6 +351,7 @@ def l2s_tactic_int(prover,goals,proof,full):
                     raise iu.IvyError(expr,"operator 'happened' does not take parameters")
                 return lg.And(l2s_saved,apply_happened(expr.body))
         return expr.clone([desugar(a) for a in expr.args])
+
     
     invars = list(map(desugar,invars))
                           
@@ -228,11 +408,6 @@ def l2s_tactic_int(prover,goals,proof,full):
 
     # construct the monitor related building blocks
 
-    finite_sorts = set()
-    for name,sort in ilg.sig.sorts.items():
-        if thy.get_sort_theory(sort).is_finite() or name in mod.finite_sorts:
-            finite_sorts.add(name)
-    uninterpreted_sorts = [s for s in list(ilg.sig.sorts.values()) if type(s) is lg.UninterpretedSort and s.name not in finite_sorts]
     reset_a = [
         AssignAction(l2s_a(s)(v), l2s_d(s)(v)).set_lineno(lineno)
         for s in uninterpreted_sorts
@@ -664,13 +839,24 @@ def l2s_tactic_int(prover,goals,proof,full):
     # Build the new goal
     non_temporal_prems = [x for x in ipr.goal_prems(goal) if not (hasattr(x,'temporal') and x.temporal)]
     goal = ipr.clone_goal(goal,non_temporal_prems,conc)
+    goal.trace_hook = lambda tr: renaming_hook(subs,tr)
 
     # Return the new goal stack
 
     goals = [goal] + goals[1:]
     return goals
 
+# Hook to convert temporary symbols back to named binders. Argument
+# 'subs' is the map from named binders to temporary symbols.
+
+def renaming_hook(subs,tr):
+    return tr.rename(dict((x,y) for (y,x) in subs.items()))
+
+            
+            
+
 # Register the l2s tactics
 
 ipr.register_tactic('l2s',l2s_tactic)
 ipr.register_tactic('l2s_full',l2s_tactic_full)
+ipr.register_tactic('l2s_auto',l2s_tactic_auto)

@@ -770,11 +770,13 @@ def elim_ite(expr,cnsts):
 # we are just using the ones that occur in the invariant
 
 def mine_constants(mod,trans,invariant):
+    print ('invariant: {}'.format(invariant))
     res = defaultdict(list)
     for c in ilu.used_symbols_ast(invariant):
         if not il.is_function_sort(c.sort) and tr.is_skolem(c):
             res[c.sort].append(c)
-#    iu.dbg('res')
+    print ('mine_constants')
+    iu.dbg('res')
     return res
 
 def mine_constants2(mod,trans,invariant):
@@ -785,7 +787,8 @@ def mine_constants2(mod,trans,invariant):
     for c in syms:
         if not il.is_function_sort(c.sort):
             res[c.sort].append(c)
-#    iu.dbg('res')
+    print('mine_constants2')
+    iu.dbg('res')
     return res
 
 # Tricky: if an atomic proposition has a next variable in it, but no curremnt versions of state

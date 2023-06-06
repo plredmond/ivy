@@ -231,8 +231,10 @@ class AnalysisGraphUI(object):
                 s = self.g.do_state_action(a,self.get_alpha())
                 print("state = {}".format(s))
                 print("} action %s" % a.args[0])
+        self.view_state(s,reset=True)
         self.rebuild()
 
+        
     # Evaluate an action at a node
 
     def execute_action(self,n,a):
@@ -470,7 +472,12 @@ class AnalysisGraphUI(object):
 
     def reverse_goal(self, state, clauses):
         if state.pred != None:
-            print("reverse from %s to %s: post_state = %s" % (state.id,state.pred.id,clauses))
+            if not hasattr(state,"id"):
+                print ("state has no id")
+            elif not hasattr(state.pred,"id"):
+                print ("state.pred has no id")
+            else:
+                print("reverse from %s to %s: post_state = %s" % (state.id,state.pred.id,clauses))
             next_state = state.pred
             clauses = reverse_update_concrete_clauses(state,clauses)
             return (clauses,state.pred)

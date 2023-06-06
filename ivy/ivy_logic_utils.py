@@ -241,6 +241,7 @@ def normalize_named_binders(ast,names=None):
     else:
         return ast.clone(args)
 
+
 def default_globally_binder(vs, t, env):
     name = 'g['+str(env)+']' if env is not None else 'g'
     return lg.NamedBinder(name, vs, t)
@@ -266,6 +267,25 @@ def replace_temporals_by_named_binder_g_ast(ast, g=default_globally_binder):
         else:
             return ast.clone(args)
 
+# Reduce subexpressions of the form ($b V1...Vn. t)(s1...sn) where $b is a
+# named binder to $b. t[Vi/si]$. 
+
+def reduce_named_binders(ast,g=default_globally_binder):
+    if is_constant(ast):
+        return ast
+    args = [reduce_named_binders(arg,g) for arg in ast.args]
+    if is_app(ast):
+        if is_named_binder(ast.rep):
+            subst = dict((x.name,y) for x,y in zip(ast.rep.variables,ast.args))
+            body = reduce_named_binders(substitute_ast(ast.rep.body,subst),g)
+            # if ast.args:
+            #     print("orig body: {}".format(ast.rep.body))
+            #     print("subst: {}".format(subst))
+            #     print("new body: {}".format(body))
+            return lg.NamedBinder(ast.rep.name, [], None, body)
+        return normalize_named_binders(ast.rep,g)(*args)
+    return ast.clone(args)    
+        
 
 def replace_named_binders_ast(ast,subs):
     """
@@ -425,6 +445,8 @@ def symbols_ast(ast):
         else:
             yield ast.rep
     for arg in ast.args:
+        if isinstance(arg,str):
+            print(arg)
         for x in symbols_ast(arg):
             yield x
 

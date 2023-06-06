@@ -39,6 +39,10 @@ tokens = (
    'CARET',
     'LB',
     'RB',
+    'WHENFIRST',
+    'WHENLAST',
+    'WHENPREV',
+    'WHENNEXT',
 )
 
 reserved = all_reserved = {
@@ -157,6 +161,10 @@ reserved = all_reserved = {
     'debug' : 'DEBUG',
     'for' : 'FOR',
     'subclass' : 'SUBCLASS',
+    'whenfirst' : 'WHENFIRST',
+    'whenlast' : 'WHENLAST',
+    'whenprev' : 'WHENPREV',
+    'whennext' : 'WHENNEXT',
 }
 
 tokens += tuple(all_reserved.values())
@@ -266,7 +274,7 @@ class LexerVersion(object):
                 if s in reserved:
                     del reserved[s]
         if self.version <= [1,7]:
-            for s in ['global','common','debug','field','for','process','subclass','template']:
+            for s in ['global','common','debug','field','for','process','subclass','template','whenfirst','whenlast','whennext','whenprev']:
                 if s in reserved:
                     del reserved[s]
         else:

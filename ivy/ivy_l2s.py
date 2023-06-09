@@ -68,6 +68,8 @@ debug = iu.BooleanParameter("l2s_debug",False)
 def forall(vs, body):
     return lg.ForAll(vs, body) if len(vs) > 0 else body
 
+def exists(vs, body):
+    return lg.Exists(vs, body) if len(vs) > 0 else body
 
 def l2s_tactic(prover,goals,proof,tactic_name="l2s"):
     vocab = ipr.goal_vocab(goals[0])
@@ -194,23 +196,32 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         # says that all elements used in defn are in l2s_d
 
         def all_d(defn):
-            cons = [l2s_d(var.sort)(var) for var in defn.args[0].args]
+            cons = [l2s_d(var.sort)(var) for var in defn.args[0].args if var.sort.name not in finite_sorts]
             return lg.Implies(defn.args[1],lg.And(*cons))
 
         # says that all elements used in defn are in l2s_a
 
         def all_a(defn):
-            cons = [l2s_a(var.sort)(var) for var in defn.args[0].args]
+            cons = [l2s_a(var.sort)(var) for var in defn.args[0].args if var.sort.name not in finite_sorts]
             return lg.Implies(defn.args[1],lg.And(*cons))
 
         def all_created(defn):
             subs = dict(zip(defn.args[0].args,work_created.args[0].args))
+            print (defn.args[1])
+            print (subs)
             return lg.Implies(lu.substitute(defn.args[1],subs),work_created.args[1])
 
-        def not_all_done(defn):
+        def not_all_done(defn,skip=0):
             subs = dict(zip(defn.args[0].args,work_done.args[0].args))
             tmp = lg.Implies(lu.substitute(defn.args[1],subs),work_done.args[1])
-            return lg.Not(lg.ForAll(work_done.args[0].args,tmp))
+            return lg.Not(forall(work_done.args[0].args[skip:],tmp))
+
+        def not_all_was_done(defn,skip=0):
+            done_args = work_done.args[0].args
+            subs = dict(zip(defn.args[0].args,done_args))
+            was_done = l2s_s(done_args,work_done.args[1])(*done_args)
+            tmp = lg.Implies(lu.substitute(defn.args[1],subs),was_done)
+            return lg.Not(forall(work_done.args[0].args[skip:],tmp))
 
         # invariant l2s_needed_when_start
         #
@@ -266,10 +277,21 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
 
         # invariant l2s_progress_made
 
-        waiting_for_progress = l2s_w((),work_progress.args[1])
-        tmp = lg.Implies(lg.And(l2s_saved,
-                                 lg.Not(waiting_for_progress)),
-                          lg.Exists(done_args,lg.And(lg.Not(was_done),work_done.args[1])))
+        progress_args = work_progress.args[0].args
+        if tuple(progress_args) != tuple(done_args[:len(progress_args)]):
+            raise iu.IvyError(proof,"work_progess parameters must be a prefix of work_done parameters")
+        waiting_for_progress = l2s_w(progress_args,work_progress.args[1])
+        if progress_args:
+            nad = not_all_was_done(work_needed,len(progress_args))
+            tmp = forall(progress_args,
+                         lg.Implies(lg.And(nad,l2s_saved,
+                                           lg.Not(waiting_for_progress(*progress_args))),
+                                    exists(done_args[len(progress_args):],
+                                           lg.And(lg.Not(was_done),work_done.args[1]))))
+        else:
+            tmp = lg.Implies(lg.And(l2s_saved,
+                                    lg.Not(waiting_for_progress)),
+                             exists(done_args,lg.And(lg.Not(was_done),work_done.args[1])))
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_progress_made"),tmp).sln(proof.lineno))
 
         def init_globally(prop,res,pos=True):
@@ -282,8 +304,11 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
                 init_globally(prop.args[0],res,pos)
             elif pos and isinstance(prop,lg.Eventually):
                 arg = prop.args[0]
+                vs = tuple(ilu.variables_ast(prop.args[0]))
+                print ('arg: {}'.format(arg))
+                print ('vars: {}'.format(vs))
                 res.append(lg.Implies(lg.Not(prop),
-                                      lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w((),prop.args[0])))))
+                                      lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w(vs,arg)(*vs)))))
             elif not pos and isinstance(prop,lg.Implies):
                 init_globally(prop.args[0],res,not pos)
                 init_globally(prop.args[1],res,pos)
@@ -293,6 +318,10 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
             elif not pos and isinstance(prop,lg.Or):
                 for arg in prop.args:
                     init_globally(arg,res,pos)
+            elif pos and isinstance(prop,lg.ForAll):
+                init_globally(prop.args[0],res,pos)
+            elif not pos and isinstance(prop,lg.Exists):
+                init_globally(prop.args[0],res,pos)
             elif isinstance(prop,lg.Not):
                 init_globally(prop.args[0],res,not pos)
 
@@ -315,6 +344,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         
         tmp = lg.And(*list(l2s_d(s)(c)
                            for s in uninterpreted_sorts
+                           if s.name not in finite_sorts
                            for c in list(ilg.sig.symbols.values()) if c.sort == s))
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_consts_d"),tmp).sln(proof.lineno))
 
@@ -483,7 +513,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     fair_cycle += done_waiting
     # projection of relations
     fair_cycle += [
-        lg.ForAll(vs, lg.Implies(
+        forall(vs, lg.Implies(
             lg.And(*(l2s_a(v.sort)(v) for v in vs if v.sort.name not in finite_sorts)),
             lg.Iff(l2s_s(vs, t)(*vs), t)
         ))

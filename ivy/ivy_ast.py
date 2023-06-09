@@ -882,6 +882,10 @@ class TacticTactic(Tactic):
         return self.args[2] if len(self.args) > 2 and not isinstance(self.args[2],NoneAST) else None
     def __str__(self):
         res = 'tactic ' + str(self.args[0]) + str(self.args[1])
+    def vocab(self,names):
+        names.update(symbols_ast(self.args[1]))
+        if not isinstance(self.args[2],NoneAST):
+            self.args[2].vocab(names)
 
 class ProofTactic(Tactic):
     @property
@@ -1833,7 +1837,7 @@ used_variables_ast = gen_to_set(variables_ast)
 def symbols_ast(ast):
     if isinstance(ast,(App,Atom)):
         yield ast.rep
-    elif ast != None and not isinstance(ast,str):
+    if ast != None and not isinstance(ast,str):
 #        if not hasattr(ast,'args'):
 #            print ast
 #            print type(ast)

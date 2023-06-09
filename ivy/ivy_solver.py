@@ -838,7 +838,8 @@ class HerbrandModel(object):
         s = self.solver
         m = self.model
         ranges = [enumerated_range(x.sort) if isinstance(x.sort,ivy_logic.EnumeratedSort) else
-                  self.constants[x.sort] for x in vs]
+                  [z3.BoolVal(False),z3.BoolVal(True)] if isinstance(x.sort,ivy_logic.BooleanSort) else self.constants[x.sort]
+                  for x in vs]
         z3_fmla = literal_to_z3(fmla)
 #        print "z3_fmla = {}".format(z3_fmla)
         z3_vs = [term_to_z3(v) for v in vs]

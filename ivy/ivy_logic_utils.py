@@ -264,6 +264,8 @@ def replace_temporals_by_named_binder_g_ast(ast, g=default_globally_binder):
         if type(ast) == lg.Apply:
             func = replace_temporals_by_named_binder_g_ast(ast.func, g)
             return type(ast)(func, *args)
+        elif type(ast) == lg.Not and type(args[0]) == lg.Not:
+            return args[0].args[0]
         else:
             return ast.clone(args)
 

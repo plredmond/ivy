@@ -1198,7 +1198,6 @@ def isolate_component(mod,isolate_name,extra_with=[],extra_strip=None,after_init
     all_names = set()
     for x in mod.proofs:
         x[1].vocab(all_names)
-    print ('all_names: {}'.format(all_names))
 
     # erase assignments to unreferenced variables
 

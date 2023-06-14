@@ -605,6 +605,8 @@ def check_isolate(trace_hook = None):
                     else:
                         print("")
 
+        im.module.assumed_invariants.extend(im.module.labeled_conjs)
+        im.module.labeled_conjs = []
         check_temporals()
 
 

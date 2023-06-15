@@ -605,6 +605,8 @@ def check_isolate(trace_hook = None):
                     else:
                         print("")
 
+        im.module.assumed_invariants.extend(im.module.labeled_conjs)
+        im.module.labeled_conjs = []
         check_temporals()
 
 
@@ -828,6 +830,8 @@ def main():
             check_module()
     if some_bounded:
         print("BOUNDED")
+    if ivy_tactics.used_sorry:
+        print("OK, but used 'sorry'")
     else:
         print("OK")
 

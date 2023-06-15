@@ -44,3 +44,13 @@ def skolemize(self,decls,proof):
     return [goal] + decls[1:]
 
 pf.register_tactic('skolemize',skolemize)
+
+used_sorry = False
+
+def sorry(self,decls,proof):
+    global used_sorry
+    used_sorry = True
+    return decls[1:]
+
+pf.register_tactic('sorry',sorry)
+

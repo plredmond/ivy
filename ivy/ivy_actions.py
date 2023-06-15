@@ -1495,6 +1495,11 @@ class ReturnAction(object):
         return ([], true_clauses(EmptyAnnotation()), false_clauses(EmptyAnnotation()))
     def __str__(self):
         return 'return'
+    @property
+    def args(self):
+        return []
+    def clone(self,args):
+        return self
 
 
 class IgnoreAction(object):

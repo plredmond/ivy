@@ -1293,7 +1293,7 @@ else:
         p[0] = addlabel(p[2],'invar')
         
     def p_tacticwithelem_fun_defn(p):
-        'tacticwithelem : DEFINITION typeddefn EQ defnrhs'
+        'tacticwithelem : DEFINITION typeddefn EQ fmla'
         df = Definition(app_to_atom(p[2]),p[4])
         df.lineno = get_lineno(p,3)
         p[0] = DerivedDecl(addlabel(mk_lf(df),'def'))

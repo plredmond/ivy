@@ -428,9 +428,16 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
             ninvs.append(lg.Or(initf,lg.Not(evf)))
             ninvs.append(lg.Implies(lg.And(initf,lg.Not(evf)),
                                    lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w(vs,arg)(*vs)))))
-            if isinstance(arg,lg.Globally) or isinstance(arg,lg.Not) and isinstance(arg.args[0],lg.Eventually) or isinstance(arg,lg.NamedBinder) and arg.name == 'l2s_g':
+#            if isinstance(arg,lg.Globally) or isinstance(arg,lg.Not) and isinstance(arg.args[0],lg.Eventually) or isinstance(arg,lg.NamedBinder) and arg.name == 'l2s_g':
+#                ninvs.append(lg.Implies(lg.And(initf,lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w(vs,arg)(*vs)))),
+#                                      arg))
+            tinvs = []
+            init_globally(arg,tinvs,True)
+            for tinv in tinvs:
                 ninvs.append(lg.Implies(lg.And(initf,lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w(vs,arg)(*vs)))),
-                                      arg))
+                                        tinv))
+                
+            
             
 
         for i,ninv in enumerate(ninvs):

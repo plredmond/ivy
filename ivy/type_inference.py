@@ -14,7 +14,7 @@ raised if the unification fails.
 from itertools import product, chain
 
 from .logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
-                   Iff, ForAll, Exists, NamedBinder)
+                    Iff, ForAll, Exists, NamedBinder, Globally, Eventually)
 from .logic import (UninterpretedSort, FunctionSort, Boolean, TopSort,
                    SortError, contains_topsort, is_polymorphic)
 from .logic_util import used_constants, free_variables
@@ -204,6 +204,16 @@ def infer_sorts(t, env=None):
         for s in terms_s:
             unify(s, Boolean)
         return Boolean, lambda: type(t)(*[
+            x() for x in terms_t
+        ])
+
+    elif type(t) in (Globally, Eventually):
+        xys = [infer_sorts(tt, env) for tt in t]
+        terms_s = [x for x, y in xys]
+        terms_t = [y for x, y in xys]
+        for s in terms_s:
+            unify(s, Boolean)
+        return Boolean, lambda: type(t)(t.environ,*[
             x() for x in terms_t
         ])
 

@@ -131,9 +131,26 @@ class Eventually(Formula):
     def __repr__(self):
         return '(eventually ' + repr(self.args[0]) + ')'
 
+class WhenOperator(Formula):
+    """
+    Temporal whennext operator
+    """
+    def __init__(self,name,*args):
+        assert len(args) == 2
+        self.name = name
+        self.args = args
+    def __repr__(self):
+        return '(' + repr(self.args[0]) + ' ' + self.name + 'whennext ' + repr(self.args[1]) + ')'
+    def clone(self,args):
+        res = WhenOperator(self.name,*args)
+        if hasattr(self,'lineno'):
+            res.lineno = lineno_add_ref(self.lineno)
+        return res
+
+
 def has_temporal(f):
     assert f is not None
-    return (type(f) in [Globally, Eventually]) or any(has_temporal(x) for x in f.args)
+    return (type(f) in [Globally, Eventually, WhenOperator]) or any(has_temporal(x) for x in f.args)
 
 class Let(Formula):
     """

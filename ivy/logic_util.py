@@ -8,7 +8,7 @@ from itertools import product, chain
 from functools import partial
 
 from .logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
-                   Iff, ForAll, Exists, Lambda, NamedBinder, Globally, Eventually)
+                    Iff, ForAll, Exists, Lambda, NamedBinder, Globally, Eventually, WhenOperator)
 from .logic import contains_topsort
 
 from . import ivy_utils as iu
@@ -157,6 +157,9 @@ def substitute(t, subs):
 
     elif type(t) in (Globally, Eventually):
         return type(t)(t.environ, *(substitute(x, subs) for x in t))
+
+    elif type(t) is WhenOperator:
+        return type(t)(t.name, *(substitute(x, subs) for x in t))
 
     elif type(t) in (ForAll, Exists, Lambda, NamedBinder):
         forbidden_variables = free_variables(*list(subs.values()))

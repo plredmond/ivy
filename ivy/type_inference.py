@@ -14,7 +14,7 @@ raised if the unification fails.
 from itertools import product, chain
 
 from .logic import (Var, Const, Apply, Eq, Ite, Not, And, Or, Implies,
-                    Iff, ForAll, Exists, NamedBinder, Globally, Eventually)
+                    Iff, ForAll, Exists, NamedBinder, Globally, Eventually, WhenOperator, Cond)
 from .logic import (UninterpretedSort, FunctionSort, Boolean, TopSort,
                    SortError, contains_topsort, is_polymorphic)
 from .logic_util import used_constants, free_variables
@@ -216,6 +216,18 @@ def infer_sorts(t, env=None):
         return Boolean, lambda: type(t)(t.environ,*[
             x() for x in terms_t
         ])
+
+    elif type(t) is WhenOperator:
+        s_then, t_then = infer_sorts(t.t1, env)
+        s_cond, t_cond = infer_sorts(t.t2, env)
+        unify(s_cond, Boolean)
+        return s_then, lambda: WhenOperator(t.name, t_then(), t_cond())
+
+    elif type(t) is Cond:
+        s_cond, t_cond = infer_sorts(t.t1, env)
+        s_then, t_then = infer_sorts(t.t2, env)
+        unify(s_cond, Boolean)
+        return s_then, lambda: Cond(t_cond(),t_then())
 
     elif type(t) in (ForAll, Exists):
         # create a copy of the environment and shadow that quantified

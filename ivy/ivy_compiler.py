@@ -88,6 +88,7 @@ def compile_args(self):
 for fc,tc in op_pairs:
     fc.cmpl = lambda self,tc=tc: tc(*compile_args(self))
 
+ivy_ast.WhenOperator.cmpl = lambda self: ivy_logic.WhenOperator(self.name,*compile_args(self))
 
 class Context(object):
     def __enter__(self):

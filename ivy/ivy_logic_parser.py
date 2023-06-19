@@ -606,7 +606,27 @@ else:
         p[0] = Eventually(p[2])
         p[0].lineno = get_lineno(p,1)
 
+    def p_term_term_whennext_term(p):
+        'term : term WHENNEXT term'
+        p[0] = WhenOperator('next',p[1],p[3])
+        p[0].lineno = get_lineno(p,2)
 
+    def p_term_term_whenprev_term(p):
+        'term : term WHENPREV term'
+        p[0] = WhenOperator('prev',p[1],p[3])
+        p[0].lineno = get_lineno(p,2)
+
+    def p_term_term_whenfirst_term(p):
+        'term : term WHENFIRST term'
+        p[0] = WhenOperator('first',p[1],p[3])
+        p[0].lineno = get_lineno(p,2)
+
+    def p_term_term_whenlast_term(p):
+        'term : term WHENLAST term'
+        p[0] = WhenOperator('last',p[1],p[3])
+        p[0].lineno = get_lineno(p,2)
+
+        
 def p_term_namedbinder_vars_dot_term(p):
     'term : LPAREN DOLLAR SYMBOL simplevars DOT fmla RPAREN LPAREN terms RPAREN'
     x = NamedBinder(p[3], p[4],p[6])

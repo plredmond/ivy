@@ -66,7 +66,7 @@ from .ivy_utils import flatten, IvyError
 from . import ivy_utils as iu
 from . import logic as lg
 from . import logic_util as lu
-from .logic import And,Or,Not,Globally,Eventually,Implies,Iff,Ite,ForAll,Exists,Lambda,NamedBinder
+from .logic import And,Or,Not,Globally,Eventually,WhenOperator,Implies,Iff,Ite,ForAll,Exists,Lambda,NamedBinder
 from .type_inference import concretize_sorts, concretize_terms, SortVar
 from collections import defaultdict
 from itertools import chain
@@ -257,7 +257,7 @@ class DefinitionSchema(Definition):
     pass
 
 
-lg_ops = [lg.Eq, lg.Not, lg.And, lg.Or, lg.Implies, lg.Iff, lg.Ite, lg.ForAll, lg.Exists, lg.Lambda, lg.NamedBinder]
+lg_ops = [lg.Eq, lg.Not, lg.And, lg.Or, lg.Implies, lg.Iff, lg.Ite, lg.ForAll, lg.Exists, lg.Lambda, lg.NamedBinder, lg.Cond]
 
 for cls in lg_ops:
     cls.args = property(lambda self: [ a for a in self])
@@ -269,6 +269,10 @@ for cls in [lg.ForAll, lg.Exists, lg.Lambda]:
 for cls in [lg.Globally, lg.Eventually]:
     cls.args = property(lambda self: [ a for a in self])
     cls.clone = lambda self,args: type(self)(self.environ,*args)
+
+for cls in [lg.WhenOperator]:
+    cls.args = property(lambda self: [ a for a in self])
+    cls.clone = lambda self,args: type(self)(self.name,*args)
 
 lg.NamedBinder.clone = lambda self,args: lg.NamedBinder(self.name, self.variables, self.environ, *args)
 lg.NamedBinder.rep = property(lambda self: self)
@@ -614,7 +618,7 @@ def is_named_binder(term):
     return isinstance(term, lg.NamedBinder)
 
 def is_temporal(term):
-    return isinstance(term, (lg.Globally, lg.Eventually))
+    return isinstance(term, (lg.Globally, lg.Eventually, lg.WhenOperator))
 
 def has_temporal(fmla):
     return is_temporal(fmla) or any(has_temporal(x) for x in fmla.args)
@@ -1294,10 +1298,12 @@ lg.Not.ugly = lambda self,prec: (nary_ugly('~=',self.body.args,8,prec)
                                else '~{}'.format(self.body.ugly(6)))
 lg.Globally.ugly = lambda self,prec: ('globally{} {}'.format(ugly_environ(self),self.body.ugly(2)))
 lg.Eventually.ugly = lambda self,prec: ('eventually{} {}'.format(ugly_environ(self),self.body.ugly(2)))
+lg.WhenOperator.ugly = lambda self,prec: nary_ugly('when'+self.name,self.args,2,prec)
 lg.Implies.ugly = lambda self,prec: nary_ugly('->',self.args,3,prec)
 lg.Iff.ugly = lambda self,prec: nary_ugly('<->',self.args,3,prec)
 lg.Ite.ugly = lambda self,prec:  '({} if {} else {})'.format(*[self.args[idx].ugly(9) for idx in (1,0,2)])
 Definition.ugly = lambda self,prec: nary_ugly('=',self.args,7,prec)
+lg.Cond.ugly = lambda self,prec:  '({} => {})'.format(*[self.args[idx].ugly(9) for idx in (0,1)])
 
 def ugly_environ(self):
     environ = self.environ
@@ -1357,6 +1363,13 @@ def ite_drop_annotations(self,inferred_sort,annotated_vars):
 
 lg.Ite.drop_annotations = ite_drop_annotations
 
+def cond_drop_annotations(self,inferred_sort,annotated_vars):
+    arg1 = self.args[1].drop_annotations(inferred_sort,annotated_vars)
+    arg0 = self.args[0].drop_annotations(True,annotated_vars)
+    return lg.Cond(arg0,arg1)
+
+lg.Cond.drop_annotations = cond_drop_annotations
+
 def apply_drop_annotations(self,inferred_sort,annotated_vars):
     name = self.func.name
     if name in polymorphic_symbols:
@@ -1391,7 +1404,7 @@ lg.NamedBinder.drop_annotations = lambda self,inferred_sort,annotated_vars: lg.N
 def default_drop_annotations(self,inferred_sort,annotated_vars):
     return self.clone([arg.drop_annotations(True,annotated_vars) for arg in self.args])
 
-for cls in [lg.Not, lg.Globally, lg.Eventually, lg.And, lg.Or, lg.Implies, lg.Iff, Definition]: # should binder be here?
+for cls in [lg.Not, lg.Globally, lg.Eventually, lg.WhenOperator, lg.And, lg.Or, lg.Implies, lg.Iff, Definition]: # should binder be here?
     cls.drop_annotations = default_drop_annotations
 
 
@@ -1711,8 +1724,10 @@ def polar(fmla,pos,pol):
     return None
 
 def label_temporal(fmla,label):
-    if is_temporal(fmla):
+    if isinstance(fmla,(lg.Globally,lg.Eventually)):
         return type(fmla)(label,label_temporal(fmla.body,label))
+    elif isinstance(fmla,lg.WhenOperator):
+        return type(fmla)(fmla.name,label_temporal(fmla.t1,label), label_temporal(fmla.t2,label))
     elif is_named_binder(fmla):
         return type(fmla)(fmla.name,fmla.variables,label,label_temporal(fmla.body,label))
     args = [label_temporal(x,label) for x in fmla.args]

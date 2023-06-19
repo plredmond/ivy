@@ -261,6 +261,34 @@ class Eventually(recstruct('Eventually', ['environ'], ['body'])):
         environ = self.environ
         return 'eventually{}({})'.format('' if environ is None else '['+str(environ)+']',self.body)
 
+class WhenOperator(recstruct('WhenOperator', ['sort','name'], ['t1','t2'])):
+    __slots__ = ()
+    def __init__(self, name, t1, t2):
+        super(WhenOperator, self).__init__(t1.sort,name,t1,t2)
+    @classmethod
+    def _preprocess_(cls, sort, name, t1, t2):
+        assert isinstance(name,str)
+        if t2.sort not in (Boolean, TopS):
+            raise SortError("WhenOperator second argument must be Boolean: {}".format(t2))
+        return sort, name, t1, t2
+    def __str__(self):
+        return 'WhenOperator({},{},{})'.format(self.name,self.t1,self.t2)
+
+class Cond(recstruct('Cond', ['sort'], ['t1', 't2'])):
+    __slots__ = ()
+    def __init__(self, t1, t2):
+        super(Cond, self).__init__(t2.sort,t1,t2)
+    @classmethod
+    def _preprocess_(cls, sort, t1, t2):
+        bad_sorts = [i for i, t in enumerate([t1])
+                     if i == 1 and t.sort not in (Boolean, TopS)]
+        if len(bad_sorts) > 0:
+            raise SortError("Bad sorts in: Cond({}, {}) (positions: {})".format(
+                t1, t2, bad_sorts,
+            ))
+        return sort, t1, t2
+    def __str__(self):
+        return 'Cond({}, {})'.format(self.t1, self.t2)
 
 class And(recstruct('And', [], ['*terms'])):
     __slots__ = ()

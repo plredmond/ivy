@@ -293,6 +293,12 @@ def replace_temporals_by_named_binder_g_ast(ast, g=default_globally_binder, when
     else:
         args = [replace_temporals_by_named_binder_g_ast(x, g, when) for x in ast.args]
         if type(ast) == lg.Apply:
+            if type(ast.func) == lg.NamedBinder and ast.func.name == 'l2s_init':
+                body = replace_temporals_by_named_binder_g_ast(ast.func.body, g, when)
+                if type(body) == lg.Not:
+                    return lg.Not(lg.Apply(ast.func.clone([body.body]), *args))
+                else:
+                    return lg.Apply(ast.func.clone([body]), *args)
             func = replace_temporals_by_named_binder_g_ast(ast.func, g, when)
             return type(ast)(func, *args)
         elif type(ast) == lg.Not and type(args[0]) == lg.Not:

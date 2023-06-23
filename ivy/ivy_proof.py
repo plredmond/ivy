@@ -939,6 +939,12 @@ def match_rhs_vars(match):
 def is_lambda(p):
     return isinstance(p,ia.ConstantDecl) and isinstance(p.args[0],il.Lambda)
 
+def goal_is_property(x):
+    return isinstance(x,ia.LabeledFormula) and not isinstance(x.formula,ia.SchemaBody)
+
+def goal_is_schema(x):
+    return isinstance(x,ia.LabeledFormula) and isinstance(x.formula,ia.SchemaBody)
+
 def apply_match_goal(match,x,apply_match,env = None):
     """ Apply a match to a goal """
     env = env if env is not None else set()

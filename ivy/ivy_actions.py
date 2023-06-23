@@ -493,6 +493,7 @@ class AssignAction(Action):
 
         lhs_vars = used_variables_ast(lhs)
         if any(v not in lhs_vars for v in used_variables_ast(rhs)):
+            print (self)
             raise IvyError(self,"multiply assigned: {}".format(lhs.rep))
 
         type_check(domain,rhs)
@@ -881,6 +882,7 @@ class IfAction(Action):
 #        update = self.args[1].int_update(domain,pvars)
 #        return condition_update_on_fmla(update,self.args[0],domain.relations)
         if used_variables_ast(self.args[0]):
+            print (self)
             raise IvyError(self,'variables in "if" conditions must be explicitly quantified')
         if not isinstance(self.args[0],ivy_ast.Some):
             if not is_boolean(self.args[0]):

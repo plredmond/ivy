@@ -123,7 +123,6 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     assumed_gprops = [x for x in prover.axioms if not x.explicit and x.temporal and isinstance(x.formula,lg.Globally)]
     model.asms.extend([p.clone([p.label,p.formula.args[0]]) for p in assumed_gprops])
 
-
     temporal_prems = [x for x in ipr.goal_prems(goal) if hasattr(x,'temporal') and x.temporal] + [
         x for x in prover.axioms if not x.explicit and x.temporal]
     if temporal_prems:
@@ -542,6 +541,13 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
 
     # Add the invariant list to the model
     model.invars = model.invars + invars
+
+    prems = list(ipr.goal_prems(goal))
+
+    def list_transform(lst,trns):
+        for i in range(0,len(lst)):
+            if ipr.goal_is_property(lst[i]):
+                lst[i] = trns(lst[i])
     
     # for inv in invars:
     #     print inv
@@ -556,6 +562,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         newb = []
         model.bindings = [b.clone([transform(b.action)]) for b in model.bindings]
         model.init = transform(model.init)
+        list_transform(prems,transform)
 
     # We first convert all temporal operators to named binders, so
     # it's possible to normalize them. Otherwise we won't have the
@@ -841,8 +848,8 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
             oldcond = l2s_old(vs, cond)(*vs)
             pre.append(AssignAction(oldcond,cond).set_lineno(lineno))
             if name == 'l2s_whennext':
-                print ('when: {}'.format(when))
-                print ('oldcond :{}'.format(oldcond))
+                # print ('when: {}'.format(when))
+                # print ('oldcond :{}'.format(oldcond))
                 post.append(IfAction(oldcond,HavocAction(when(*vs)).set_lineno(lineno)).set_lineno(lineno))
 
         for when in whens:
@@ -1078,7 +1085,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     conc = ivy_ast.TemporalModels(model,lg.And())
 
     # Build the new goal
-    non_temporal_prems = [x for x in ipr.goal_prems(goal) if not (hasattr(x,'temporal') and x.temporal)]
+    non_temporal_prems = [x for x in prems if not (hasattr(x,'temporal') and x.temporal)]
     goal = ipr.clone_goal(goal,non_temporal_prems,conc)
     goal.trace_hook = lambda tr: renaming_hook(subs,tr)
 

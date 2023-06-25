@@ -627,6 +627,7 @@ class LabeledFormula(AST):
         self.explicit = False
         self.definition = False
         self.assumed = False
+        self.unprovable = False
         lf_counter += 1
     @property
     def label(self):
@@ -652,6 +653,7 @@ class LabeledFormula(AST):
         res.explicit = self.explicit
         res.definition = self.definition
         res.assumed = self.assumed
+        res.unprovable = self.unprovable
         return res
 
     def clone_with_fresh_id(self,args):
@@ -661,6 +663,7 @@ class LabeledFormula(AST):
         res.explicit = self.explicit
         res.definition = self.definition
         res.assumed = self.assumed
+        res.unprovable = self.unprovable
         return res
 
     def rename(self,s):

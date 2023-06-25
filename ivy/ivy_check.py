@@ -178,7 +178,15 @@ failures = 0
 def print_dots():
     print('...', end=' ')
     sys.stdout.flush()
-    
+
+def is_unprovable_assert(asrt):
+    return asrt.args[0].unprovable if isinstance(asrt.args[0],ivy_ast.LabeledFormula) else False
+
+def is_guarantee_mod_unprovable(asrt):
+    return is_unprovable_assert(asrt) == act.check_unprovable.get()
+
+def is_check_mod_unprovable(lf):
+    return lf.unprovable == act.check_unprovable.get()
 
 class Checker(object):
     def __init__(self,conj,report_pass=True,invert=True):
@@ -195,18 +203,28 @@ class Checker(object):
         if self.report_pass:
             print_dots()
     def sat(self):
+        return self._pass() if act.check_unprovable.get() else self.fail()
         print('FAIL')
         global failures
         failures += 1
         self.failed = True
         return not (diagnose.get() or opt_trace.get()) # ignore failures if not diagnosing
     def unsat(self):
-        if self.report_pass:
-            print('PASS')
+        return self.fail() if act.check_unprovable.get() else self._pass()
     def assume(self):
         return False
     def get_annot(self):
         return None
+    def fail(self):
+        print('FAIL')
+        global failures
+        failures += 1
+        self.failed = True
+        return not (diagnose.get() or opt_trace.get()) or act.check_unprovable.get() # ignore failures if not diagnosing
+    def _pass(self):
+        if self.report_pass:
+            print('PASS')
+        return True
 
 def pretty_label(label):
     return "(no name)" if label is None else label
@@ -376,6 +394,7 @@ def check_fcs_in_state(mod,ag,post,fcs):
 
 def check_conjs_in_state(mod,ag,post,indent=8):
     conjs = mod.conj_subgoals if mod.conj_subgoals is not None else mod.labeled_conjs
+    conjs = [x for x in conjs if is_check_mod_unprovable(x)]
     check_lineno = act.checked_assert.get()
     if check_lineno == "":
         check_lineno = None
@@ -393,7 +412,7 @@ opt_summary = iu.BooleanParameter("summary",False)
 # This gets the pre-state for inductive checks. Only implicit conjectures are used.
 
 def get_conjs(mod):
-    fmlas = [lf.formula for lf in mod.labeled_conjs + mod.assumed_invariants if not lf.explicit]
+    fmlas = [lf.formula for lf in mod.labeled_conjs + mod.assumed_invariants if not lf.explicit and not lf.unprovable]
     return lut.Clauses(fmlas,annot=act.EmptyAnnotation())
 
 def apply_conj_proofs(mod):
@@ -437,6 +456,7 @@ def check_isolate(trace_hook = None):
             check_lineno = None
     #    print 'check_lineno: {}'.format(check_lineno)
         check = not opt_summary.get()
+        unprovable = act.check_unprovable.get()
         subgoalmap = dict((x.id,y) for x,y in im.module.subgoals)
         axioms = [m for m in mod.labeled_axioms if m.id not in subgoalmap] 
         schema_instances = [m for m in mod.labeled_axioms if m.id in subgoalmap]
@@ -450,7 +470,7 @@ def check_isolate(trace_hook = None):
             for lf in mod.definitions:
                 print(pretty_lf(lf))
 
-        if (mod.labeled_props or schema_instances) and not checked_action.get():
+        if (mod.labeled_props or schema_instances) and not checked_action.get() and not unprovable :
             print("\n    The following properties are to be checked:")
             if check:
                 for lf in schema_instances:
@@ -475,9 +495,10 @@ def check_isolate(trace_hook = None):
             print("\n    The following properties are assumed initially:")
             for lf in mod.labeled_inits:
                 print(pretty_lf(lf))
-        if mod.labeled_conjs:
+        checked_invariants = [x for x in mod.labeled_conjs if is_check_mod_unprovable(x)]
+        if checked_invariants:
             print("\n    The inductive invariant consists of the following conjectures:")
-            for lf in mod.labeled_conjs:
+            for lf in checked_invariants:
                 print(pretty_lf(lf))
 
         apply_conj_proofs(mod)
@@ -502,7 +523,7 @@ def check_isolate(trace_hook = None):
             for actname,action in sorted(mod.initializers, key=lambda x: x[0]):
                 print("        {}{}".format(pretty_lineno(action),actname))
 
-        if mod.labeled_conjs and not checked_action.get():
+        if checked_invariants and not checked_action.get() and not unprovable:
             print("\n    Initialization must establish the invariant")
             if check:
                 with itp.EvalContext(check=False):
@@ -512,16 +533,23 @@ def check_isolate(trace_hook = None):
                 print('')
 
         if mod.initializers:
-            print("\n    Any assertions in initializers must be checked", end=' ')
-            if check:
-                ag = ivy_art.AnalysisGraph(initializer=lambda x:None)
-                fail = itp.State(expr = itp.fail_expr(ag.states[0].expr))
-                check_safety_in_state(mod,ag,fail)
+            guarantees = [sub for sub in action.iter_subactions()
+                          if isinstance(sub,(act.AssertAction,act.Ranking))
+                          for action in mod.initializers]
+            if check_lineno is not None:
+                guarantees = [sub for sub in guarantees if sub.lineno == check_lineno]
+            guarantees = [x for x in guarantees if is_guarantee_mod_unprovable(x)]
+            if guarantees and not unprovable:
+                print("\n    Any assertions in initializers must be checked", end=' ')
+                if check:
+                    ag = ivy_art.AnalysisGraph(initializer=lambda x:None)
+                    fail = itp.State(expr = itp.fail_expr(ag.states[0].expr))
+                    check_safety_in_state(mod,ag,fail)
 
 
         checked_actions = get_checked_actions()
 
-        if checked_actions and mod.labeled_conjs:
+        if checked_actions and checked_invariants:
             print("\n    The following set of external actions must preserve the invariant:")
             for actname in sorted(checked_actions):
                 action = act.env_action(actname)
@@ -547,7 +575,8 @@ def check_isolate(trace_hook = None):
         some_assumps = False
         for actname,action in mod.actions.items():
             assumptions = [sub for sub in action.iter_subactions()
-                               if isinstance(sub,act.AssumeAction)]
+                               if isinstance(sub,act.AssumeAction)
+                                  and not is_unprovable_assert(sub)]
             if assumptions:
                 if not some_assumps:
                     print("\n    The following program assertions are treated as assumptions:")
@@ -568,6 +597,7 @@ def check_isolate(trace_hook = None):
                               if isinstance(sub,(act.AssertAction,act.Ranking))]
             if check_lineno is not None:
                 guarantees = [sub for sub in guarantees if sub.lineno == check_lineno]
+            guarantees = [x for x in guarantees if is_guarantee_mod_unprovable(x)]
             if guarantees:
                 if not some_guarants:
                     print("\n    The following program assertions are treated as guarantees:")
@@ -607,7 +637,8 @@ def check_isolate(trace_hook = None):
 
         im.module.assumed_invariants.extend(im.module.labeled_conjs)
         im.module.labeled_conjs = []
-        check_temporals()
+        if not unprovable:
+            check_temporals()
 
 
 
@@ -660,6 +691,9 @@ def check_subgoals(goals,method=None):
             with lg.WithSymbols(vocab.symbols):
                 with lg.WithSorts(vocab.sorts):
                     if method is not None:
+                        if act.check_unprovable.get():
+                            print("SKIPPED\n")
+                            return
                         with im.module.theory_context():
                             foo = method()
                             if foo:

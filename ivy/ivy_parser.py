@@ -3,7 +3,7 @@
 #
 from .ivy_concept_space import NamedSpace, ProductSpace, SumSpace
 from .ivy_ast import *
-from .ivy_actions import AssumeAction, AssertAction, EnsuresAction, SetAction, AssignAction, VarAction, HavocAction, IfAction, AssignFieldAction, NullFieldAction, CopyFieldAction, InstantiateAction, CallAction, LocalAction, LetAction, Sequence, UpdatePattern, PatternBasedUpdate, SymbolList, UpdatePatternList, Schema, ChoiceAction, NativeAction, WhileAction, Ranking, RequiresAction, EnsuresAction, CrashAction, ThunkAction, DebugAction
+from .ivy_actions import AssumeAction, AssertAction, EnsuresAction, SetAction, AssignAction, VarAction, HavocAction, IfAction, AssignFieldAction, NullFieldAction, CopyFieldAction, InstantiateAction, CallAction, LocalAction, LetAction, Sequence, UpdatePattern, PatternBasedUpdate, SymbolList, UpdatePatternList, Schema, ChoiceAction, NativeAction, WhileAction, Ranking, RequiresAction, EnsuresAction, CrashAction, ThunkAction, DebugAction, check_unprovable
 from .ivy_lexer import *
 from . import ivy_utils as iu
 import copy
@@ -406,6 +406,19 @@ def addtemporal(lf):
     lf.temporal = True
     return lf
 
+def p_optunprovable(p):
+    'optunprovable : '
+    p[0] = None
+
+def p_optunprovable_symbol(p):
+    'optunprovable : UNPROVABLE'
+    p[0] = True
+
+def addunprovable(lf,cond):
+    if cond:
+        lf.unprovable = True
+    return lf
+
 def addexplicit(lf):
     lf.explicit = True
     return lf
@@ -502,16 +515,19 @@ if not iu.get_numeric_version() <= [1,6]:
 
 
     def p_top_invariant_labeledfmla(p):
-        'top : top optexplicit INVARIANT labeledfmla optproof'
+        'top : top optunprovable optexplicit INVARIANT labeledfmla optproof'
         p[0] = p[1]
-        lf = addlabel(p[4],'invar')
+        lf = addlabel(p[5],'invar')
         if p[2]:
+            lf.unprovable = True
+        if p[3]:
             lf.explicit = True
         d = ConjectureDecl(lf)
-        d.lineno = get_lineno(p,3)
-        p[0].declare(d)
-        if p[5] is not None:
-            p[0].declare(ProofDecl(p[5]))
+        d.lineno = get_lineno(p,4)
+        if not lf.unprovable or check_unprovable.get():
+            p[0].declare(d)
+            if p[6] is not None:
+                p[0].declare(ProofDecl(p[6]))
 
 def p_modulestart(p):
     'modulestart :'
@@ -2331,51 +2347,69 @@ def p_action_complexact(p):
     p[0] = p[1]
 
 def p_action_assume(p):
-    'simpleact : ASSUME fmla'
-    p[0] = AssumeAction(check_non_temporal(p[2]))
+    'simpleact : ASSUME labeledfmla'
+    p[0] = AssumeAction(check_non_temporal(addlabel(p[2],'asrt')))
     p[0].lineno = get_lineno(p,1)
 
 
 if iu.get_numeric_version() <= [1,6]:
     def p_action_assert(p):
-        'simpleact : ASSERT fmla'
-        p[0] = AssertAction(check_non_temporal(p[2]))
+        'simpleact : ASSERT labeledfmla'
+        p[0] = AssertAction(check_non_temporal(addlabel(p[2],'asrt')))
         p[0].lineno = get_lineno(p,1)
 
     def p_action_ensures(p):
-        'simpleact : ENSURES fmla'
-        p[0] = EnsuresAction(check_non_temporal(p[2]))
+        'simpleact : ENSURES labeledfmla'
+        p[0] = EnsuresAction(check_non_temporal(addlabel(p[2],'asrt')))
         p[0].lineno = get_lineno(p,1)
 else:
     def p_action_assert(p):
-         'simpleact : ASSERT fmla'
-         p[0] = AssertAction(check_non_temporal(p[2]))
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable ASSERT labeledfmla'
+         p[0] = AssertAction(check_non_temporal(addlabel(p[3],'asrt')))
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     def p_action_assert_proof_proofstep(p):
-         'simpleact : ASSERT fmla PROOF proofstep'
-         p[0] = AssertAction(check_non_temporal(p[2]),p[4])
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable ASSERT labeledfmla PROOF proofstep'
+         p[0] = AssertAction(check_non_temporal(addlabel(p[3],'asrt')),p[5])
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     def p_action_ensure(p):
-         'simpleact : ENSURE fmla'
-         p[0] = EnsuresAction(check_non_temporal(p[2]))
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable ENSURE labeledfmla'
+         p[0] = EnsuresAction(check_non_temporal(addlabel(p[3],'asrt')))
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     def p_action_ensure_proof_proofstep(p):
-         'simpleact : ENSURE fmla PROOF proofstep'
-         p[0] = EnsuresAction(check_non_temporal(p[2]),p[4])
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable ENSURE labeledfmla PROOF proofstep'
+         p[0] = EnsuresAction(check_non_temporal(addlabel(p[3],'asrt')),p[5])
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     def p_action_require(p):
-         'simpleact : REQUIRE fmla'
-         p[0] = RequiresAction(check_non_temporal(p[2]))
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable REQUIRE labeledfmla'
+         p[0] = RequiresAction(check_non_temporal(addlabel(p[3],'asrt')))
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     def p_action_require_proof_proofstep(p):
-         'simpleact : REQUIRE fmla PROOF proofstep'
-         p[0] = RequiresAction(check_non_temporal(p[2]),p[4])
-         p[0].lineno = get_lineno(p,1)
+         'simpleact : optunprovable REQUIRE labeledfmla PROOF proofstep'
+         p[0] = RequiresAction(check_non_temporal(addlabel(p[3],'asrt')),p[5])
+         addunprovable(p[0].args[0],p[1])
+         if p[1] and not check_unprovable.get():
+             p[0] = Sequence()
+         p[0].lineno = get_lineno(p,2)
 
     # def p_action_ensure_optproof(p):
     #     'simpleact : ENSURE fmla optproof'
@@ -2508,17 +2542,17 @@ else:
         p[0] = []
 
     def p_invariant_invariant_fmla(p):
-        'invariants : invariants INVARIANT fmla'
+        'invariants : invariants INVARIANT labeledfmla'
         p[0] = p[1]
-        inv = check_non_temporal(p[3])
+        inv = check_non_temporal(addlabel(p[3],'asrt'))
         a = AssertAction(inv)
         a.lineno = get_lineno(p,2)
         p[0].append(a)
 
     def p_invariant_invariant_fmla_proof(p):
-        'invariants : invariants INVARIANT fmla PROOF proofstep'
+        'invariants : invariants INVARIANT labeledfmla PROOF proofstep'
         p[0] = p[1]
-        inv = check_non_temporal(p[3])
+        inv = check_non_temporal(addlabel(p[3],'asrt'))
         a = AssertAction(inv,p[5])
         a.lineno = get_lineno(p,2)
         p[0].append(a)

@@ -22,6 +22,7 @@ def p_c_a(s):
 
 checked_assert = iu.Parameter("assert","",check=lambda s: len(s.split(':'))==2,
                               process=p_c_a)
+check_unprovable = iu.BooleanParameter("unprovable",False)
 
 class Schema(AST):
     def __init__(self,defn):
@@ -313,8 +314,13 @@ class AssumeAction(Action):
     def name(self):
         return 'assume'
     def action_update(self,domain,pvars):
-        type_check(domain,self.args[0])
-        clauses = formula_to_clauses_tseitin(skolemize_formula(self.args[0]))
+        fmla = self.args[0]
+        if isinstance(fmla,ivy_ast.LabeledFormula):
+            if fmla.unprovable:
+                return ([],true_clauses(annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
+            fmla = fmla.formula
+        type_check(domain,fmla)
+        clauses = formula_to_clauses_tseitin(skolemize_formula())
         clauses = unfold_definitions_clauses(clauses)
         clauses = Clauses(clauses.fmlas,clauses.defs,EmptyAnnotation())
         return ([],clauses,false_clauses(annot = EmptyAnnotation()))
@@ -327,13 +333,22 @@ class AssertAction(Action):
     def name(self):
         return 'assert'
     def action_update(self,domain,pvars):
-        type_check(domain,self.args[0])
-#        print type(self.args[0])
+        fmla = self.args[0]
+        unprovable = False
+        if isinstance(fmla,ivy_ast.LabeledFormula):
+            unprovable = fmla.unprovable
+            fmla = fmla.formula
+        type_check(domain,fmla)
+        if check_unprovable.get() != unprovable:
+            return ([],true_clauses(annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
         ca = checked_assert.get()
         if ca:
             if ca != self.lineno:
-                return ([],formula_to_clauses(self.args[0],annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
-        cl = formula_to_clauses(dual_formula(self.args[0]))
+                if unprovable:
+                    return ([],true_clauses(annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
+                return ([],formula_to_clauses(fmla,annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
+    
+        cl = formula_to_clauses(dual_formula(fmla))
 #        return ([],formula_to_clauses_tseitin(self.args[0]),cl)
         cl = Clauses(cl.fmlas,cl.defs,EmptyAnnotation())
         return ([],true_clauses(annot = EmptyAnnotation()),cl)

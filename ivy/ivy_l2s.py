@@ -161,7 +161,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     l2s_s = lambda vs, t: lg.NamedBinder('l2s_s', vs, proof_label, t)
     l2s_g = lambda vs, t, environ: lg.NamedBinder('l2s_g', vs, environ, t)
     old_l2s_g = lambda vs, t, environ: lg.NamedBinder('_old_l2s_g', vs, environ, t)
-    l2s_init = lambda vs, t: lg.NamedBinder('l2s_init', vs, proof_label, t)
+    l2s_init = lambda vs, t: lg.NamedBinder('l2s_init', tuple(vs), proof_label, t)
     l2s_when = lambda name, vs, t: lg.NamedBinder('l2s_when'+name, vs, proof_label, t)
     l2s_old = lambda vs, t: lg.NamedBinder('l2s_old', vs, proof_label, t)
 
@@ -476,7 +476,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_consts_d"),tmp).sln(proof.lineno))
 
         def convert_to_init(fmla):
-            if isinstance(fmla,(lg.And,lg.Or,lg.Not,lg.Implies,lg.Iff)):
+            if isinstance(fmla,(lg.And,lg.Or,lg.Not,lg.Implies,lg.Iff,lg.ForAll,lg.Exists)):
                 return fmla.clone([convert_to_init(arg) for arg in fmla.args])
             vs = tuple(iu.unique(ilu.variables_ast(fmla)))
             return l2s_init(vs,fmla)(*vs)
@@ -1054,6 +1054,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
          lg.NamedBinder('_old_l2s_g', b.variables, b.environ, b.body)
          for b in named_binders['l2s_g']
     ]
+
     subs = dict(
         (b, lg.Const('{}_{}'.format(k, i), b.sort))
         for k, v in named_binders.items()

@@ -1408,6 +1408,16 @@ def compile_with_goal_vocab(expr,goal):
 #    the_goal_vocab.variables.extend(list(logic_util.used_variables(goal_conc(goal))))
     return compile_expr_vocab_ext(expr,the_goal_vocab)
 
+# This function compiles a defintion onto a goal, as a service to tactics
+# The result for definiton f(X:t) = exp:u is to add two premises:
+# - function f(X:t) : u
+# - property forall X. f(X) = expr
+#
+# TRICKY: Operators in expr are normalized, but the forall quantifier is not normalized,
+# meaning you may get multiple variables in a single quantifier. This means that natural
+# deduction rules may not work as expected on the property, but it is easier for
+# tactics to parse the property.
+
 def compile_definition_goal_vocab(df,goal):
     vocab = goal_vocab(goal)
     free = goal_free(goal)
@@ -1421,7 +1431,10 @@ def compile_definition_goal_vocab(df,goal):
         fmla = ia.Forall(vars,body) if vars else body
         elf = lf.clone([lf.label,fmla])
         lf = compile_expr_vocab(elf,vocab)
-        thing = lf.formula.body if vars else lf.formula 
+        thing = lf.formula.body if vars else lf.formula
+        thing = il.normalize_ops(thing)
+        # this normalizes the body but not the quantifier
+        lf = lf.clone([lf.label,lf.formula.clone([thing]) if vars else thing])
         sym = thing.args[0].rep
         deps = list(lu.symbols_ast(thing.args[1]))
         if sym in deps:

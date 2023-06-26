@@ -320,7 +320,7 @@ class AssumeAction(Action):
                 return ([],true_clauses(annot = EmptyAnnotation()),false_clauses(annot = EmptyAnnotation()))
             fmla = fmla.formula
         type_check(domain,fmla)
-        clauses = formula_to_clauses_tseitin(skolemize_formula())
+        clauses = formula_to_clauses_tseitin(skolemize_formula(fmla))
         clauses = unfold_definitions_clauses(clauses)
         clauses = Clauses(clauses.fmlas,clauses.defs,EmptyAnnotation())
         return ([],clauses,false_clauses(annot = EmptyAnnotation()))

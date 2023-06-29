@@ -7,6 +7,7 @@ from . import ivy_proof as pf
 from . import ivy_actions as ia
 from . import ivy_temporal as tm
 from . import ivy_logic as lg
+from . import ivy_logic_utils as ilu
 from . import ivy_utils as iu
 from . import ivy_trace as tr
 from . import ivy_logic_utils as lu
@@ -44,6 +45,37 @@ def skolemize(self,decls,proof):
     return [goal] + decls[1:]
 
 pf.register_tactic('skolemize',skolemize)
+
+def tempind_fmla(fmla,vs=[]):
+    if lg.is_forall(fmla):
+        return tempind_fmla(fmla.body,vs+list(fmla.variables))
+    if isinstance(fmla,lg.Implies):
+        prem_vars = set(ilu.variables_ast(fmla.args[0]))
+        conc = tempind_fmla(fmla.args[1],[v for v in vs if v.name not in prem_vars])
+        res = lg.Implies(fmla.args[0],conc)
+        uvs = [v for v in vs if v.name in prem_vars]
+        return lg.ForAll(uvs,res) if uvs else res
+    if vs and isinstance(fmla,lg.Globally):
+        return lg.ForAll(vs,lg.Or(fmla,lg.WhenOperator("next",fmla.body,lg.Not(lg.ForAll(vs,fmla.body)))))
+    return lg.Forall(vs,fmla) if vs else fmla
+        
+def apply_tempind(goal,proof):
+    conc = pr.goal_conc(goal)
+    if not (goal.temporal or isinstance(conc,ivy_ast.TemporalModels)):
+        raise iu.IvyError(proof,'proof goal is not temporal')
+    if isinstance(conc,ivy_ast.TemporalModels):
+        fmla = tempind_fmla(conc.fmla)
+        fmla = conc.clone([fmla])
+    else:
+        fmla = tempind_fmla(conc)
+    return pr.clone_goal(goal,pr.goal_prems(goal),fmla)
+    
+def tempind(self,decls,proof):
+    goal = decls[0]
+    goal = apply_tempind(goal,proof)
+    return [goal] + decls[1:]
+    
+pf.register_tactic('tempind',tempind)
 
 used_sorry = False
 

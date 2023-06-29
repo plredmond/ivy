@@ -770,10 +770,10 @@ def elim_ite(expr,cnsts):
 # we are just using the ones that occur in the invariant
 
 def mine_constants(mod,trans,invariant):
-    print ('invariant: {}'.format(invariant))
     res = defaultdict(list)
-    for c in ilu.used_symbols_ast(invariant):
-        if not il.is_function_sort(c.sort) and tr.is_skolem(c):
+    fmlas = [invariant]+mod.params
+    for c in ilu.used_symbols_asts(fmlas):
+        if not il.is_function_sort(c.sort) and (tr.is_skolem(c) or c in mod.params):
             res[c.sort].append(c)
     return res
 

@@ -194,8 +194,8 @@ class ProofChecker(object):
     def compose_proofs(self,decls,proofs):
         for proof in proofs:
             decls = self.apply_proof(decls,proof)
-            if decls is None:
-                return None
+            if decls is None or len(decls) == 0:
+                return decls
         return decls
 
     def show_goals_tactic(self,decls,proof):

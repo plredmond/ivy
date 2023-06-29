@@ -95,7 +95,7 @@ def l2s_tactic_auto(prover,goals,proof):
 # mark the loop start state.
 
 def trace_hook(tr):
-    tr.hidden_symbols = lambda sym: sym.name.startswith('l2s_') or sym.name.startswith('_old_l2s_')
+    # tr.hidden_symbols = lambda sym: sym.name.startswith('l2s_') or sym.name.startswith('_old_l2s_')
     for idx,state in enumerate(tr.states):
         for c in state.clauses.fmlas:
             s1,s2 = list(map(str,c.args))
@@ -167,7 +167,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
 
     finite_sorts = set()
     for name,sort in ilg.sig.sorts.items():
-        if thy.get_sort_theory(sort).is_finite() or name in mod.finite_sorts:
+        if thy.get_sort_theory(sort).is_finite() or name in mod.finite_sorts or full:
             finite_sorts.add(name)
     uninterpreted_sorts = [s for s in list(ilg.sig.sorts.values()) if type(s) is lg.UninterpretedSort and s.name not in finite_sorts]
 
@@ -484,8 +484,10 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         tmp = lg.Not(convert_to_init(fmla))
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("neg_prop_init"),tmp).sln(proof.lineno))
                           
+        prems = list(x for x in ipr.goal_prems(goal) if ipr.goal_is_property(x))
+        
         winvs = []
-        for tmprl in list(iu.unique(ilu.temporals_asts(invars))):
+        for tmprl in list(iu.unique(ilu.temporals_asts(invars+prems))):
             if isinstance(tmprl,lg.WhenOperator):
                 if tmprl.name == 'first':
                     nws = lg.Or(lg.Not(l2s_waiting),lg.Not(l2s_w((),tmprl.t2)))
@@ -570,6 +572,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     # that we replace them even inside named binders.
     l2s_gs = set()
     l2s_whens = set()
+    l2s_inits = set()
     def _l2s_g(vs, t, env):
         vs = tuple(vs)
         res = l2s_g(vs, t,env)
@@ -622,9 +625,17 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
 
     # figure out which l2s_w and l2s_s are used in conjectures
     named_binders_conjs = defaultdict(list) # dict mapping names to lists of (vars, body)
+    ntprems = [x for x in prems if ipr.goal_is_property(x)
+               and not (hasattr(x,'temporal') and x.temporal)]
     for b in ilu.named_binders_asts(model.invars):
 #        print 'binder: {} {} {}'.format(b.name,b.environ,b.body)
         named_binders_conjs[b.name].append((b.variables, b.body))
+            
+
+    def list_transform(lst,trns):
+        for i in range(0,len(lst)):
+            if ipr.goal_is_property(lst[i]):
+                lst[i] = trns(lst[i])
     named_binders_conjs = defaultdict(list,((k,list(set(v))) for k,v in named_binders_conjs.items()))
 
     # in full mode, add all the state variables to 'to_save' and all
@@ -646,6 +657,10 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
                 vs,t = b.variables,ilu.negate(b.body)
                 if t not in seen:
                     named_binders_conjs['l2s_w'].append((vs,t))
+            if b.name == 'l2s_init':
+                named_binders_conjs['l2s_init'].append((b.variables,b.body))
+        named_binders_conjs['l2s_init'] = list(set(named_binders_conjs['l2s_init']))
+                
                     
     to_wait = [] # list of (variables, term) corresponding to l2s_w in conjectures
     to_wait += named_binders_conjs['l2s_w']

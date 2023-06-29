@@ -313,6 +313,10 @@ class AssumeAction(Action):
     sort_infer_root = True
     def name(self):
         return 'assume'
+    @property
+    def formula(self):
+        fmla = self.args[0]
+        return fmla.formula if isinstance(fmla,ivy_ast.LabeledFormula) else fmla
     def action_update(self,domain,pvars):
         fmla = self.args[0]
         if isinstance(fmla,ivy_ast.LabeledFormula):
@@ -332,6 +336,10 @@ class AssertAction(Action):
     sort_infer_root = True
     def name(self):
         return 'assert'
+    @property
+    def formula(self):
+        fmla = self.args[0]
+        return fmla.formula if isinstance(fmla,ivy_ast.LabeledFormula) else fmla
     def action_update(self,domain,pvars):
         fmla = self.args[0]
         unprovable = False
@@ -757,13 +765,18 @@ class InstantiateAction(Action):
         n = self.args[0].rep
         return InstantiateAction(ivy_ast.Atom(n,mas))
 
-
+def my_str(x,depth=0):
+    if depth > 25:
+        return '...'
+    return x.dstr(depth) if hasattr(x,'dstr') else str(x)
 
 class Sequence(Action):
     def name(self):
         return 'sequence'
-    def __str__(self):
-        return '{' + '; '.join(str(x) for x in self.args) + '}'
+    def dstr(self,depth=0):  
+        return '{' + '; '.join(my_str(x,depth+1) for x in self.args) + '}'
+    def __str__(self):  
+        return '{' + '; '.join(my_str(x) for x in self.args) + '}'
     def int_update(self,domain,pvars):
         update = ([],true_clauses(EmptyAnnotation()),false_clauses(EmptyAnnotation()))
         axioms = domain.background_theory(pvars)
@@ -850,8 +863,8 @@ class EnvAction(ChoiceAction):
     def formal_returns(self):
         return []
 
-def bracket_action(action):
-    return ('{' + str(action) + '}') if not isinstance(action,Sequence) else str(action)
+def bracket_action(action,depth=0):
+    return ('{' + my_str(action,depth) + '}') if not isinstance(action,Sequence) else my_str(action,depth)
 
 class IfAction(Action):
     def name(self):
@@ -1045,8 +1058,10 @@ class LocalAction(Action):
         local_action_ctr += 1
     def name(self):
         return 'local'
+    def dstr(self,depth=0):
+        return 'local ' + ','.join(my_str(a,depth+1) for a in self.args[0:-1]) + ' ' + bracket_action(self.args[-1],depth+1)
     def __str__(self):
-        return 'local ' + ','.join(str(a) for a in self.args[0:-1]) + ' ' + bracket_action(self.args[-1])
+        return 'local ' + ','.join(my_str(a) for a in self.args[0:-1]) + ' ' + bracket_action(self.args[-1])
     def int_update(self,domain,pvars):
         update = self.args[-1].int_update(domain,pvars)
 #        syms = used_symbols_asts(self.args[0:-1])

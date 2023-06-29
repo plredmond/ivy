@@ -1285,13 +1285,19 @@ def nary_ugly(op,args,myprec,prec):
     res = (' ' + op + ' ').join(uargs)
     return ('(' + res + ')') if len(args) > 1 and myprec <= prec else res
 
+def nary_paren(op,args,myprec,prec):
+    uargs = [a.ugly(myprec) for a in args]
+    res = (' ' + op + ' ').join(uargs)
+    return ('(' + res + ')')
+
 lg.Var.ugly = (lambda self,prec: (self.name+':'+self.sort.name)
                   if show_variable_sorts and not isinstance(self.sort,(lg.TopSort,SortVar)) else self.name)
 lg.Const.ugly = (lambda self,prec: (self.name+':'+self.sort.name)
                     if show_numeral_sorts and self.is_numeral() and not isinstance(self.sort,lg.TopSort)
                  else self.name)
 lg.Eq.ugly = lambda self,prec: nary_ugly('=',self.args,7,prec)
-lg.And.ugly = lambda self,prec: nary_ugly('&',self.args,5,prec) if self.args else 'true'
+# lg.And.ugly = lambda self,prec: nary_ugly('&',self.args,5,prec) if self.args else 'true'
+lg.And.ugly = lambda self,prec: nary_paren('&',self.args,5,prec) if self.args else 'true'
 lg.Or.ugly = lambda self,prec: nary_ugly('|',self.args,4,prec) if self.args else 'false'
 lg.Not.ugly = lambda self,prec: (nary_ugly('~=',self.body.args,8,prec)
                                if type(self.body) is lg.Eq

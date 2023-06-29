@@ -775,8 +775,6 @@ def mine_constants(mod,trans,invariant):
     for c in ilu.used_symbols_ast(invariant):
         if not il.is_function_sort(c.sort) and tr.is_skolem(c):
             res[c.sort].append(c)
-    print ('mine_constants')
-    iu.dbg('res')
     return res
 
 def mine_constants2(mod,trans,invariant):
@@ -787,8 +785,6 @@ def mine_constants2(mod,trans,invariant):
     for c in syms:
         if not il.is_function_sort(c.sort):
             res[c.sort].append(c)
-    print('mine_constants2')
-    iu.dbg('res')
     return res
 
 # Tricky: if an atomic proposition has a next variable in it, but no curremnt versions of state
@@ -1019,7 +1015,7 @@ def add_err_flag(action,erf,errconds):
         if checked(action):
             if verbose:
                 print("{}Model checking guarantee".format(action.lineno))
-            errcond = ilu.dual_formula(il.drop_universals(action.args[0]))
+            errcond = ilu.dual_formula(il.drop_universals(action.formula))
             res = ia.AssignAction(erf,il.Or(erf,errcond))
             errconds.append(errcond)
             res.lineno = iu.nowhere()
@@ -1031,7 +1027,7 @@ def add_err_flag(action,erf,errconds):
         if isinstance(action,ia.AssertAction):
             if verbose:
                 print("assuming assertion at line {}".format(action.lineno))
-        res = ia.AssumeAction(il.Or(erf,action.args[0])) 
+        res = ia.AssumeAction(il.Or(erf,action.formula)) 
         res.lineno = iu.nowhere()
         return res
     if isinstance(action,(ia.Sequence,ia.ChoiceAction,ia.EnvAction,ia.BindOldsAction)):

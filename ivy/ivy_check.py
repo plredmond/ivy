@@ -125,12 +125,13 @@ def check_temporals():
                 pc.admit_axiom(prop)
             else:
                 print('\n    The following temporal property is being proved:\n')
-                print(pretty_lf(prop) + ' ...', end=' ')
+                print(pretty_lf(prop) + ' ...\n', end=' ')
                 sys.stdout.flush()
                 if prop.temporal:
                     proof = pmap.get(prop.id,None)
+                    propn = ivy_proof.normalize_goal(prop)
                     model = itmp.normal_program_from_module(im.module)
-                    subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,prop.args[1])])
+                    subgoal = prop.clone([prop.args[0],ivy_ast.TemporalModels(model,propn.args[1])])
                     subgoals = [subgoal]
                     subgoals = pc.admit_proposition(prop,proof,subgoals)
                     check_subgoals(subgoals)
@@ -669,8 +670,8 @@ def check_subgoals(goals,method=None):
             mod.labeled_axioms = list(mod.labeled_axioms)
             mod.assumed_invars = model.asms
             for prem in ivy_proof.goal_prems(goal):
-                if hasattr(prem,'temporal') and prem.temporal:
-                    # if ivy_proof.goal_is_property(prem):
+                # if hasattr(prem,'temporal') and prem.temporal:
+                if ivy_proof.goal_is_property(prem):
                     # print ('using premise: {}'.format(prem))
                     mod.labeled_axioms.append(prem)
             # ivy_printer.print_module(mod)

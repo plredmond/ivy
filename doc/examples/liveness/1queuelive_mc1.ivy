@@ -1,0 +1,73 @@
+#lang ivy1.8
+
+# This file contains a simple liveness proof, also shown in figure 3
+# in the tool paper submission.
+#
+# To verify this file, run:
+#
+#     $ ivy_check liveness.ivy
+#     ...
+#     OK
+#
+
+include order
+
+instance nat : unbounded_sequence
+
+include mc_schemata
+instantiate unbounded_sequence_schemata(nat)
+
+module signal = {
+    action raise
+
+    specification {
+        relation now
+        after init { now := false; }
+        before raise {
+            now := true;
+            now := false;
+        }
+        invariant ~now
+    }
+}
+
+action send
+
+action recv
+
+var head : nat
+var tail : nat
+
+after init {
+    head := 0;
+    tail := 0;
+}
+
+instance receiving : signal
+
+before send {
+    tail := tail.next;
+}
+
+before recv {
+    require head < tail;
+    call receiving.raise;
+    var bif := head.next;
+    head := bif;
+}
+
+invariant head <= tail
+
+temporal property
+forall X.
+(globally eventually receiving.now)
+-> (globally tail = X -> eventually head = X)
+proof {
+    tactic tempind;
+    tactic skolemize;
+    tactic mc proof {let Xm1 = _X - 1}
+}
+
+export send
+export recv
+

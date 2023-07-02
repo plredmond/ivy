@@ -65,7 +65,7 @@ def tempind_fmla(fmla,cond,params,vs=[]):
 def apply_tempind(goal,proof):
     if proof.tactic_decls:
         raise iu.IvyError(proof,'tactic does not take declarations')
-    vocab = pr.goal_vocab(goal)
+    vocab = pr.goal_vocab(goal,bound=True)
     defs = [pr.compile_expr_vocab(ivy_ast.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.tactic_lets]
     cond = lg.And(*[lg.Equals(a.args[0],a.args[1]) for a in defs])
     params = list(a.args[0] for a in defs)
@@ -101,7 +101,7 @@ def tempcase_fmla(fmla,cond,vs,proof):
 def apply_tempcase(goal,proof):
     if proof.tactic_decls:
         raise iu.IvyError(proof,'tactic does not take declarations')
-    vocab = pr.goal_vocab(goal)
+    vocab = pr.goal_vocab(goal,bound=True)
     defs = [pr.compile_expr_vocab(ivy_ast.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.tactic_lets]
     cond = lg.And(*[lg.Equals(a.args[0],a.args[1]) for a in defs])
     vs = list(a.args[0] for a in defs)

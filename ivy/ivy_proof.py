@@ -446,13 +446,15 @@ class ProofChecker(object):
         return goal_subgoals(prob.schema,decl,proof.lineno)
 
     def witness_tactic(self,decls,proof):
+        decl = decls[0]
+        conc = goal_conc(decl)
+        if has_temporal(decl) and not goal_is_temporal(goal):
+            raise iu.IvyError(proof,'temporal operator not allowed')
         wits = compile_witness_list(proof,decls[0])
         for wit in wits:
             if not il.is_variable(wit.args[0]):
                 raise iu.IvyError(wit,'left-hand side of witness must be a variable')
         wit_map = dict((x.args[0],x.args[1]) for x in wits)
-        decl = decls[0]
-        conc = goal_conc(decl)
         conc = lu.witness_ast(False,[],wit_map,conc)
         prems = goal_prems(decl)
         return [clone_goal(decl,prems,conc)] + decls[1:]
@@ -550,15 +552,20 @@ class Vocab(object):
         self.sorts,self.symbols,self.variables = sorts,symbols,variables
 
 # Get the vocabulary of a goal. This is the collection of sorts, symbols and
-# variables that are bound in the goal.
+# variables that are bound in the goal. If optional argument 'bound' is true,
+# include the bound variables in the conclusion.
 
-def goal_vocab(goal):
+def goal_vocab(goal,bound=False):
     prems = goal_prems(goal)
     conc = goal_conc(goal)
     symbols = [x.args[0] for x in prems if isinstance(x,ia.ConstantDecl)]
     sorts = [s for s in prems if isinstance(s,il.UninterpretedSort)]
     fmlas = [x.formula for x in prems if isinstance(x,ia.LabeledFormula)] + [conc]
     variables = list(lu.used_variables_asts(fmlas))
+    if bound:
+        conc_fmla = conc.fmla if isinstance(conc,ia.TemporalModels) else conc
+        variables = variables + [x for x in logic_util.bound_variables(conc_fmla)
+                                 if x not in variables]
     return Vocab(sorts,symbols,variables)
 
 # Check that the conclusions of two goals match
@@ -578,6 +585,10 @@ def check_premises_provided(g1,g2):
         for sym in syms:
             if sym not in defns and not il.sig.contains(sym):
                 raise ProofError(None,'premise "{}" does not match anything in the environment'.format(thing))
+
+def goal_is_temporal(x):
+    conc = goal_conc(x)
+    return conc.temoral or isinstance(conc.formula,ia.TemporalModels)
 
 def goal_is_defn(x):
     if isinstance(x,ia.ConstantDecl):

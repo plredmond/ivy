@@ -863,13 +863,14 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         for when in whens:
             name, vs,t = when.name, when.variables, when.body
             cond,val = t.t1,t.t2
-            oldcond = l2s_old(vs, cond)(*vs)
-            pre.append(AssignAction(oldcond,cond).set_lineno(lineno))
             if name == 'l2s_whennext':
+                oldcond = l2s_old(vs, cond)(*vs)
+                pre.append(AssignAction(oldcond,cond).set_lineno(lineno))
                 # print ('when: {}'.format(when))
                 # print ('oldcond :{}'.format(oldcond))
                 post.append(IfAction(oldcond,HavocAction(when(*vs)).set_lineno(lineno)).set_lineno(lineno))
-
+            if name == 'l2s_whenprev':
+                post.append(IfAction(cond,HavocAction(when(*vs)).set_lineno(lineno)).set_lineno(lineno))
         for when in whens:
             post.append(AssumeAction(forall(when.variables, lg.Implies(when.body.t1,lg.Eq(when(*when.variables),when.body.t2)))))
         # for when in whens:

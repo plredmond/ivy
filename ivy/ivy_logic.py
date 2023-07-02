@@ -597,8 +597,14 @@ def Constant(sym):
 def is_forall(term):
     return isinstance(term,lg.ForAll)
 
+def forall(vs,body):
+    return ForAll(vs,body) if vs else body
+
 def is_exists(term):
     return isinstance(term,lg.Exists)
+
+def exists(vs,body):
+    return Exists(vs,body) if vs else body
 
 def is_lambda(term):
     return isinstance(term,lg.Lambda)

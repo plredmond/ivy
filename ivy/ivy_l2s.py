@@ -116,6 +116,9 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     model = conc.model.clone([])
     fmla = conc.fmla
 
+    if proof.tactic_lets:
+        raise iu.IvyError(proof,'tactic does not take lets')
+
     # Get all the temporal properties from the prover environment as assumptions
     
     # Add all the assumed invariants to the model

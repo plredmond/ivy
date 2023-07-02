@@ -1300,9 +1300,17 @@ else:
         p[0] = TacticWith()
 
     def p_opttacticwith_with_tacticwithlist(p):
-        'opttacticwith : WITH tacticwithlist'
-        p[0] = TacticWith(*p[2])
+        'opttacticwith : WITH tacticwithlistchoice'
+        p[0] = p[2]
         p[0].lineno = get_lineno(p,1)
+
+    def p_tacticwithlistchoice_tactwithlist(p):
+        'tacticwithlistchoice : tacticwithlist'
+        p[0] = TacticWith(*p[1])
+
+    def p_tacticwithlistchoice_pflets(p):
+        'tacticwithlistchoice : pflets'
+        p[0] = TacticLets(*p[1])
 
     def p_tacticwithelem_invariant(p):
         'tacticwithelem : INVARIANT labeledfmla'

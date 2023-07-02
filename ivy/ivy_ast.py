@@ -896,7 +896,10 @@ class TacticTactic(Tactic):
         return self.args[0].rep
     @property
     def tactic_decls(self):
-        return self.args[1].args
+        return self.args[1].args if isinstance(self.args[1],TacticWith) else []
+    @property
+    def tactic_lets(self):
+        return self.args[1].args if isinstance(self.args[1],TacticLets) else []
     @property
     def tactic_proof(self):
         return self.args[2] if len(self.args) > 2 and not isinstance(self.args[2],NoneAST) else None
@@ -920,6 +923,10 @@ class ProofTactic(Tactic):
         self.args[1].vocab(names)
     
 class TacticWith(Tactic):
+    def __str__(self):
+        res = (' with ' + ' '.join(str(x) for x in self.args[1].args)) if self.args[1].args > 0 else ''
+
+class TacticLets(Tactic):
     def __str__(self):
         res = (' with ' + ' '.join(str(x) for x in self.args[1].args)) if self.args[1].args > 0 else ''
 

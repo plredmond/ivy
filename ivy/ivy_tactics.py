@@ -46,6 +46,13 @@ def skolemize(self,decls,proof):
 
 pf.register_tactic('skolemize',skolemize)
 
+def skolemizenp(self,decls,proof):
+    goal = decls[0]
+    goal = pr.skolemize_goal(goal,prenex=False)
+    return [goal] + decls[1:]
+
+pf.register_tactic('skolemizenp',skolemizenp)
+
 def tempind_fmla(fmla,cond,params,vs=[]):
     if lg.is_forall(fmla):
         return tempind_fmla(fmla.body,cond,params,vs+list(fmla.variables))

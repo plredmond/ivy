@@ -670,10 +670,14 @@ def check_subgoals(goals,method=None):
             mod.labeled_axioms = list(mod.labeled_axioms)
             mod.assumed_invars = model.asms
             mod.params = list(mod.params)
+            mod.updates = list(mod.updates)
             for prem in ivy_proof.goal_prems(goal):
                 # if hasattr(prem,'temporal') and prem.temporal:
                 if ivy_proof.goal_is_property(prem):
                     # print ('using premise: {}'.format(prem))
+                    if prem.definition:
+                        df = lg.drop_universals(prem.formula)
+                        mod.updates.append(act.DerivedUpdate(df))
                     mod.labeled_axioms.append(prem)
                 elif ivy_proof.goal_is_defn(prem):
                     dfnd = ivy_proof.goal_defines(prem)
@@ -725,7 +729,10 @@ def mc_tactic(prover,goals,proof):
     conc = ivy_proof.goal_conc(goal)
     if isinstance(conc,ivy_ast.TemporalModels):
         if not lg.is_true(conc.fmla):
-            goals = ivy_l2s.l2s_tactic_full(prover,goals,proof)
+            goals = ivy_tactics.tempind(prover,goals,proof)
+            goals = ivy_tactics.skolemizenp(prover,goals,proof)
+            l2s_pf = proof.clone([proof.args[0],ivy_ast.TacticLets()]+list(proof.args[2:]))
+            goals = ivy_l2s.l2s_tactic_full(prover,goals,l2s_pf)
     check_subgoals(goals[0:1],method=ivy_mc.check_isolate)
     return goals[1:]
 

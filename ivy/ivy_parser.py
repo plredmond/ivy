@@ -515,19 +515,31 @@ if not iu.get_numeric_version() <= [1,6]:
 
 
     def p_top_invariant_labeledfmla(p):
-        'top : top optunprovable optexplicit INVARIANT labeledfmla optproof'
+        'top : top optexplicit INVARIANT labeledfmla optproof'
         p[0] = p[1]
-        lf = addlabel(p[5],'invar')
+        lf = addlabel(p[4],'invar')
+        lf.unprovable = False
         if p[2]:
-            lf.unprovable = True
-        if p[3]:
             lf.explicit = True
         d = ConjectureDecl(lf)
-        d.lineno = get_lineno(p,4)
+        d.lineno = get_lineno(p,3)
         if not lf.unprovable or check_unprovable.get():
             p[0].declare(d)
-            if p[6] is not None:
-                p[0].declare(ProofDecl(p[6]))
+            if p[5] is not None:
+                p[0].declare(ProofDecl(p[5]))
+
+    def p_top_unprovable_invariant_labeledfmla(p):
+        'top : top UNPROVABLE INVARIANT labeledfmla optproof'
+        p[0] = p[1]
+        lf = addlabel(p[4],'invar')
+        lf.unprovable = True
+        lf.explicit = True
+        d = ConjectureDecl(lf)
+        d.lineno = get_lineno(p,3)
+        if not lf.unprovable or check_unprovable.get():
+            p[0].declare(d)
+            if p[5] is not None:
+                p[0].declare(ProofDecl(p[5]))
 
 def p_modulestart(p):
     'modulestart :'

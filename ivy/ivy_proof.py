@@ -1339,9 +1339,9 @@ def equiv_alpha(x,y):
 
 # Convert a goal to skolem normal form. This means the premises are in
 # universal prenex form and the conclusion is in existential prenex
-# form.
+# form. If argument 'prenex' is false, don't convert to prenex form.
 
-def skolemize_goal(goal):
+def skolemize_goal(goal,prenex=True):
     var_uniq = il.VariableUniqifier()
     vocab = goal_vocab(goal)
     used_names = set(x.name for x in vocab.symbols)
@@ -1352,13 +1352,13 @@ def skolemize_goal(goal):
         if not isinstance(goal,ia.LabeledFormula):
             return goal
         prems = [rec(prem,not pos) for prem in goal_prems(goal)]
-        conc = skolemize_fmla(goal_conc(goal),pos,renamer,skfuns)
+        conc = skolemize_fmla(goal_conc(goal),pos,renamer,skfuns,prenex)
         return clone_goal(goal,prems,conc)
     goal = rec(goal,True)
     return clone_goal(goal,[ia.ConstantDecl(s) for s in skfuns]+goal_prems(goal), goal_conc(goal))
 
 
-def skolemize_fmla(fmla,pos,renamer,skfuns):
+def skolemize_fmla(fmla,pos,renamer,skfuns,prenex=True):
     univs = []
     outer = []
     var_uniq = il.VariableUniqifier(used=renamer.used) # don't capture any free symbols!
@@ -1388,10 +1388,13 @@ def skolemize_fmla(fmla,pos,renamer,skfuns):
             body = fmla.body
             for v in fmla.variables:
                 u = var_uniq(v)
-                univs.append(u)
+                if prenex:
+                    univs.append(u)
                 outer.append(u)
                 body = il.substitute(body,[(v,u)])
             res = rec(body,pos)
+            if not prenex:
+                res = type(fmla)(outer[-len(fmla.variables):],res)
             for v in fmla.variables:
                 outer.pop()
             return res
@@ -1460,6 +1463,28 @@ def compile_definition_goal_vocab(df,goal):
             raise Redefinition(df,"redefinition of {}".format(sym))
         return goal
 
+def remove_unused_definitions_goal(goal):
+    prems = goal_prems(goal)
+    prems = list(reversed(prems))
+    conc = goal_conc(goal)
+    if isinstance(conc,ia.TemporalModels):
+        fmlas = conc.model.fmlas + [conc.fmla]
+    else:
+        fmlas = [conc]
+    syms = lu.used_symbols_asts(fmlas)
+    new_prems = []
+    for x in prems:
+        if goal_is_property(x) and x.definition:
+            sym = il.drop_universals(x.formula).args[0].rep
+            if sym not in syms:
+                continue
+        elif goal_is_defn(x):
+            if goal_defines(x) not in syms:
+                continue
+        syms.update(lu.used_symbols_ast(x))
+        new_prems.append(x)
+    return clone_goal(goal,list(reversed(new_prems)),goal_conc(goal))
+    
 def match_from_defn(defn):
     vs = set()
     defn = defn.formula

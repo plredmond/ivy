@@ -1290,7 +1290,15 @@ class CallAction(Action):
         # print "callee = {}".format(callee)
         # print "post = {}".format(post)
         return res
-        
+    def split_returns(self):
+        actual_returns = self.args[1:]
+        rn = iu.UniqueRenamer('',used_symbols_ast(self))
+        new_returns = [x.rename(rn) for x in actual_returns]
+        asgn = Sequence(*([self.clone([self.args[0]] + new_returns)]
+                          +[AssignAction(x,y).sln(self.lineno)
+                            for x,y in zip(actual_returns,new_returns)]))
+        res = LocalAction(*(new_returns+[asgn])).sln(self.lineno)
+        return res
 
 class RME(AST):
     """ A requires-modifies-ensures clause """

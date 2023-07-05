@@ -142,6 +142,18 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     # operators. Here, we compile the invariants in the tactic, using the given
     # label.
 
+    # compile definition dependcies
+
+    defn_deps = defaultdict(list)
+
+    for defn in list(prover.definitions.values()) + [x.args[0] for x in tactic_defns]:
+        fml = ilg.drop_universals(defn.formula)
+        for sym in iu.unique(ilu.symbols_ast(fml.args[1])):
+            defn_deps[sym].append(fml.args[0].rep)
+            
+    def dependencies(syms):
+        return iu.reachable(syms,lambda x: defn_deps.get(x) or [])
+
     # compiled definitions into goal
 
     for defn in tactic_defns:
@@ -598,7 +610,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     if debug.get():
         print("=" * 80 +"\nafter replace_temporals_by_named_binder_g_ast"+ "\n"*3)
         print("=" * 80 + "\nl2s_gs:")
-        for vs, t, env in sorted(l2s_gs):
+        for vs, t, env in l2s_gs:
             print(vs, t, env)
         print("=" * 80 + "\n"*3)
         print(model)
@@ -639,6 +651,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         for i in range(0,len(lst)):
             if ipr.goal_is_property(lst[i]):
                 lst[i] = trns(lst[i])
+
     named_binders_conjs = defaultdict(list,((k,list(set(v))) for k,v in named_binders_conjs.items()))
 
     # in full mode, add all the state variables to 'to_save' and all
@@ -788,7 +801,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     to_g = list(set(to_g))
     if debug.get():
         print('='*40 + "\nto_g:\n")
-        for vs, t, env in sorted(to_g):
+        for vs, t, env in to_g:
             print(vs, t, '\n')
         print('='*40)
 
@@ -937,6 +950,16 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
             
     def instr_stmt(stmt,labels):
 
+        # A call statement that modifies a monitored symbol as to be split
+        # into call followed by assignment.
+
+        if (isinstance(stmt,CallAction)):
+            actual_returns = stmt.args[1:]
+            if any(sym in symprops or sym in symwhens
+                   or sym in symwaits for sym in actual_returns):
+                return instr_stmt(stmt.split_returns(),labels)
+            
+        
         # first, recur on the sub-statements
         args = [instr_stmt(a,labels) if isinstance(a,Action) else a for a in stmt.args]
         res = stmt.clone(args)
@@ -957,9 +980,11 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         #             event_props.add(prop)
 
         # Second, if a symbol is modified, we must add events for every property that
-        # depends on the symbol, but only if we are not in the environment of that property. 
+        # depends on the symbol, but only if we are not in the environment of that property.
+        #
+        # Notice we have to consider defined functions that depend on the modified symbols
                     
-        for sym in stmt.modifies():
+        for sym in dependencies(stmt.modifies()):
             for prop in symprops[sym]:
 #                if prop.environ not in labels:
                 event_props.add(prop)
@@ -975,7 +1000,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
 
         (pre_events, post_events) = prop_events(event_props)
         (when_pre_events, when_post_events) = when_events(event_whens)
-        pre_events += when_pre_events
+        pre_events = when_pre_events + pre_events
         post_events += when_post_events
         post_events += wait_events(event_waits)
         res =  iact.prefix_action(res,pre_events)
@@ -1107,6 +1132,9 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
     # Build the new goal
     non_temporal_prems = [x for x in prems if not (hasattr(x,'temporal') and x.temporal)]
     goal = ipr.clone_goal(goal,non_temporal_prems,conc)
+
+    goal = ipr.remove_unused_definitions_goal(goal)
+
     goal.trace_hook = lambda tr: renaming_hook(subs,tr)
 
     # Return the new goal stack

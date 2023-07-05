@@ -1172,7 +1172,7 @@ def to_aiger(mod,ext_act,method="mc"):
     annot = trans.annot
 #    match_annotation(action,annot,MatchHandler())
     
-    indhyps = [il.close_formula(il.Implies(init_var,lf.formula)) for lf in mod.labeled_conjs]
+    indhyps = [il.close_formula(il.Implies(init_var,lf.formula)) for lf in mod.labeled_conjs + mod.assumed_invars]
 #    trans = ilu.and_clauses(trans,indhyps)
 
     # save the original symbols for trace

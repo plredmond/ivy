@@ -45,7 +45,8 @@ after init {
 instance receiving : signal
 
 before send {
-    tail := tail.next;
+    var baf := tail.next;
+    tail := baf;
 }
 
 before recv {

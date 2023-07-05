@@ -159,7 +159,7 @@ class ActionTermBinding(ia.AST):
     @property
     def args(self):
         """ the only subterm is the statement """
-        return [self.stmt]
+        return [self.action]
     def clone(self,args):
         """ clone relaces the action in a binding """
         res = ActionTermBinding(self.name,args[0])
@@ -184,6 +184,9 @@ class NormalProgram(ia.AST):
     @property
     def binding_map(self):
         return dict((x.name,new_action_to_old(x.action)) for x in self.bindings)
+    @property
+    def fmlas(self):
+        return self.bindings + [self.init] + self.invars + self.asms
     def __str__(self):
         res = ['\nlet\n']
         for b in self.bindings:

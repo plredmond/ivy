@@ -406,6 +406,8 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_not_all_done"),tmp).sln(proof.lineno))
 
         def init_globally(prop,res,pos=True):
+            if isinstance(prop,(lg.Globally,lg.Eventually)):
+                known_inits.add(prop)
             if pos and isinstance(prop,lg.Globally):
                 res.append(prop)
                 init_globally(prop.args[0],res,pos)
@@ -449,6 +451,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
                 init_globally(prop.args[0],res,not pos)
 
         ninvs = []
+        known_inits = set()
         init_globally(fmla,ninvs,False)
 
         for trig in triggers:
@@ -490,13 +493,28 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
                            for c in list(ilg.sig.symbols.values()) if c.sort == s))
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_consts_d"),tmp).sln(proof.lineno))
 
+        iinvs = []
+
+        def add_ini_invar(cond,fmla):
+            if cond not in known_inits:
+                iinvs.append(fmla)
+                known_inits.add(cond)
+
         def convert_to_init(fmla):
             if isinstance(fmla,(lg.And,lg.Or,lg.Not,lg.Implies,lg.Iff,lg.ForAll,lg.Exists)):
                 return fmla.clone([convert_to_init(arg) for arg in fmla.args])
             vs = tuple(iu.unique(ilu.variables_ast(fmla)))
-            return l2s_init(vs,fmla)(*vs)
+            ini =  l2s_init(vs,fmla)(*vs)
+            if isinstance(fmla,lg.Globally):
+                add_ini_invar(fmla,lg.Implies(ini,fmla))
+            if isinstance(fmla,lg.Eventually):
+                add_ini_invar(fmla,lg.Implies(fmla,ini))
+            return ini
 
         tmp = lg.Not(convert_to_init(fmla))
+        for i,ninv in enumerate(iinvs):
+            invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("l2s_init_glob_"+str(i)),ninv).sln(proof.lineno))
+        
         invars.append(ivy_ast.LabeledFormula(ivy_ast.Atom("neg_prop_init"),tmp).sln(proof.lineno))
                           
         prems = list(x for x in ipr.goal_prems(goal) if ipr.goal_is_property(x))

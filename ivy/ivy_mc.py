@@ -1496,6 +1496,8 @@ class AigerMatchHandler2(ivy_trace.TraceBase):
             res = False
         elif il.is_true(cond):
             res =  True
+        elif isinstance(cond,il.Not):
+            return not self.eval(cond.args[0])
         else:
             res = il.is_true(self.aiger.get_sym(cond))
 #        print 'eval: {} = {}'.format(cond,res)

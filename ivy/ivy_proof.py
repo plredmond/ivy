@@ -448,8 +448,8 @@ class ProofChecker(object):
     def witness_tactic(self,decls,proof):
         decl = decls[0]
         conc = goal_conc(decl)
-        if has_temporal(decl) and not goal_is_temporal(goal):
-            raise iu.IvyError(proof,'temporal operator not allowed')
+        if ia.has_temporal(proof) and not goal_is_temporal(goal):
+            raise iu.IvyError(proof,'temporal operator not allowed in instantiation')
         wits = compile_witness_list(proof,decls[0])
         for wit in wits:
             if not il.is_variable(wit.args[0]):
@@ -1337,6 +1337,25 @@ def equiv_alpha(x,y):
     return False
     pass
 
+def goal_free_vars(goal):
+    prems = goal_prems(goal)
+    conc = goal_conc(goal)
+    fmlas = [x.formula for x in prems if isinstance(x,ia.LabeledFormula)] + [conc]
+    return list(lu.used_variables_in_order_asts(fmlas))
+
+def var_subst_goal(goal,subst):
+    """ Apply a variable substitution to a goal. """
+    prems = [var_subst_goal(prem,subst) for prem in goal_prems(goal)]
+    conc = goal_conc(goal)
+    if not isinstance(conc,ia.SchemaBody):
+        conc = apply_to_conc(conc,lambda x: il.substitute(x,subst))
+    return clone_goal(goal,prems,conc)
+
+def apply_to_conc(conc,func):
+    if isinstance(conc,ia.TemporalModels):
+        return conc.clone([func(conc.fmla)])
+    return func(conc)
+
 # Convert a goal to skolem normal form. This means the premises are in
 # universal prenex form and the conclusion is in existential prenex
 # form. If argument 'prenex' is false, don't convert to prenex form.
@@ -1348,6 +1367,13 @@ def skolemize_goal(goal,prenex=True):
     used_names.update(x.name for x in goal_free(goal))
     renamer = iu.UniqueRenamer(used = used_names)
     skfuns = []
+    if not prenex:
+        variables = goal_free_vars(goal)
+        sks = [il.Symbol(renamer('_'+v.name),v.sort) for v in variables]
+        subst = list(zip(variables,sks))
+        goal = var_subst_goal(goal,subst)
+        skfuns += sks
+        
     def rec(goal,pos):
         if not isinstance(goal,ia.LabeledFormula):
             return goal

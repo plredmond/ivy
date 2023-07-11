@@ -448,7 +448,7 @@ def check_isolate(trace_hook = None):
         subgoals = pc.admit_proposition(prop,mod.isolate_proof,subgoals)
         check_subgoals(subgoals)
         return
-
+ 
     ifc.check_fragment()
     with im.module.theory_context():
         global check_lineno
@@ -668,7 +668,7 @@ def check_subgoals(goals,method=None):
             mod.actions = model.binding_map
             mod.initializers = [('init',model.init)]
             mod.labeled_axioms = list(mod.labeled_axioms)
-            mod.assumed_invars = model.asms
+            mod.assumed_invariants = model.asms
             mod.params = list(mod.params)
             mod.updates = list(mod.updates)
             for prem in ivy_proof.goal_prems(goal):
@@ -760,12 +760,16 @@ def all_assert_linenos():
         raise iu.IvyError(None,'There is no assertion at the specified line')
     return res
 
-def get_isolate_attr(isolate,attr,default=None):
+def get_isolate_attr(isolate,attr_name,default=None):
     if isolate is None:
         return default
-    attr = iu.compose_names(isolate,attr)
+    attr = iu.compose_names(isolate,attr_name)
     if attr not in im.module.attributes:
-        return default
+        parent,child = iu.parent_child_name(isolate)
+        if child == 'iso':
+            attr = iu.compose_names(parent,attr_name)
+        if attr not in im.module.attributes:
+            return default
     return im.module.attributes[attr].rep
 
 def check_separately(isolate):
@@ -776,7 +780,7 @@ def check_separately(isolate):
 def mc_isolate(isolate,meth=ivy_mc.check_isolate):
     im.module.labeled_axioms.extend(lf for lf in im.module.labeled_props if lf.assumed)
     im.module.labeled_props = [lf for lf in im.module.labeled_props if not lf.assumed]
-    if im.module.labeled_props:
+    if any(not x.temporal for x in im.module.labeled_props):
         raise iu.IvyError(im.module.labeled_props[0],'model checking not supported for property yet')
     if not check_separately(isolate):
         with im.module.theory_context():
@@ -850,6 +854,9 @@ def check_module():
                     raise IvyError(None,'BMC method specifier should be bmc[<steps>] or bmc[<steps>][<unroll>]. Got "{}".'.format(method_name))
                 mc_isolate(isolate,lambda : ivy_bmc.check_isolate(prms[0],n_unroll = prms[1] if len(prms) >= 2 else None))
             else:
+                logic = get_isolate_attr(isolate,'complete',None)
+                if logic is not None:
+                    im.module.logics = [logic]
                 check_isolate()
         if isolate is not None and iu.compose_names(isolate,'macro_finder') in im.module.attributes:
             if save_macro_finder:

@@ -1172,7 +1172,7 @@ def to_aiger(mod,ext_act,method="mc"):
     annot = trans.annot
 #    match_annotation(action,annot,MatchHandler())
     
-    indhyps = [il.close_formula(il.Implies(init_var,lf.formula)) for lf in mod.labeled_conjs + mod.assumed_invars]
+    indhyps = [il.close_formula(il.Implies(init_var,lf.formula)) for lf in mod.labeled_conjs + mod.assumed_invariants]
 #    trans = ilu.and_clauses(trans,indhyps)
 
     # save the original symbols for trace
@@ -1738,7 +1738,7 @@ def check_isolate(method="mc"):
     while True:
         text = p.stdout.read(256)
         if verbose:
-            sys.stdout.write(text)
+            sys.stdout.write(text.decode("utf-8"))
         texts.append(text)
         if len(text) < 256:
             break

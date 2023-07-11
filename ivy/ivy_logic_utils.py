@@ -436,6 +436,7 @@ used_variables_clauses = gen_to_set(variables_clauses)
 used_variables_in_order_ast = gen_unique(variables_ast)
 used_variables_in_order_clause = used_variables_in_order_cube = gen_unique(variables_clause)
 used_variables_in_order_clauses = used_variables_in_order_cubes = gen_unique(variables_clauses)
+used_variables_in_order_asts = gen_unique(used_variables_asts)
 
 # check if some variable occurs
 

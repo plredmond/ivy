@@ -88,7 +88,7 @@ class Module(object):
         self.finite_sorts = set() # set of sort names
         self.isolate_proofs = {}
         self.isolate_proof = None
-        
+        self.logics = []
         self.sig = il.sig.copy() # capture the current signature
 
     def __enter__(self):
@@ -352,6 +352,8 @@ param_logic = iu.Parameter("complete",','.join(il.default_logics),
                            check=lambda ls: all(s in il.logics for s in ls.split(',')))
 
 def logics():
+    if module.logics:
+        return module.logics
     return param_logic.get().split(',')
 
 def drop_label(labeled_fmla):

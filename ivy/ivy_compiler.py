@@ -1011,7 +1011,7 @@ def resolve_alias(name):
     res = resolve_alias_int(name)
     return res
 
-defined_attributes = set(["weight","test","check","mc","bmc","method","separate","iterable","cardinality","radix","override","cppstd","libspec","macro_finder","global_parameter"])
+defined_attributes = set(["weight","test","check","mc","bmc","method","separate","iterable","cardinality","radix","override","cppstd","libspec","macro_finder","global_parameter","complete"])
 
 class IvyDomainSetup(IvyDeclInterp):
     def __init__(self,domain):
@@ -1444,10 +1444,12 @@ class IvyARGSetup(IvyDeclInterp):
         oname = iu.ivy_compose_character.join(fields[:-1])
         oname = 'this' if oname == '' else oname
         aname = fields[-1]
-        if oname not in self.mod.actions and oname not in self.mod.hierarchy and oname != 'this' and oname not in ivy_logic.sig.sorts and oname not in ivy_logic.sig.symbols:
+        if oname not in self.mod.actions and oname not in self.mod.hierarchy and oname != 'this' and oname not in ivy_logic.sig.sorts and oname not in ivy_logic.sig.symbols and oname not in self.mod.isolates:
             raise IvyError(a,'"{}" does not name an action, object or type'.format(oname))
         if aname not in defined_attributes:
             raise IvyError(a,'"{}" does not name a defined attribute'.format(aname))
+        if aname == 'complete' and rhs.rep not in ivy_logic.logics:
+            raise IvyError(a,'"{}" is not a known logic'.format(rhs))
         self.mod.attributes[lhs.rep] = rhs
     def scenario(self,scen):
         init_tokens = set(p.rep for p in scen.args[0].args)

@@ -784,6 +784,9 @@ class AssumeTactic(TacticWithMatch):
         res.label = self.label
         return res
 
+class AssumeGlobalTactic(AssumeTactic):
+    pass
+
 class UnfoldSpec(AST):
     @property
     def defname(self):

@@ -1069,7 +1069,7 @@ else:
         'proofstep : ASSUME atype optrenaming'
         a = Atom(p[2])
         a.lineno = get_lineno(p,2)
-        p[0] = AssumeTactic(a,p[3])
+        p[0] = AssumeGlobalTactic(a,p[3])
         p[0].label = NoneAST()
         p[0].lineno = get_lineno(p,1)
 
@@ -1214,7 +1214,7 @@ else:
         'proofstep : ASSUME atype optrenaming WITH matches'
         a = Atom(p[2])
         a.lineno = get_lineno(p,2)
-        p[0] = AssumeTactic(*([a,p[3]]+p[5]))
+        p[0] = AssumeGlobalTactic(*([a,p[3]]+p[5]))
         p[0].label = NoneAST()
         p[0].lineno = get_lineno(p,1)
 

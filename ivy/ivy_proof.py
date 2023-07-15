@@ -343,7 +343,7 @@ class ProofChecker(object):
         decl = decls[0]
         schemaname = proof.schemaname()
         premmap = dict((x.name,x) for x in goal_prem_goals(decl))
-        if schemaname in premmap:
+        if not isinstance(proof,ia.AssumeGlobalTactic) and schemaname in premmap:
             schema = premmap[schemaname]
             if isinstance(proof.label,ia.NoneAST):
                 decl = goal_remove_prem(decl,schemaname)
@@ -367,7 +367,10 @@ class ProofChecker(object):
         if not isinstance(proof.label,ia.NoneAST):
             prem = prem.clone([proof.label,prem.formula])
         if any(prem.name == x.name for x in goal_prem_goals(decl)):
-            raise ProofError(proof,'instance name {} clashes with context'.format(prem.name))
+            if isinstance(proof,ia.AssumeGlobalTactic):
+                prem = rename_prem_no_clash(prem,decl)
+            else:
+                raise ProofError(proof,'instance name {} clashes with context'.format(prem.name))
         return [goal_add_prem(decl,prem,proof.lineno)] + decls[1:]
 
     def unfold_tactic(self,decls,proof):
@@ -1594,6 +1597,11 @@ def remove_explicit(goal):
         goal = goal.clone(goal.args)
         goal.explicit = False
     return goal
+
+def rename_prem_no_clash(prem,decl):
+    names = set(x.name for x in goal_prem_goals(decl))
+    rn = iu.UniqueRenamer(used=names)
+    return prem.rename(rn(prem.name))
 
 class AddSymbols(object):
     """ temporarily add some symbols to a set of symbols """

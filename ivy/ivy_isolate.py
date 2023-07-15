@@ -1531,6 +1531,7 @@ def apply_present_conjectures(isol,mod):
     mod.assumed_invariants = list(conjs)
     conjs = [c for c in conjs if not c.explicit]
     post_conjs = get_isolate_post_conjs(mod,isol)
+    post_conjs = [c for c in post_conjs if not c.explicit]
     cg = mod.call_graph()  # TODO: cg should be cached
     myexports = get_isolate_exports(mod,cg,isol)
     for actname in myexports:

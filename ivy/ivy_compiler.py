@@ -1915,7 +1915,8 @@ def fix_constructors(mod):
     
 def apply_assert_proof(prover,self,pf):
     cond = self.args[0]
-    goal = ivy_ast.LabeledFormula(None,cond)
+    goal = cond if isinstance(cond,ivy_ast.LabeledFormula) else ivy_ast.LabeledFormula(None,cond)
+    cond = ip.goal_conc(goal)
     goal.lineno = self.lineno
     subgoals = prover.get_subgoals(goal,pf)
     subgoals = list(map(theorem_to_property,subgoals))

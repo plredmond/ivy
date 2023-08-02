@@ -1716,6 +1716,13 @@ def normalize_ops(fmla):
         return mkquant(type(fmla),list(fmla.variables),args[0])
     return fmla.clone(args)
 
+def normalized_and(*args):
+    def mkbin(op,first,rest):
+        if len(rest) == 0:
+            return first
+        return mkbin(op,op(first,rest[0]),rest[1:])
+    return And() if len(args) == 0 else mkbin(And,args[0],args[1:])
+
 def negate_polarity(pol):
     return 1 - pol if pol is not None else None
 

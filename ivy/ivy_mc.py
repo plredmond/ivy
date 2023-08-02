@@ -577,7 +577,7 @@ class Match(object):
 def str_map(map):
     return '{' + ','.join('{}:{}'.format(x,y) for x,y in map.items()) + '}'
 
-def match_schema_prems(prems,sort_constants,funs,match):
+def match_schema_prems(prems,sort_constants,funs,match,bound_sorts):
     if len(prems) == 0:
         yield match.map.copy()
     else:
@@ -589,25 +589,28 @@ def match_schema_prems(prems,sort_constants,funs,match):
                 for f in funs:
                     fsorts = f.sort.dom + (f.sort.rng,)
                     match.push()
+                    for s in sorts:
+                        if s not in bound_sorts and s not in match.map:
+                            match.add(s,s)
                     if match.unify_lists(sorts,fsorts):
                         match.add(sym,f)
-                        for m in match_schema_prems(prems,sort_constants,funs,match):
+                        for m in match_schema_prems(prems,sort_constants,funs,match,bound_sorts):
                             yield m
                     match.pop()
             else:
-                if sym.sort in match.map:
-                    cands = sort_constants[match.map[sym.sort]]
+                if sym.sort in match.map or sym.sort not in bound_sorts:
+                    cands = sort_constants[match.map.get(sym.sort,sym.sort)]
                 else:
                     cands = [s for v in list(sort_constants.values()) for s in v]
                 for cand in cands:
                     match.push()
                     if match.unify(sym.sort,cand.sort):
                         match.add(sym,cand)
-                        for m in match_schema_prems(prems,sort_constants,funs,match):
+                        for m in match_schema_prems(prems,sort_constants,funs,match,bound_sorts):
                             yield m
                     match.pop()
         elif isinstance(prem,il.UninterpretedSort):
-            for m in match_schema_prems(prems,sort_constants,funs,match):
+            for m in match_schema_prems(prems,sort_constants,funs,match,bound_sorts):
                 yield m
         prems.append(prem)
             
@@ -641,9 +644,11 @@ def expand_schemata(mod,sort_constants,funs):
         if any(name.startswith(pref) for pref in ['rec[','lep[','ind[']):
             continue
         conc = schema.args[-1]
-        for m in match_schema_prems(list(schema.args[:-1]),sort_constants,funs,match):
-#            iu.dbg('str_map(m)')
-#            iu.dbg('conc')
+        prems = list(schema.args[:-1])
+        bound_sorts = [s for s in prems if isinstance(s,il.UninterpretedSort)]
+        for m in match_schema_prems(prems,sort_constants,funs,match,bound_sorts):
+            # print ('m: {}'.format(str_map(m)))
+            # print ('conc: {}'.format(conc))
             inst = apply_match(m,conc)
             res.append(ivy_ast.LabeledFormula(ivy_ast.Atom(name),inst))
     return res

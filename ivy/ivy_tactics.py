@@ -75,7 +75,7 @@ def apply_tempind(goal,proof):
     vocab = pr.goal_vocab(goal,bound=True)
     defs = [pr.compile_expr_vocab(ivy_ast.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.tactic_lets]
     conds = [lg.Equals(a.args[0],a.args[1]) for a in defs]
-    cond = conds[0] if len(conds) ==1 else lg.And(*conds)
+    cond = conds[0] if len(conds) ==1 else lg.normalized_and(*conds)
     params = list(a.args[0] for a in defs)
     conc = pr.goal_conc(goal)
     if not (goal.temporal or isinstance(conc,ivy_ast.TemporalModels)):
@@ -112,7 +112,7 @@ def apply_tempcase(goal,proof):
     vocab = pr.goal_vocab(goal,bound=True)
     defs = [pr.compile_expr_vocab(ivy_ast.Atom('=',x.args[0],x.args[1]),vocab) for x in proof.tactic_lets]
     conds = [lg.Equals(a.args[0],a.args[1]) for a in defs]
-    cond = conds[0] if len(conds) ==1 else lg.And(*conds)
+    cond = conds[0] if len(conds) ==1 else lg.normalized_and(*conds)
     vs = list(a.args[0] for a in defs)
     conc = pr.goal_conc(goal)
     if isinstance(conc,ivy_ast.TemporalModels):

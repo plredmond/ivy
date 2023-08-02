@@ -1,6 +1,7 @@
 from . import ivy_logic
 from . import ivy_utils as iu
 from . import ivy_actions as ia
+from . import ivy_ast
 
 def labeled_fmlas_to_str(kwd,lfmlas):
     res = ''
@@ -14,6 +15,8 @@ def labeled_fmlas_to_str(kwd,lfmlas):
 def print_module(mod):
     print(ivy_logic.sig)
     thing = ''
+    for x,y in mod.schemata.items():
+        thing += 'schema [' + x + ']' + str(y) + '\n' 
     for kwd,lst in [('axiom',mod.labeled_axioms),
                     ('property',mod.labeled_props),
                     ('init',mod.labeled_inits),

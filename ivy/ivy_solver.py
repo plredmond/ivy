@@ -105,6 +105,8 @@ def sorts(name):
         return z3.BitVecSort(width)
     if name == 'int':
         return z3.IntSort()
+    if name == 'real':
+        return z3.RealSort()
     if name == 'nat':
         return z3.IntSort()
     if name == 'strlit':
@@ -124,7 +126,7 @@ def parse_int_params(name):
     
 
 def is_solver_sort(name):
-    return name.startswith('bv[') and name.endswith(']') or name == 'int' or name == 'nat' or name == 'strlit' or name.startswith('strbv[') or name.startswith('intbv[')
+    return name.startswith('bv[') and name.endswith(']') or name == 'int' or name == 'nat' or name == 'real' or name == 'strlit' or name.startswith('strbv[') or name.startswith('intbv[')
 
 relations_dict = {'<':(lambda x,y: z3.ULT(x, y) if z3.is_bv(x) else x < y),
              '<=':(lambda x,y: z3.ULE(x, y) if z3.is_bv(x) else x <= y),

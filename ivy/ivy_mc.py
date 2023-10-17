@@ -24,6 +24,7 @@ import os
 
 logfile = None
 verbose = False
+fullqi = iu.BooleanParameter("fullqi",False)
 
 def get_truth(digits,idx,syms):
     if (len(digits) != len(syms)):
@@ -901,8 +902,9 @@ class Qelim(object):
         return clone_normal(expr,[self.qe(e,sort_constants) for e in expr.args])
     def __call__(self,trans,invariant,indhyps):
         # apply to the transition relation
-        new_defs = [self.qe(defn,self.sort_constants) for defn in trans.defs]
-        new_fmlas = [self.qe(il.close_formula(fmla),self.sort_constants) for fmla in trans.fmlas]
+        constants = self.sort_constants2 if fullqi.get() else self.sort_constants
+        new_defs = [self.qe(defn,constants) for defn in trans.defs]
+        new_fmlas = [self.qe(il.close_formula(fmla),constants) for fmla in trans.fmlas]
         # apply to the invariant
         invariant = self.qe(invariant,self.sort_constants)
         # apply to inductive hyps

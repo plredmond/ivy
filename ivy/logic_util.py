@@ -162,17 +162,17 @@ def substitute(t, subs):
         return type(t)(t.name, *(substitute(x, subs) for x in t))
 
     elif type(t) in (ForAll, Exists, Lambda, NamedBinder):
-        forbidden_variables = free_variables(*list(subs.values()))
+        newsubs = dict((k, v) for k, v in subs.items()
+                       if k not in t.variables)
+        forbidden_variables = free_variables(*list(newsubs.values()))
         if forbidden_variables.isdisjoint(t.variables):
             if type(t) is NamedBinder:
                 return type(t)(t.name,t.variables,t.environ,substitute(t.body, (
-                    (k, v) for k, v in subs.items()
-                    if k not in t.variables
+                    newsubs
                 )))
             else: 
                 return type(t)(t.variables, substitute(t.body, (
-                    (k, v) for k, v in subs.items()
-                    if k not in t.variables
+                    newsubs
                 )))
         else:
             raise CaptureError(forbidden_variables.intersection(t.variables))

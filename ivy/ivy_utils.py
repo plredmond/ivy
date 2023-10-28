@@ -707,6 +707,9 @@ polymorphic_symbols = set(
      'bvor',
      'bvnot',
      'cast',
+     'arrsel',
+     'arrupd',
+     'arrcst',
     ]
 )
 

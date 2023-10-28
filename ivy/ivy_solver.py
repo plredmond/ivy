@@ -21,6 +21,7 @@ from .ivy_core import minimize_core, biased_core
 from . import ivy_utils as iu
 from . import ivy_unitres as ur
 from . import logic as lg
+from . import ivy_ast
 
 import sys
 
@@ -62,12 +63,14 @@ def solver_name(symbol):
         if bfe_to_z3(symbol) is not None:
             return None
     elif name in iu.polymorphic_symbols:
-        sort = symbol.sort.domain[0].name
+        sort = symbol.sort.domain[0].name if name != 'arrcst' else symbol.sort.rng.name
         if sort in ivy_logic.sig.interp and not isinstance(ivy_logic.sig.interp[sort],ivy_logic.EnumeratedSort):
             return None
 #        name += ':' + sort
         for s in symbol.sort.domain:
             name += ':' + s.name
+        if name == 'arrcst':
+            name += ':' + sort.name
     if name in ivy_logic.sig.interp:
         return None
     if name in z3_builtins:
@@ -93,10 +96,28 @@ def my_eq(x,y):
 
 z3_sort_parser = re.compile(r'bv\[[0-9]+\]')
 
+def parse_array_theory(name):
+    pname = ivy_ast.parse_name(name)
+    if not(isinstance(pname,ivy_ast.Bracket)
+           and isinstance(pname.args[0],ivy_ast.Bracket)
+           and isinstance(pname.args[0].args[0],ivy_ast.Symbol)):
+        return None
+    return pname.args[0].args[1].unparse(),pname.args[1].unparse()
+    
+def sort_name_to_z3(name):
+    sort = ivy_logic.find_sort(name)
+    return sort.to_z3()
+
 def sorts(name):
     if name.startswith('bv[') and name.endswith(']'):
         width = int(name[3:-1])
         return z3.BitVecSort(width)
+    if name.startswith('arr[') and name.endswith(']'):
+        p = parse_array_theory(name)
+        if p is None:
+            return p
+        dom,rng = p
+        return z3.ArraySort(sort_name_to_z3(dom),sort_name_to_z3(rng))
     if name.startswith('strbv[') and name.endswith(']'):
         width = int(name[6:-1])
         return z3.BitVecSort(width)
@@ -126,12 +147,13 @@ def parse_int_params(name):
     
 
 def is_solver_sort(name):
-    return name.startswith('bv[') and name.endswith(']') or name == 'int' or name == 'nat' or name == 'real' or name == 'strlit' or name.startswith('strbv[') or name.startswith('intbv[')
+    return name.startswith('bv[') and name.endswith(']') or name == 'int' or name == 'nat' or name == 'real' or name == 'strlit' or name.startswith('strbv[') or name.startswith('intbv[') or name.startswith('arr[')
 
 relations_dict = {'<':(lambda x,y: z3.ULT(x, y) if z3.is_bv(x) else x < y),
              '<=':(lambda x,y: z3.ULE(x, y) if z3.is_bv(x) else x <= y),
              '>':(lambda x,y: z3.UGT(x, y) if z3.is_bv(x) else x > y),
              '>=':(lambda x,y: z3.UGE(x, y) if z3.is_bv(x) else x >= y),
+             "arrsel":(lambda x,y: z3.Select(x,y)),
              }
 
 def relations(name):
@@ -145,6 +167,8 @@ functions_dict = {"+":(lambda x,y: x + y),
              "bvand":(lambda x,y: x & y),
              "bvor":(lambda x,y: x | y),
              "bvnot":(lambda x: ~x),
+             "arrsel":(lambda x,y: z3.Select(x,y)),
+             "arrupd":(lambda x,y,z: z3.Update(x,y,z)),
              }
 
 def bfe_to_z3(sym):
@@ -264,6 +288,10 @@ def lookup_native(thing,table,kind):
     if z3name == None:
         if  thing.name.startswith('bfe['):
             return bfe_to_z3(thing)
+        if thing.name == 'arrcst':
+            sort = thing.sort.rng
+            if sort.name in ivy_logic.sig.interp:
+                return lambda x: z3.K(sort.to_z3().domain(),x)
         if thing.name in iu.polymorphic_symbols:
             sort = thing.sort.domain[0].name
             if sort in ivy_logic.sig.interp and not isinstance(ivy_logic.sig.interp[sort],ivy_logic.EnumeratedSort):

@@ -175,7 +175,7 @@ class Apply(recstruct('Apply', [], ['func', '*terms'])):
                 ', '.join(str(t) for t in self.terms)
             )
 
-    sort = property(lambda self: TopS if self.func.sort == TopS else
+    sort = property(lambda self: TopS if isinstance(self.func.sort,TopSort) else
                     self.func.sort.range)
 
 

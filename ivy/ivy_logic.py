@@ -1035,6 +1035,7 @@ class BindSymbolValues(object):
 
 alpha = lg.TopSort('alpha')
 beta = lg.TopSort('beta')
+gamma = lg.TopSort('gamma')
 
 lg.BooleanSort.name = 'bool'
 
@@ -1057,7 +1058,10 @@ polymorphic_symbols_list = [
     ('l2s_saved', [lg.Boolean]),
     ('l2s_d', [alpha, lg.Boolean]),
     ('l2s_a', [alpha, lg.Boolean]),
-    ('cast',[alpha,beta])
+    ('cast',[alpha,beta]),
+    ('arrsel',[alpha,beta,gamma]),
+    ('arrupd',[alpha,beta,gamma,alpha]),
+    ('arrcst',[alpha]),
 ]
 
 uninterpreted_polymorphic_symbols = set([

@@ -26,6 +26,7 @@ from . import ivy_temporal as itmp
 from . import ivy_printer
 from . import ivy_l2s
 from . import ivy_mc
+from . import ivy_vmt
 from . import ivy_bmc
 from . import ivy_tactics
 
@@ -738,6 +739,19 @@ def mc_tactic(prover,goals,proof):
 
 ivy_proof.register_tactic('mc',mc_tactic)
 
+def vmt_tactic(prover,goals,proof):
+    goal = goals[0]
+    conc = ivy_proof.goal_conc(goal)
+    if isinstance(conc,ivy_ast.TemporalModels):
+        if not lg.is_true(conc.fmla):
+            goals = ivy_tactics.tempind(prover,goals,proof)
+            goals = ivy_tactics.skolemizenp(prover,goals,proof)
+            l2s_pf = proof.clone([proof.args[0],ivy_ast.TacticLets()]+list(proof.args[2:]))
+            goals = ivy_l2s.l2s_tactic_full(prover,goals,l2s_pf)
+    check_subgoals(goals[0:1],method=ivy_vmt.check_isolate)
+    return goals[1:]
+
+ivy_proof.register_tactic('vmt',vmt_tactic)
                     
 def all_assert_linenos():
     mod = im.module
@@ -846,6 +860,8 @@ def check_module():
             method_name = get_isolate_method(isolate)
             if method_name == 'mc':
                 mc_isolate(isolate)
+            elif method_name == 'vmt':
+                mc_isolate(isolate,meth=ivy_vmt.check_isolate)
             elif method_name.startswith('bmc['):
                 global some_bounded
                 some_bounded = True

@@ -999,6 +999,11 @@ def compile_proof_tactic(self):
     
 ivy_ast.ProofTactic.compile = compile_proof_tactic
 
+def compile_trigger(self):
+    return self.clone([self.args[0]]+[sortify_with_inference(x) for x in self.args[1:]])
+
+ivy_ast.Trigger.compile = compile_trigger
+
 def resolve_alias_int(name): 
     if name in im.module.aliases:
         return im.module.aliases[name]

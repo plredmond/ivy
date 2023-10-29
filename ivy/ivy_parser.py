@@ -1334,6 +1334,11 @@ else:
         df.lineno = get_lineno(p,3)
         p[0] = DerivedDecl(addlabel(mk_lf(df),'def'))
 
+    def p_tacticwithelem_trigger(p):
+        'tacticwithelem : TRIGGER atype WITH terms'
+        p[0] = Trigger(*([Atom(p[2])]+p[4]))
+        p[0].lineno = get_lineno(p,3)
+
     def p_tactwithlist_tacticwithelem(p):
         'tacticwithlist : tacticwithelem'
         p[0] = [p[1]]

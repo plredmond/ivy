@@ -465,6 +465,9 @@ class ProofChecker(object):
 
 # A proof goal is a LabeledFormula whose body is either a Formula or a SchemaBody
 
+def is_goal(g):
+    return isinstance(g,ia.LabeledFormula)
+
 # Get the conclusion of a goal
 
 def goal_conc(g):

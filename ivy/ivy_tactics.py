@@ -12,6 +12,7 @@ from . import ivy_utils as iu
 from . import ivy_trace as tr
 from . import ivy_logic_utils as lu
 from . import ivy_proof as pr
+from . import ivy_auto_inst
 
 # This tactic reduces a safety property to initiatation and consecution
 # subgoals. TODO: we lose the annotation here, so we can't extract a

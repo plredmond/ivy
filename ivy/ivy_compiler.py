@@ -1535,7 +1535,7 @@ def BalancedChoice(choices):
 
 def get_file_version(filename):
     try:
-        f = open(filename,'rU')
+        f = open(filename,'r')
     except:
         raise IvyError(None,"not found: %s" % filename)
     header = f.readline()
@@ -1549,7 +1549,7 @@ def get_file_version(filename):
 def ivy_new(filename = None):
 #    d = Interp()
     if filename:
-        f = open(filename,'rU')
+        f = open(filename,'r')
         if not f:
             raise IvyError(None,"not found: %s" % filename)
         ivy_load_file(f)
@@ -2295,11 +2295,11 @@ def read_module(f,nested=False):
 def import_module(name):
     fname = name + '.ivy'
     try: 
-        f = open(fname,'rU')
+        f = open(fname,'r')
     except Exception:
         fname = os.path.join(iu.get_std_include_dir(),fname)
         try:
-            f = open(fname,'rU')
+            f = open(fname,'r')
         except Exception:
             raise IvyError(None,"module {} not found in current directory or module path".format(name))
     with iu.SourceFile(fname):

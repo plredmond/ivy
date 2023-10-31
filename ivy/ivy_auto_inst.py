@@ -179,6 +179,28 @@ def normalize(expr):
         return normalize(il.expand_macro(expr))
     return clone_normal(expr,list(map(normalize,expr.args)))
 
+def merge_match_lists(match_lists):
+    res = []
+    def try_merge(i,mp,mpi):
+        mpo = mp.copy()
+        for x,y in mpi.items():
+            if x in mpo:
+                if y != mpo[x]:
+                    return
+            else:
+                mpo[x] = y
+        recur(i+1,mpo)
+
+    def recur(i,mp):
+        if i == len(match_lists):
+            res.append(mp)
+        else:
+            for mpi in match_lists[i]:
+                try_merge(i,mp,mpi)
+    recur(0,dict())
+    return res
+
+            
 # This is where we do pattern-based eager instantiation of the axioms
 
 def instantiate_axioms(mod,fmlas,triggers):
@@ -232,7 +254,7 @@ def instantiate_axioms(mod,fmlas,triggers):
 # #                iu.dbg('trig')
 # #                iu.dbg('ax')
 #                 print ('trig: {}, ax: {}'.format(trig,ax))
-#                 triggers.append((trig,ax))
+#                 triggers.append(([trig],ax))
 
     insts = set()
     global inst_list # python lamemess -- should be local but inner function cannot access
@@ -266,21 +288,29 @@ def instantiate_axioms(mod,fmlas,triggers):
                                                                 
 
     # TODO: make sure matches are ground
-    def recur(expr):
+    def recur(expr,trig,res):
         for e in expr.args:
-            recur(e)
-        for trig,ax in triggers:
-            mp = dict()
-            if match(trig,expr,mp):
-                # fmla = normalize(il.substitute(ax.formula,mp))
-                fmla = il.substitute(ax.formula,mp)
-                if fmla not in insts:
-                    insts.add(fmla)
-                    inst_list.append((ax,fmla))
+            recur(e,trig,res)
+        mp = dict()
+        if match(trig,expr,mp):
+            res.append(mp)
+
+    def trigger_matches(fmlas,trig):
+        res = []
+        for f in fmlas:
+            recur(f,trig,res)
+        return res
 
     # match triggers against the formulas
-    for f in fmlas:
-        recur(f)
+    for trigs,ax in triggers:
+        trig_matches = [trigger_matches(fmlas,trig) for trig in trigs]
+        matches = merge_match_lists(trig_matches)
+        for mp in matches:
+            # fmla = normalize(il.substitute(ax.formula,mp))
+            fmla = il.substitute(ax.formula,mp)
+            if fmla not in insts:
+                insts.add(fmla)
+                inst_list.append((ax,fmla))
                     
     for f in inst_list:
         logfile.write('    {}\n'.format(f))
@@ -299,10 +329,8 @@ def auto_inst(self,decls,proof):
             if axname not in axmap:
                 raise iu.IvyError(trigger,'property ' + axname + ' not found')
             ax = axmap[axname]
-            if len(trigger.args) != 2:
-                raise iu.IvyError(trigger,'multiple trigger terms not supported yet')
-            trig = trigger.args[1]
-            triggers.append((trig,ax))
+            trigs = trigger.args[1:]
+            triggers.append((trigs,ax))
         else:
             raise iu.IvyError(decl,'tactic does not take this type of argument')
 

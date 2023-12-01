@@ -234,16 +234,16 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
         # $was (work_needed[sfx](X) -> work_done[sfx](X)). This will
         # be used to preprocess "work_depends".
         
-        depends_subst = dict()
-        for sfx in tasks:
-            if 'work_needed' in tasks[sfx] and 'work_done' in tasks[sfx]:
-                work_needed = tasks[sfx]['work_needed']
-                work_done = tasks[sfx]['work_done']
-                print ('foo: {}'.format(get_work_was_done(work_needed,work_done)))
-                rhs = get_work_was_done(work_needed,work_done).rep
-                lhs = ilg.Symbol('work_done'+sfx,work_done.args[0].rep.sort)
-                depends_subst[lhs] = rhs
-                print ('foo: {} = {}'.format(lhs,rhs))
+        # depends_subst = dict()
+        # for sfx in tasks:
+        #     if 'work_needed' in tasks[sfx] and 'work_done' in tasks[sfx]:
+        #         work_needed = tasks[sfx]['work_needed']
+        #         work_done = tasks[sfx]['work_done']
+        #         print ('foo: {}'.format(get_work_was_done(work_needed,work_done)))
+        #         rhs = get_work_was_done(work_needed,work_done).rep
+        #         lhs = ilg.Symbol('work_done'+sfx,work_done.args[0].rep.sort)
+        #         depends_subst[lhs] = rhs
+        #         print ('foo: {} = {}'.format(lhs,rhs))
                 
         for sfx in tasks:
             for name in ['work_created','work_needed','work_done','work_progress']:
@@ -323,7 +323,7 @@ def l2s_tactic_int(prover,goals,proof,tactic_name):
                 subs = dict(zip(work_depends.args[0].args,work_progress.args[0].args))
                 # print ('subs: {}'.format(subs))
                 prep = lu.substitute(work_depends.args[1],subs)
-                print ('prep: {}'.format(prep))
+                # print ('prep: {}'.format(prep))
                 return prep
 
             # invariant l2s_needed_when_start

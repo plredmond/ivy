@@ -4363,7 +4363,7 @@ def emit_assert(self,header):
     indent(code)
     code.append('ivy_assert(')
     with ivy_ast.ASTContext(self):
-        il.close_formula(self.args[0]).emit(header,code)
+        il.close_formula(self.formula).emit(header,code)
     code.append(', "{}");\n'.format(iu.lineno_str(self).replace('\\','\\\\')))
     header.extend(code)
 
@@ -4374,7 +4374,7 @@ def emit_assume(self,header):
     indent(code)
     code.append('ivy_assume(')
     with ivy_ast.ASTContext(self):
-        il.close_formula(self.args[0]).emit(header,code)
+        il.close_formula(self.formula).emit(header,code)
     code.append(', "{}");\n'.format(iu.lineno_str(self).replace('\\','\\\\')))
     header.extend(code)
 

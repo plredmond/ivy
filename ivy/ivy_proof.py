@@ -618,11 +618,13 @@ def normalize_goal(x):
 
 def get_unprovided_defns(g1,g2):
     defns = goal_defns(g2)
+    free = goal_free(g2)
     res = []
     for prem in goal_prems(g1):
         if goal_is_defn(prem):
             sym = goal_defines(prem)
-            if sym not in defns and not il.sig.contains(sym):
+            # if sym not in defns and not il.sig.contains(sym):
+            if sym not in defns and sym not in free:
                 res.append(prem)
     return res
 

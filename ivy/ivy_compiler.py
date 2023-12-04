@@ -407,7 +407,7 @@ ivy_ast.NamedBinder.cmpl = lambda self: ivy_logic.NamedBinder(
     self.args[0].compile()
 )
 
-ivy_ast.LabeledFormula.cmpl = lambda self: self.clone([self.label,
+ivy_ast.LabeledFormula.cmpl = lambda self: self.clone([None if self.label is None else self.label.clone([sortify_with_inference(x) for x in self.label.args]),
                                                        self.formula.compile() 
                                                        if isinstance(self.formula,ivy_ast.SchemaBody)
                                                        else sortify_with_inference(self.formula)])
@@ -446,7 +446,7 @@ def get_relation_sort(sig,args,term=None):
     return ivy_logic.RelationSort(get_arg_sorts(sig,args,term))
 
 def sortify(ast):
-#    print "compiling : {}".format(ast)
+    # print ("compiling : {}".format(ast))
     return ast.compile()
 
 def sortify_with_inference(ast):
@@ -654,7 +654,10 @@ WhileAction.cmpl = compile_while_action
 def compile_assert_action(self):
     ctx = ExprContext(lineno = self.lineno)
     with ctx:
-        cond = sortify_with_inference(self.args[0])
+        if isinstance(self.args[0],ivy_ast.LabeledFormula):
+            cond = self.args[0].compile()
+        else:
+            cond = sortify_with_inference(self.args[0])
     if len(self.args) > 1:
         pf = self.args[1].compile()
         asrt = self.clone([cond,pf])

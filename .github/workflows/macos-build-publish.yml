@@ -31,8 +31,9 @@ jobs:
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
 
       - run: pip3 install wheel
+      - run: pip3 install cibuildwheel
       - run: python3 build_submodules.py
-      - run: python3 setup.py bdist_wheel --plat-name macosx_13_0_x86_64
+      - run: python3 -m cibuildwheel --output-dir dist/
       - run: ls -l dist
       - uses: actions/upload-artifact@v2
         with:
@@ -42,7 +43,7 @@ jobs:
   publish:
     name: Publish
     needs: build
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
 
       - uses: actions/download-artifact@v2

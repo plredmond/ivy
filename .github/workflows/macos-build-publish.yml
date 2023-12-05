@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ['macos-13.0']
+        os: ['macos-latest']
     steps:
       - uses: actions/checkout@v2
         with:
@@ -42,7 +42,7 @@ jobs:
   publish:
     name: Publish
     needs: build
-    runs-on: macos-13.0
+    runs-on: macos-latest
     steps:
 
       - uses: actions/download-artifact@v2

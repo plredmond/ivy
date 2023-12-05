@@ -12,7 +12,6 @@ There are two ways to install ivy:
 --------------------------------------------
 
 1. [Install from source on Linux](#linuxnotes)
-2. [Install from source on Windows](#windowsnotes)
 3. [Install from source on Mac](#macnotes)
 
 
@@ -25,25 +24,25 @@ There are two ways to install ivy:
 <a name="linuxnotes"></a> Installation from source on Linux
 ===========================================================
 
-This describes the steps need to install IVy on Ubuntu 18.04. This may
+This describes the steps need to install IVy on Ubuntu 20.04. This may
 also work on other Debian-based distributions.
 
 ### Prerequisites
 
-    $ sudo apt-get install python python-pip g++ cmake python-ply python-pygraphviz git python-tk tix pkg-config libssl-dev libreadline-dev
-    $ sudo pip install pyparsing==2.1.4 pexpect
+    $ sudo apt-get install python3 python3-pip g++ cmake python3-ply python3-pygraphviz git python3-tk tix pkg-config libssl-dev libreadline-dev
+    $ sudo pip3 install pyparsing pexpect
 
 
 ### Install IVy
 
 Get the source like this:
 
-    $ git clone --recurse-submodules https://github.com/Microsoft/ivy.git
+    $ git clone --recurse-submodules https://github.com/kenmcmil/ivy.git
     $ cd ivy
 
 Build the submodules like this (it takes a while):
 
-    $ python build_submodules.py
+    $ python3 build_submodules.py
 
 Install into your local Python like this:
 
@@ -52,17 +51,7 @@ Install into your local Python like this:
 If you want to run from the source tree for development purposes, do
 this instead:
 
-    $ export PYTHONPATH=~/lib/python2.7/site-packages:$PYTHONPATH
-    $ python setup.py develop --prefix=~
-
-This installs Ivy into your home directory, so you don't need sudo.
-In fact, be careful *not* to use sudo when installing in your home
-directory, as the files will be owned by root. Also put the first
-command in your .profile script, so Python will find Ivy in the
-future.
-
-See the [python documentation](https://docs.python.org/2/install/) for
-general instructions on installing python packages.
+    $ sudo python setup.py develop
 
 Optionally, build the experimental Ivy v2.0 compiler:
 

@@ -15,9 +15,9 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
-          python-version: 2.7
+          python-version: 3.10.13
           architecture: x64
 
       - name: ccache
@@ -30,9 +30,9 @@ jobs:
         run: |
           export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
 
-      - run: pip install wheel
-      - run: python build_submodules.py
-      - run: python setup.py bdist_wheel --plat-name macosx_10_15_x86_64
+      - run: pip3 install wheel
+      - run: python3 build_submodules.py
+      - run: python3 setup.py bdist_wheel --plat-name macosx_13_0_x86_64
       - run: ls -l dist
       - uses: actions/upload-artifact@v2
         with:
@@ -42,7 +42,7 @@ jobs:
   publish:
     name: Publish
     needs: build
-    runs-on: macos-10.15
+    runs-on: macos-13.0
     steps:
 
       - uses: actions/download-artifact@v2

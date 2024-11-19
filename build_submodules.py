@@ -55,9 +55,9 @@ def build_z3():
 
 
     if platform.system() != 'Windows':
-        cmd = 'python scripts/mk_make.py --python --prefix {} --pypkgdir {}/'.format(cwd,ivydir)
+        cmd = 'python3.10 scripts/mk_make.py --python --prefix {} --pypkgdir {}/'.format(cwd,ivydir)
     else:
-        cmd = 'python scripts/mk_make.py -x --python --pypkgdir {}/'.format(ivydir)
+        cmd = 'python3.10 scripts/mk_make.py -x --python --pypkgdir {}/'.format(ivydir)
 
     do_cmd(cmd)
 
@@ -143,7 +143,7 @@ def build_v2_compiler():
     cwd = os.getcwd()
 
     os.chdir('ivy/ivy2/s1')
-    do_cmd('python ../../ivy_to_cpp.py target=repl ivyc_s1.ivy')
+    do_cmd('python3.10 ../../ivy_to_cpp.py target=repl ivyc_s1.ivy')
     do_cmd('g++ -O2 -o ivyc_s1 ivyc_s1.cpp -pthread')
 
     os.chdir('../s2')
@@ -200,17 +200,17 @@ def install_abc():
 if __name__ == "__main__":
     build_z3()
     install_z3()
-    build_picotls()
-    install_picotls()
-
-    if platform.system() == 'Windows':
-        print("*******************************************")
-        print("Model checking not supported on Windows")
-        print("*******************************************")
-    else:
-        build_aiger()
-        install_aiger()
-        build_abc()
-        install_abc()
-        
-
+#    build_picotls()
+#    install_picotls()
+#
+#    if platform.system() == 'Windows':
+#        print("*******************************************")
+#        print("Model checking not supported on Windows")
+#        print("*******************************************")
+#    else:
+#        build_aiger()
+#        install_aiger()
+#        build_abc()
+#        install_abc()
+#        
+#

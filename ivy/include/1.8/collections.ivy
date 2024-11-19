@@ -162,6 +162,7 @@ autoinstance array[domain][range] : array(domain,range)
 
 module vector(range) = {
     
+    # FIXME: index is unbound
     instantiate array(index,range)
 }
 

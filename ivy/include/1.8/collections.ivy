@@ -1464,8 +1464,8 @@ module keyval(index,key,data) = {
             assert value_at(s,end(old s)) = d
         }
         after find {
-            assert  (exists I. s.key_at(I, k)) ->   key_at(s,i,k);
-            assert ~(exists I. s.key_at(I, k)) ->  ~key_at(s,i,k) & end(s) <= i;
+            assert  (exists I. s.key_at(I, k)) ->   s.key_at(i,k);
+            assert ~(exists I. s.key_at(I, k)) ->  ~s.key_at(i,k) & s.end <= i;
         }
     }
 
